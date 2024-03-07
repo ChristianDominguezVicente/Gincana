@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1>{{gincana.titulo}}</h1>
+
+    {{error}}
+
+    <form method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <button>
+            Guardar Cambios
+        </button>
+    </form>
+
+    <form action="{% url 'gincana_completada' gincana.id %}" method="POST">
+        {% csrf_token %}
+        <button>
+            Completar
+        </button>
+    </form>
+
+    <form action="{% url 'gincana_eliminar' gincana.id %}" method="POST">
+        {% csrf_token %}
+        <button>
+            Eliminar
+        </button>
+    </form>
+
+{% endblock %}
