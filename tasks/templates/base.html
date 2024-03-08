@@ -10,10 +10,10 @@
 
     <nav>
         <ul>
-            <li>
-                <a href="/">Home</a>
-            </li>
             {% if user.is_authenticated %}
+            <li>
+                <a href="{% url 'home' %}">Gincana</a>
+            </li>
             <li>
                 <a href="{% url 'gincanas' %}">Gincanas sin Completar</a>
             </li>
@@ -21,17 +21,10 @@
                 <a href="{% url 'gincanas_completadas' %}">Gincanas Completadas</a>
             </li>
             <li>
-                <a href="/gincanas/crear/">Crear Gincana</a>
+                <a href="{% url 'crear_gincana' %}">Crear Gincana</a>
             </li>
             <li>
-                <a href="/logout">Cerrar Sesión</a>
-            </li>
-            {% else %}
-            <li>
-                <a href="/signup">Iniciar Sesión</a>
-            </li>
-            <li>
-                <a href="/signin">Signin</a>
+                <a href="{% url 'logout' %}">Cerrar Sesión</a>
             </li>
             {% endif %}
 

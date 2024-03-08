@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
-
+@login_required
 def home(request):
     return render(request, 'home.html')
 
@@ -105,7 +105,7 @@ def gincana_eliminar(request, gincana_id):
 @login_required
 def signout(request):
     logout(request)
-    return redirect('home')
+    return redirect('signin')
 
 def signin(request):
     if request.method == 'GET':
@@ -123,4 +123,7 @@ def signin(request):
             })
         else:
             login(request, user)
-            return redirect('gincanas')
+            return redirect('home')
+        
+def informacion(request):
+    return render(request, 'informacion.html')

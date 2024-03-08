@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Iniciar Sesión</h1>
+
+{% load static %}
+<a href="{% url 'signin' %}">
+    <img src="{% static 'media/flecha.png' %}">
+</a>
+
+<h1>Gincana</h1>
+<h2>Registro</h2>
 
 {{error}}
 
@@ -9,7 +16,7 @@
     {% csrf_token%}
     {{form.as_p}}
     <button>
-        Iniciar Sesión
+        Siguiente
     </button>
 </form> 
 {% endblock %}   

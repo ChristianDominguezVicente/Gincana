@@ -20,7 +20,7 @@ from tasks import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
+    path('home/', views.home, name='home'),
     path('signup/', views.signup, name='signup'),
     path('gincanas/', views.gincanas, name='gincanas'),
     path('gincanas_completadas/', views.gincanas_completadas, name='gincanas_completadas'),
@@ -29,5 +29,6 @@ urlpatterns = [
     path('gincanas/<int:gincana_id>/completada', views.gincana_completada, name='gincana_completada'),
     path('gincanas/<int:gincana_id>/eliminar', views.gincana_eliminar, name='gincana_eliminar'),
     path('logout/', views.signout, name='logout'),
-    path('signin/', views.signin, name='signin')
+    path('informacion/', views.informacion, name='informacion'),
+    path('', views.signin, name='signin')
 ]
