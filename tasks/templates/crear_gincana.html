@@ -5,7 +5,7 @@
 
     {{error}}
 
-    <form action="/gincanas/crear/" method="POST">
+    <form action="{% url 'crear_gincana' %}" method="POST">
         {% csrf_token %}
 
         {{form}}
