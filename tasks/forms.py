@@ -27,7 +27,7 @@ class ProfesorForm(forms.ModelForm):
 
     class Meta:
         model = Profesor
-        fields = ['email', 'username', 'nombre', 'apellidos']
+        fields = ['email', 'nombre', 'apellidos']
         widget = {
             'email': forms.EmailInput(
                 attrs = {
@@ -45,12 +45,6 @@ class ProfesorForm(forms.ModelForm):
                 attrs = {
                     'class': 'form-control',
                     'placeholder': 'Ingrese sus apellidos'
-                }
-            ),
-            'username': forms.TextInput(
-                attrs = {
-                    'class': 'form-control',
-                    'placeholder': 'Ingrese su nombre de Usuario'
                 }
             )
         }

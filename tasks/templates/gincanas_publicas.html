@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Gincanas Públicas</h1>
+
+<ul>
+    {% for gincana in gincanas %}
+    <li>
+        <a href=" {% url 'gincana_publica' gincana.id %}">
+            {% if gincana.visibilidad %}
+                <strong>{{gincana.titulo}}</strong>
+            {% else %}
+                {{gincana.titulo}}
+            {% endif %}
+
+            <p>{{gincana.descripcion}}</p>
+            <p>{{gincana.email_profesor}}</p>
+
+            <p>{{gincana.edicion|date:'M j Y:i'}}</p>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

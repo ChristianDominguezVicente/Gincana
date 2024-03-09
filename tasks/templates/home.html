@@ -1,13 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Home</h1>
-<p>
-    Ipsum nulla eu aliqua dolore id excepteur occaecat et Lorem ea proident. 
-    Sint eiusmod sunt nisi sit magna eiusmod adipisicing id est. 
-    Anim incididunt anim consectetur eu officia sint amet cupidatat nulla quis tempor. 
-    Consequat incididunt pariatur cillum aute occaecat laborum nostrud mollit nulla. 
-    Tempor non et qui commodo sint veniam nulla irure dolor ad occaecat eu ullamco. 
-    Non laborum ex anim culpa. Cillum in veniam labore sunt ex.
-</p>
+<h1>Mis Gincanas</h1>
+<ul>
+    {% for mi_gincana in mis_gincanas %}
+    <li>
+        <a href=" {% url 'gincana' mi_gincana.id %}">
+            {% if mi_gincana.visibilidad %}
+                <strong>{{mi_gincana.titulo}}</strong>
+            {% else %}
+                {{mi_gincana.titulo}}
+            {% endif %}
+
+            <p>{{mi_gincana.descripcion}}</p>
+            <p>{{mi_gincana.email_profesor}}</p>
+
+            <p>{{mi_gincana.edicion|date:'M j Y:i'}}</p>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+
+<h1>Gincanas Públicas</h1>
+<ul>
+    {% for gincana_publica in gincanas_publicas %}
+    <li>
+        <a href=" {% url 'gincana_publica' gincana_publica.id %}">
+            {% if gincana_publica.visibilidad %}
+                <strong>{{gincana_publica.titulo}}</strong>
+            {% else %}
+                {{gincana_publica.titulo}}
+            {% endif %}
+
+            <p>{{gincana_publica.descripcion}}</p>
+            <p>{{gincana_publica.email_profesor}}</p>
+
+            <p>{{gincana_publica.edicion|date:'M j Y:i'}}</p>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
 {% endblock %}
