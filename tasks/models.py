@@ -3,25 +3,33 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
 class Usuario(BaseUserManager):
-    def create_user(self, email, nombre, apellidos, password = None):
+    def create_user(self, email, nombre, apellidos, fecha_nacimiento, genero, telefono, organizacion, password = None):
         if not email:
             raise ValueError('El usuario debe tener un correo electrónico.')
         
         usuario = self.model(
             email = self.normalize_email(email),
             nombre = nombre, 
-            apellidos = apellidos
+            apellidos = apellidos,
+            fecha_nacimiento = fecha_nacimiento,
+            genero = genero,
+            telefono = telefono,
+            organizacion = organizacion
         )
 
         usuario.set_password(password)
         usuario.save()
         return usuario
     
-    def create_superuser(self, email, nombre, apellidos, password):
+    def create_superuser(self, email, nombre, apellidos, fecha_nacimiento, genero, telefono, organizacion,  password):
         usuario = self.create_user(
             email, 
             nombre = nombre, 
             apellidos = apellidos,
+            fecha_nacimiento = fecha_nacimiento,
+            genero = genero,
+            telefono = telefono,
+            organizacion = organizacion,
             password=password
         )
         usuario.usuario_administrador = True
@@ -29,21 +37,20 @@ class Usuario(BaseUserManager):
         return usuario
 
 class Profesor(AbstractBaseUser):
-    #username = models.CharField('Nombre de usuario', unique = True, max_length=100)
     email = models.EmailField("Correo Electrónico", unique = True, max_length=254)
-    nombre = models.CharField("Nombre" ,max_length=200, null=True, blank=True)
-    apellidos = models.CharField("Apellidos", max_length=200, null=True, blank=True)
+    nombre = models.CharField("Nombre" ,max_length=200, null=True, blank=False)
+    apellidos = models.CharField("Apellidos", max_length=200, null=True, blank=False)
     imagen = models.ImageField("Imagen de Perfil", upload_to='perfil/', max_length=200, blank = True, null = True)
     usuario_activo = models.BooleanField(default = True)
     usuario_administrador = models.BooleanField(default=False)
-    fecha_nacimiento = models.DateTimeField('Fecha de nacimiento', auto_now_add=True)
-    genero = models.CharField("Género", max_length=200, blank=False)
+    fecha_nacimiento = models.DateField('Fecha de nacimiento', null=True, blank=False)
+    genero = models.CharField("Género", max_length=200, null=True, blank=True)
     telefono = models.IntegerField('Teléfono', null=True, blank=True)
-    organizacion = models.CharField("Organizacion", max_length=200, null=True, blank=True)
+    organizacion = models.CharField("Organizacion", max_length=200, null=True, blank=False)
     objects = Usuario()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['nombre', 'apellidos']
+    REQUIRED_FIELDS = ['nombre', 'apellidos', 'fecha_nacimiento', 'genero', 'telefono', 'organizacion']
 
     def __str__(self):
         return f'{self.nombre},{self.apellidos}'
@@ -68,4 +75,4 @@ class Gincana(models.Model):
     email_profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.titulo + ' - ' + self.email_profesor.username
+        return self.titulo + ' - ' + self.email_profesor.email

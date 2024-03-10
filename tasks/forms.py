@@ -1,5 +1,6 @@
 from django import forms
 from .models import Gincana, Profesor
+from django.contrib.admin.widgets import AdminDateWidget
 
 class GincanaForm(forms.ModelForm):
     class Meta:
@@ -7,6 +8,24 @@ class GincanaForm(forms.ModelForm):
         fields = ['titulo', 'descripcion', 'visibilidad']
 
 class ProfesorForm(forms.ModelForm):
+    telefono = forms.IntegerField(label = 'Telefóno', widget=forms.NumberInput(
+        attrs = {
+            'class': 'form-control',
+            'placeholder': 'Ingrese su telefono',
+            'id': 'telefono',
+            'required': 'required'
+        }
+    ), initial=0) 
+
+    fecha_nacimiento = forms.DateField(label = 'Fecha de nacimiento', widget = forms.DateInput(
+        attrs = {
+            'class': 'form-control',
+            'type': 'date',
+            'id': 'fecha_nacimiento',
+            'required': 'required'
+        }
+    ))
+
     password1 = forms.CharField(label = 'Contraseña', widget = forms.PasswordInput(
         attrs = {
             'class': 'form-control',
@@ -27,7 +46,7 @@ class ProfesorForm(forms.ModelForm):
 
     class Meta:
         model = Profesor
-        fields = ['email', 'nombre', 'apellidos']
+        fields = ['email', 'nombre', 'apellidos', 'genero', 'organizacion']
         widget = {
             'email': forms.EmailInput(
                 attrs = {
@@ -45,6 +64,18 @@ class ProfesorForm(forms.ModelForm):
                 attrs = {
                     'class': 'form-control',
                     'placeholder': 'Ingrese sus apellidos'
+                }
+            ),
+            'genero': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su género'
+                }
+            ),
+            'organizacion': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese la organización a la que pertenece'
                 }
             )
         }

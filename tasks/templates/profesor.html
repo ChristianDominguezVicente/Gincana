@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% for profesor in profesores %}
+        <h1>{{profesor.email}}</h1>
+        <p>{{profesor.nombre}}</p>
+        <p>{{profesor.apellidos}}</p>
+        <p>{{profesor.fecha_nacimiento}}</p>
+        <p>{{profesor.genero}}</p>
+        <p>{{profesor.telefono}}</p>
+        <p>{{profesor.organizacion}}</p>
+    {% endfor %}
+
+{% endblock %}
