@@ -31,6 +31,10 @@ def signup(request):
                     user = Profesor.objects.create_user(email=request.POST['email'],
                         nombre=request.POST['nombre'],
                         apellidos=request.POST['apellidos'],
+                        fecha_nacimiento=request.POST['fecha_nacimiento'],
+                        genero=request.POST['genero'],
+                        telefono=request.POST['telefono'],
+                        organizacion=request.POST['organizacion'],
                         password=request.POST['password1'])
                     user.save()
                     login(request, user)
@@ -142,3 +146,8 @@ def informacion(request):
         return redirect('home')
     else:
         return render(request, 'informacion.html')
+
+@login_required
+def profesor(request):  
+    profesores = Profesor.objects.filter(email = request.user.email)
+    return render(request, 'profesor.html', {'profesores': profesores})

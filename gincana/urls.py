@@ -31,5 +31,6 @@ urlpatterns = [
     path('mis_gincanas/<int:gincana_id>/eliminar', views.gincana_eliminar, name='gincana_eliminar'),
     path('logout/', views.signout, name='logout'),
     path('informacion/', views.informacion, name='informacion'),
+    path('profesor/', views.profesor, name='profesor'),
     path('', views.signin, name='signin')
 ]

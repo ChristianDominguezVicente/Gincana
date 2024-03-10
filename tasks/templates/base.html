@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -30,7 +31,18 @@
                 <a href="{% url 'logout' %}">Cerrar Sesión</a>
             </li>
             {% endif %}
+        </ul>
+    </nav>
 
+    <nav>
+        <ul>
+            {% if user.is_authenticated %}
+            <li>
+                <a href="{% url 'profesor' %}">
+                    <img src="{% static 'media/usuario.png' %}">
+                </a>
+            </li>
+            {% endif %}
         </ul>
     </nav>
 
