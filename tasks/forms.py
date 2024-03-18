@@ -5,18 +5,34 @@ from django.contrib.admin.widgets import AdminDateWidget
 class GincanaForm(forms.ModelForm):
     class Meta:
         model = Gincana
-        fields = ['titulo', 'descripcion', 'visibilidad']
+        fields = ['titulo']
+
+class GincanaConfiguracionForm(forms.ModelForm):
+    class Meta:
+        model = Gincana
+        fields = ['titulo', 'descripcion', 'visibilidad', 'duracion', 'imagen']
+        widget = {
+            'titulo': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Nombre'
+                }
+            ),
+            'descripcion': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese una descripción '
+                }
+            ),
+            'duracion': forms.TimeInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese la duración '
+                }
+            )
+        }
 
 class ProfesorForm(forms.ModelForm):
-    telefono = forms.IntegerField(label = 'Telefóno', widget=forms.NumberInput(
-        attrs = {
-            'class': 'form-control',
-            'placeholder': 'Ingrese su telefono',
-            'id': 'telefono',
-            'required': 'required'
-        }
-    ), initial=0) 
-
     fecha_nacimiento = forms.DateField(label = 'Fecha de nacimiento', widget = forms.DateInput(
         attrs = {
             'class': 'form-control',
@@ -46,7 +62,7 @@ class ProfesorForm(forms.ModelForm):
 
     class Meta:
         model = Profesor
-        fields = ['email', 'nombre', 'apellidos', 'genero', 'organizacion']
+        fields = ['email', 'nombre', 'apellidos', 'genero', 'pais', 'ciudad', 'organizacion']
         widget = {
             'email': forms.EmailInput(
                 attrs = {
@@ -70,6 +86,18 @@ class ProfesorForm(forms.ModelForm):
                 attrs = {
                     'class': 'form-control',
                     'placeholder': 'Ingrese su género'
+                }
+            ),
+            'pais': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su pais'
+                }
+            ),
+            'ciudad': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su ciudad'
                 }
             ),
             'organizacion': forms.TextInput(
