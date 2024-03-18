@@ -61,29 +61,8 @@
         </ul>
     </nav>
 
-    <h1>{{gincana.titulo}}</h1>
+    <h1>Editar {{gincana.titulo}}</h1>
 
-    {{error}}
-
-    <form action="{% url 'gincana_iniciar' gincana.id %}" method="POST">
-        {% csrf_token %}
-        {% if gincana.activa == False %}
-            <button>
-                Iniciar
-            </button>
-        {% elif gincana.activa == True %}
-            <button>
-                Terminar
-            </button>
-        {% endif %}
-    </form>
-
-    <form action="{% url 'gincana_eliminar' gincana.id %}" method="POST">
-        {% csrf_token %}
-        <button>
-            Eliminar
-        </button>
-    </form>
 
 </body>
 </html>

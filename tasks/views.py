@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError
-from .forms import GincanaForm, ProfesorForm
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm
 from .models import Gincana, Profesor
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -33,7 +33,8 @@ def signup(request):
                         apellidos=request.POST['apellidos'],
                         fecha_nacimiento=request.POST['fecha_nacimiento'],
                         genero=request.POST['genero'],
-                        telefono=request.POST['telefono'],
+                        pais=request.POST['pais'],
+                        ciudad=request.POST['ciudad'],
                         organizacion=request.POST['organizacion'],
                         password=request.POST['password1'])
                     user.save()
@@ -83,17 +84,40 @@ def crear_gincana(request):
 def gincana(request, gincana_id):  
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-        form = GincanaForm(instance=gincana)
-        return render(request, 'gincana.html', {'gincana': gincana, 'form': form})
+        return render(request, 'gincana.html', {'gincana': gincana  })
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-            form = GincanaForm(request.POST, instance=gincana)
+            return redirect('gincana')
+        except ValueError:
+            return render(request, 'gincana.html', {'gincana': gincana, 
+                'error': "Error actualizando la Gincana"})
+
+@login_required        
+def editar_gincana(request, gincana_id):  
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    return render(request, 'editar_gincana.html', {'gincana': gincana})
+
+@login_required        
+def configuracion_gincana(request, gincana_id):  
+    if request.method == 'GET':
+        gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+        form = GincanaConfiguracionForm(instance=gincana)
+        return render(request, 'configuracion_gincana.html', {'gincana': gincana,'form': form})
+    else:
+        try:
+            gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+            form = GincanaConfiguracionForm(request.POST, instance=gincana)
             form.save()
             return redirect('mis_gincanas')
         except ValueError:
-            return render(request, 'gincana.html', {'gincana': gincana, 'form': form,
+            return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
                 'error': "Error actualizando la Gincana"})
+
+@login_required        
+def puntuacion_gincana(request, gincana_id):  
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    return render(request, 'puntuacion_gincana.html', {'gincana': gincana})
 
 @login_required        
 def gincana_publica(request, gincana_id):  
@@ -101,12 +125,17 @@ def gincana_publica(request, gincana_id):
     return render(request, 'gincana_publica.html', {'gincana': gincana})
 
 @login_required
-def gincana_completada(request, gincana_id):
+def gincana_iniciar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-    if request.method == "POST":
+    if request.method == "POST" and gincana.activa == False:
+        gincana.activa = True
+        gincana.save()
+        return render(request, 'gincana.html', {'gincana': gincana})
+    elif request.method == "POST" and gincana.activa == True:
+        gincana.activa = False
         gincana.edicion = timezone.now()
         gincana.save()
-        return redirect('mis_gincanas')
+        return render(request, 'gincana.html', {'gincana': gincana})
 
 @login_required    
 def gincana_eliminar(request, gincana_id):
