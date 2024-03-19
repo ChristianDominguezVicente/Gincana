@@ -1,6 +1,5 @@
 from django import forms
 from .models import Gincana, Profesor
-from django.contrib.admin.widgets import AdminDateWidget
 
 class GincanaForm(forms.ModelForm):
     class Meta:
@@ -70,6 +69,59 @@ class ProfesorForm(forms.ModelForm):
                     'placeholder': 'Correo Electrónico'
                 }
             ),
+            'nombre': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su nombre'
+                }
+            ),
+            'apellidos': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese sus apellidos'
+                }
+            ),
+            'genero': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su género'
+                }
+            ),
+            'pais': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su pais'
+                }
+            ),
+            'ciudad': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su ciudad'
+                }
+            ),
+            'organizacion': forms.TextInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese la organización a la que pertenece'
+                }
+            )
+        }
+
+class EditarProfesorForm(forms.ModelForm):
+
+    fecha_nacimiento = forms.DateField(label = 'Fecha de nacimiento', widget = forms.DateInput(
+        attrs = {
+            'class': 'form-control',
+            'type': 'date',
+            'id': 'fecha_nacimiento',
+            'required': 'required'
+        }
+    ))
+
+    class Meta:
+        model = Profesor
+        fields = ['nombre', 'apellidos', 'genero', 'pais', 'ciudad', 'organizacion']
+        widget = {
             'nombre': forms.TextInput(
                 attrs = {
                     'class': 'form-control',

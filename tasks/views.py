@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm
 from .models import Gincana, Profesor
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -109,7 +109,7 @@ def configuracion_gincana(request, gincana_id):
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
             form = GincanaConfiguracionForm(request.POST, instance=gincana)
             form.save()
-            return redirect('mis_gincanas')
+            return render(request, 'gincana.html', {'gincana': gincana})
         except ValueError:
             return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
                 'error': "Error actualizando la Gincana"})
@@ -127,15 +127,18 @@ def gincana_publica(request, gincana_id):
 @login_required
 def gincana_iniciar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-    if request.method == "POST" and gincana.activa == False:
+    if request.method == "POST" and gincana.activa == False and gincana.duracion is not None :
         gincana.activa = True
         gincana.save()
         return render(request, 'gincana.html', {'gincana': gincana})
-    elif request.method == "POST" and gincana.activa == True:
+    elif request.method == "POST" and gincana.activa == True and gincana.duracion is not None :
         gincana.activa = False
         gincana.edicion = timezone.now()
         gincana.save()
         return render(request, 'gincana.html', {'gincana': gincana})
+    else:
+        return render(request, 'gincana.html', {'gincana': gincana, 
+            'error': "Se necesita primero establecer una duración a la gincana."})
 
 @login_required    
 def gincana_eliminar(request, gincana_id):
@@ -177,6 +180,22 @@ def informacion(request):
         return render(request, 'informacion.html')
 
 @login_required
-def profesor(request):  
-    profesores = Profesor.objects.filter(email = request.user.email)
-    return render(request, 'profesor.html', {'profesores': profesores})
+def profesor(request):
+    profesor = get_object_or_404(Profesor, pk = request.user.email)
+    return render(request, 'profesor.html', {'profesor': profesor})
+
+@login_required
+def editar_profesor(request, email):
+    if request.method == 'GET':
+        profesor = get_object_or_404(Profesor, pk=email)
+        form = EditarProfesorForm(instance=profesor)
+        return render(request, 'editar_profesor.html', {'profesor': profesor,'form': form})
+    else:
+        try:
+            profesor = get_object_or_404(Profesor, pk=email)
+            form = EditarProfesorForm(request.POST, instance=profesor)
+            form.save()
+            return render(request, 'profesor.html', {'profesor': profesor})
+        except ValueError:
+            return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form,
+                'error': "Error actualizando Perfil"})
