@@ -35,5 +35,6 @@ urlpatterns = [
     path('logout/', views.signout, name='logout'),
     path('informacion/', views.informacion, name='informacion'),
     path('profesor/', views.profesor, name='profesor'),
+    path('editar_profesor/<str:email>/', views.editar_profesor, name='editar_profesor'),
     path('', views.signin, name='signin')
 ]

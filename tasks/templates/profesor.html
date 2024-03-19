@@ -2,14 +2,20 @@
 
 {% block content %}
 
-    {% for profesor in profesores %}
         <h1>{{profesor.email}}</h1>
         <p>{{profesor.nombre}}</p>
         <p>{{profesor.apellidos}}</p>
         <p>{{profesor.fecha_nacimiento}}</p>
         <p>{{profesor.genero}}</p>
-        <p>{{profesor.telefono}}</p>
+        <p>{{profesor.pais}}</p>
+        <p>{{profesor.ciudad}}</p>
         <p>{{profesor.organizacion}}</p>
-    {% endfor %}
+
+    <form action="{% url 'editar_profesor' profesor.email %}" method="POST">
+        {% csrf_token %}
+        <button>
+            Editar
+        </button>
+    </form>
 
 {% endblock %}

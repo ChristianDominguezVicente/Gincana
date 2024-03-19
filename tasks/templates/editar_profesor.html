@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1>{{profesor.email}}</h1>
+
+    <form action="{% url 'profesor' %}" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <button>
+            Guardar
+        </button>
+    </form>
+
+{% endblock %}
