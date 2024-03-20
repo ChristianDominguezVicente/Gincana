@@ -4,7 +4,9 @@
 
     <h1>{{profesor.email}}</h1>
 
-    <form action="{% url 'profesor' %}" method="POST">
+    {{error}}
+
+    <form method="POST">
         {% csrf_token %}
         {{form.as_p}}
         <button>
