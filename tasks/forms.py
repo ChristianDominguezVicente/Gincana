@@ -108,7 +108,6 @@ class ProfesorForm(forms.ModelForm):
         }
 
 class EditarProfesorForm(forms.ModelForm):
-
     fecha_nacimiento = forms.DateField(label = 'Fecha de nacimiento', widget = forms.DateInput(
         attrs = {
             'class': 'form-control',

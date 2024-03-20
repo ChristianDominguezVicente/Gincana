@@ -2,16 +2,16 @@
 
 {% block content %}
 
-        <h1>{{profesor.email}}</h1>
-        <p>{{profesor.nombre}}</p>
-        <p>{{profesor.apellidos}}</p>
-        <p>{{profesor.fecha_nacimiento}}</p>
-        <p>{{profesor.genero}}</p>
-        <p>{{profesor.pais}}</p>
-        <p>{{profesor.ciudad}}</p>
-        <p>{{profesor.organizacion}}</p>
+    <h1>{{profesor.email}}</h1>
+    <p>{{profesor.nombre}}</p>
+    <p>{{profesor.apellidos}}</p>
+    <p>{{profesor.fecha_nacimiento}}</p>
+    <p>{{profesor.genero}}</p>
+    <p>{{profesor.pais}}</p>
+    <p>{{profesor.ciudad}}</p>
+    <p>{{profesor.organizacion}}</p>
 
-    <form action="{% url 'editar_profesor' profesor.email %}" method="POST">
+    <form action="{% url 'editar_profesor' profesor.email %}" method="POST">   
         {% csrf_token %}
         <button>
             Editar

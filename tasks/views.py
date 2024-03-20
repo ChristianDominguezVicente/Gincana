@@ -6,6 +6,8 @@ from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarPr
 from .models import Gincana, Profesor
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from datetime import date
+import datetime
 
 # Create your views here.
 
@@ -25,30 +27,38 @@ def signup(request):
                 'form': ProfesorForm
             })
         else:
-            if request.POST['password1'] == request.POST['password2']:
-                try:
-                    # Registro de usuario
-                    user = Profesor.objects.create_user(email=request.POST['email'],
-                        nombre=request.POST['nombre'],
-                        apellidos=request.POST['apellidos'],
-                        fecha_nacimiento=request.POST['fecha_nacimiento'],
-                        genero=request.POST['genero'],
-                        pais=request.POST['pais'],
-                        ciudad=request.POST['ciudad'],
-                        organizacion=request.POST['organizacion'],
-                        password=request.POST['password1'])
-                    user.save()
-                    login(request, user)
-                    return redirect('home')
-                except IntegrityError:
+            if Profesor.objects.filter(email=request.POST['email']):
+                return render(request, 'signup.html', {
+                    'form': ProfesorForm,
+                    'error': 'El usuario ya existe.'
+                })
+            else:
+                if request.POST['password1'] == request.POST['password2']:
+                    d = datetime.datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
+                    edad = date.today().year - d.year -((date.today().month, date.today().day) <(d.month, d.day))
+                    if edad >= 18:
+                        user = Profesor.objects.create_user(email=request.POST['email'],
+                            nombre=request.POST['nombre'],
+                            apellidos=request.POST['apellidos'],
+                            fecha_nacimiento=request.POST['fecha_nacimiento'],
+                            genero=request.POST['genero'],
+                            pais=request.POST['pais'],
+                            ciudad=request.POST['ciudad'],
+                            organizacion=request.POST['organizacion'],
+                            password=request.POST['password1'])
+                        user.save()
+                        login(request, user)
+                        return redirect('home')
+                    else:
+                        return render(request, 'signup.html', {
+                            'form': ProfesorForm,
+                            'error': 'Para registrarse necesita tener 18 años mínimo.'
+                        })
+                else:
                     return render(request, 'signup.html', {
                         'form': ProfesorForm,
-                        'error': 'El usuario ya existe'
+                        'error': 'Las contraseñas no coinciden'
                     })
-            return render(request, 'signup.html', {
-                'form': ProfesorForm,
-                'error': 'Las contraseñas no coinciden'
-            })
 
 @login_required
 def gincanas(request):
@@ -199,3 +209,5 @@ def editar_profesor(request, email):
         except ValueError:
             return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form,
                 'error': "Error actualizando Perfil"})
+    
+
