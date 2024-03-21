@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError
+from django.utils.datastructures import MultiValueDictKeyError
 from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm
 from .models import Gincana, Profesor
 from django.utils import timezone
@@ -15,7 +16,8 @@ import datetime
 def home(request):
     mis_gincanas = Gincana.objects.filter(email_profesor=request.user)
     gincanas_publicas = Gincana.objects.filter(visibilidad=True).order_by('-edicion')
-    return render(request, 'home.html',{'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas})
+    profesores = Profesor.objects.filter(email=request.user.email)
+    return render(request, 'home.html',{'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores})
 
 
 def signup(request):
@@ -63,19 +65,22 @@ def signup(request):
 @login_required
 def gincanas(request):
     gincanas = Gincana.objects.filter(email_profesor=request.user)
-    return render(request, 'mis_gincanas.html',{'gincanas': gincanas})
+    profesores = Profesor.objects.filter(email=request.user.email)
+    return render(request, 'mis_gincanas.html',{'gincanas': gincanas, 'profesores': profesores})
 
 @login_required
 def gincanas_publicas(request):
     gincanas = Gincana.objects.filter(visibilidad=True).order_by('-edicion')
-    return render(request, 'gincanas_publicas.html',{'gincanas': gincanas})
+    profesores = Profesor.objects.filter(email=request.user.email)
+    return render(request, 'gincanas_publicas.html',{'gincanas': gincanas, 'profesores': profesores})
 
 @login_required
 def crear_gincana(request):
-
+    profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == 'GET':
         return render(request, 'crear_gincana.html',{
-            'form': GincanaForm
+            'form': GincanaForm, 
+            'profesores': profesores
         })
     else:
         try:
@@ -87,72 +92,94 @@ def crear_gincana(request):
         except ValueError:
             return render(request, 'crear_gincana.html',{
                 'form': GincanaForm,
-                'error': 'Los datos no son válidos'
+                'error': 'Los datos no son válidos',
+                'profesores': profesores
             })
 
 @login_required
 def gincana(request, gincana_id):  
+    profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-        return render(request, 'gincana.html', {'gincana': gincana  })
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
             return redirect('gincana')
         except ValueError:
-            return render(request, 'gincana.html', {'gincana': gincana, 
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 
                 'error': "Error actualizando la Gincana"})
 
 @login_required        
 def editar_gincana(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    return render(request, 'editar_gincana.html', {'gincana': gincana})
+    profesores = Profesor.objects.filter(email=request.user.email)
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores})
 
 @login_required        
 def configuracion_gincana(request, gincana_id):  
+    profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
         form = GincanaConfiguracionForm(instance=gincana)
-        return render(request, 'configuracion_gincana.html', {'gincana': gincana,'form': form})
+        return render(request, 'configuracion_gincana.html', {'gincana': gincana,'form': form, 'profesores': profesores})
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
             form = GincanaConfiguracionForm(request.POST, instance=gincana)
             form.save()
-            return render(request, 'gincana.html', {'gincana': gincana})
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
         except ValueError:
             return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
-                'error': "Error actualizando la Gincana"})
+                'profesores': profesores, 'error': "Error actualizando la Gincana"})
 
 @login_required        
 def puntuacion_gincana(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    return render(request, 'puntuacion_gincana.html', {'gincana': gincana})
+    profesores = Profesor.objects.filter(email=request.user.email)
+    return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores})
 
 @login_required        
 def gincana_publica(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    return render(request, 'gincana_publica.html', {'gincana': gincana})
+    profesores = Profesor.objects.filter(email=request.user.email)
+    return render(request, 'gincana_publica.html', {'gincana': gincana, 'profesores': profesores})
 
 @login_required
 def gincana_iniciar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+    profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == "POST" and gincana.activa == False and gincana.duracion is not None :
         gincana.activa = True
         gincana.save()
-        return render(request, 'gincana.html', {'gincana': gincana})
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
     elif request.method == "POST" and gincana.activa == True and gincana.duracion is not None :
         gincana.activa = False
         gincana.edicion = timezone.now()
         gincana.save()
-        return render(request, 'gincana.html', {'gincana': gincana})
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
     else:
-        return render(request, 'gincana.html', {'gincana': gincana, 
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 
             'error': "Se necesita primero establecer una duración a la gincana."})
+
+@login_required
+def gincana_copiar(request, gincana_id):
+    gincanas = Gincana.objects.filter(email_profesor=request.user)
+    profesores = Profesor.objects.filter(email=request.user.email)
+    nueva_Gincana = Gincana.objects.get(pk=gincana_id)
+    if nueva_Gincana.email_profesor == request.user:
+        return render(request, 'gincana_publica.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores,
+            'error': "Esta Gincana ya te pernetece."})
+    else:
+        nueva_Gincana.pk = None
+        nueva_Gincana.email_profesor = request.user
+        nueva_Gincana.save()
+        return render(request, 'mis_gincanas.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores})
 
 @login_required    
 def gincana_eliminar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+    profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == "POST":
         gincana.delete()
         return redirect('mis_gincanas')
@@ -190,24 +217,41 @@ def informacion(request):
         return render(request, 'informacion.html')
 
 @login_required
-def profesor(request):
-    profesor = get_object_or_404(Profesor, pk = request.user.email)
-    return render(request, 'profesor.html', {'profesor': profesor})
-
-@login_required
-def editar_profesor(request, email):
+def profesor(request, email_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == 'GET':
-        profesor = get_object_or_404(Profesor, pk=email)
-        form = EditarProfesorForm(instance=profesor)
-        return render(request, 'editar_profesor.html', {'profesor': profesor,'form': form})
+        profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+        return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores})
     else:
         try:
-            profesor = get_object_or_404(Profesor, pk=email)
-            form = EditarProfesorForm(request.POST, instance=profesor)
-            form.save()
-            return render(request, 'profesor.html', {'profesor': profesor})
+            profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+            return redirect('profesor')
         except ValueError:
-            return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form,
-                'error': "Error actualizando Perfil"})
-    
+            return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores, 
+                'error': "Error actualizando el Perfil"})
 
+@login_required
+def editar_profesor(request, email_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    if request.method == 'GET':
+        profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
+        form = EditarProfesorForm(instance=profesor)
+        return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form, 'profesores': profesores})
+    else:
+        try:
+            profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
+            form = EditarProfesorForm(request.POST, instance=profesor)
+            d = datetime.datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
+            edad = date.today().year - d.year -((date.today().month, date.today().day) <(d.month, d.day))
+            if edad >= 18:
+                form.save()
+                return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores})
+            else:
+                return render(request, 'editar_profesor.html', {
+                    'profesor': profesor, 'profesores': profesores,
+                    'form': EditarProfesorForm,
+                    'error': 'Para registrarse necesita tener 18 años mínimo.'
+                })
+        except MultiValueDictKeyError:
+            return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form,
+                'profesores': profesores, 'error': "Error actualizando el Perfil"})

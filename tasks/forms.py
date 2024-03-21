@@ -116,7 +116,7 @@ class EditarProfesorForm(forms.ModelForm):
             'required': 'required'
         }
     ))
-
+    
     class Meta:
         model = Profesor
         fields = ['nombre', 'apellidos', 'genero', 'pais', 'ciudad', 'organizacion']

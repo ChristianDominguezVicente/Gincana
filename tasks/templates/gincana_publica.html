@@ -3,7 +3,17 @@
 {% block content %}
 
     <h1>{{gincana.titulo}}</h1>
+
+    {{error}}
+    
     <p>{{gincana.descripcion}}</p>
     <p>{{gincana.email_profesor}}</p>
+
+    <form action="{% url 'gincana_copiar' gincana.id %}" method="POST">
+        {% csrf_token %}
+        <button>
+                Copiar
+        </button>
+    </form>
 
 {% endblock %}

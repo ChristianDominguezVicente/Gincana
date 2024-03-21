@@ -10,12 +10,7 @@
     <p>{{profesor.pais}}</p>
     <p>{{profesor.ciudad}}</p>
     <p>{{profesor.organizacion}}</p>
-
-    <form action="{% url 'editar_profesor' profesor.email %}" method="POST">   
-        {% csrf_token %}
-        <button>
-            Editar
-        </button>
-    </form>
+ 
+    <a href="{% url 'editar_profesor' profesor.email %}">Editar</a>
 
 {% endblock %}
