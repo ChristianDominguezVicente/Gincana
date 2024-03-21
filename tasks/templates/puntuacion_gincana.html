@@ -5,10 +5,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gincana</title>
+    <link rel="icon" href="{% static 'media/Logo.png' %}">
+    <title>HerStory Gincanas</title>
 </head>
 <body>
-    
+    <nav>
+        <ul>
+            {% if user.is_authenticated %}
+            <li>
+                <a href="{% url 'home' %}">Gincana</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
     <nav>
         <ul>
             {% if user.is_authenticated %}
@@ -27,9 +36,6 @@
 
             <img src="{% static 'media/separador.png' %}">
 
-            <li>
-                <a href="{% url 'home' %}">Gincana</a>
-            </li>
             <li>
                 <a href="{% url 'crear_gincana' %}">Crear Gincana</a>
             </li>
@@ -52,11 +58,13 @@
     <nav>
         <ul>
             {% if user.is_authenticated %}
+            {% for profesor in profesores %}
             <li>
-                <a href="{% url 'profesor' %}">
+                <a href="{% url 'profesor' profesor.email %}">
                     <img src="{% static 'media/usuario.png' %}">
                 </a>
             </li>
+            {% endfor %}
             {% endif %}
         </ul>
     </nav>
