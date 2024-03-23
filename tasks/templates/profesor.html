@@ -13,4 +13,11 @@
  
     <a href="{% url 'editar_profesor' profesor.email %}">Editar</a>
 
+    <form action="{% url 'profesor_eliminar' profesor.email %}" method="POST">
+        {% csrf_token %}
+        <button>
+            Eliminar
+        </button>
+    </form>
+
 {% endblock %}

@@ -303,6 +303,7 @@ class Profesor(AbstractBaseUser):
     imagen = models.ImageField("Imagen de Perfil", upload_to='perfil/', max_length=200, blank = True, null = True)
     usuario_activo = models.BooleanField(default = True)
     usuario_administrador = models.BooleanField(default=False)
+    usuario_verificado = models.BooleanField(default=False)
     fecha_nacimiento = models.DateField('Fecha de nacimiento', null=True, blank=False)
     genero = models.CharField("Género", max_length=1 ,choices=GENDER_CHOICES ,default='H', null=True)
     pais = models.CharField("País", max_length=2 ,choices=COUNTRY_CHOICES , null=True)
@@ -348,3 +349,10 @@ class GincanaJugada(models.Model):
 
     def __str__(self):
         return self.gincana.titulo + ' - ' + self.edición
+
+class Verificacion(models.Model):
+    code = models.IntegerField('Código', default=10000, null=True, blank=True)
+    email = models.EmailField("Correo Electrónico", unique = True, max_length=254, primary_key=True)
+
+    def __str__(self):
+        return self.code + ' - ' + self.email_profesor.email
