@@ -22,6 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('home/', views.home, name='home'),
     path('signup/', views.signup, name='signup'),
+    path('verificacion/', views.verificacion, name='verificacion'),
+    path('verificacion/reenviar/', views.verificacion_reenviar, name='verificacion_reenviar'),
     path('mis_gincanas/', views.gincanas, name='mis_gincanas'),
     path('gincanas_publicas/', views.gincanas_publicas, name='gincanas_publicas'),
     path('mis_gincanas/crear/', views.crear_gincana, name='crear_gincana'),
@@ -36,6 +38,7 @@ urlpatterns = [
     path('logout/', views.signout, name='logout'),
     path('informacion/', views.informacion, name='informacion'),
     path('profesor/<str:email_id>/', views.profesor, name='profesor'),
+    path('profesor/<str:email_id>/eliminar', views.profesor_eliminar, name='profesor_eliminar'),
     path('editar_profesor/<str:email_id>/', views.editar_profesor, name='editar_profesor'),
     path('', views.signin, name='signin')
 ]

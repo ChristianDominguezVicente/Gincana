@@ -1,0 +1,28 @@
+{% block content %}
+
+{% load static %}
+<a href="{% url 'signup' %}">
+    <img src="{% static 'media/flecha.png' %}">
+</a>
+
+<h1>Gincana</h1>
+<h2>Verificación</h2>
+
+{{error}}
+
+<form method="POST">
+    {% csrf_token%}
+    {{form.as_p}}
+    <button>
+        Siguiente
+    </button>
+</form>
+
+<form action="{% url 'verificacion_reenviar' %}" method="POST">
+    {% csrf_token %}
+    <button>
+        Reeviar Código
+    </button>
+</form>
+
+{% endblock %}   

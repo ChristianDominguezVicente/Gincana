@@ -3,12 +3,14 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError
 from django.utils.datastructures import MultiValueDictKeyError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm
-from .models import Gincana, Profesor
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm
+from .models import Gincana, Profesor, Verificacion
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from datetime import date
-import datetime
+import datetime, random
+
+from django.core.mail import send_mail
 
 # Create your views here.
 
@@ -48,9 +50,19 @@ def signup(request):
                             ciudad=request.POST['ciudad'],
                             organizacion=request.POST['organizacion'],
                             password=request.POST['password1'])
+
                         user.save()
-                        login(request, user)
-                        return redirect('home')
+                        num=random.randint(0,9999)
+                        Verificacion.objects.create(code=num, email=user.email)
+
+                        send_mail(
+                            subject='Código de Verificación',
+                            message=str(num),
+                            from_email='herstorygincanas@gmail.com',
+                            recipient_list=[user.email]
+                        )
+                        
+                        return redirect('verificacion')
                     else:
                         return render(request, 'signup.html', {
                             'form': ProfesorForm,
@@ -61,6 +73,43 @@ def signup(request):
                         'form': ProfesorForm,
                         'error': 'Las contraseñas no coinciden'
                     })
+                
+def verificacion(request):
+    if request.method == 'GET':
+            return render(request, 'verificacion.html', {
+                'form': VerificacionForm
+            })
+    else:
+        form = VerificacionForm(request.POST)
+        if Verificacion.objects.filter(code=request.POST['code'],email=request.POST['email']):
+            user = get_object_or_404(Profesor, pk=request.POST['email'])
+            user.usuario_verificado=True
+            user.save()
+            code = get_object_or_404(Verificacion, email=user.email)
+            code.delete()
+            login(request, user)
+            return redirect('home')
+        else:
+            form = VerificacionForm()
+            return render(request, 'verificacion.html',{'form': form, 'error': 'No es el código de verificación.'})
+
+def verificacion_reenviar(request):
+    if request.method == "POST":
+        if request.POST['email'] is None:
+            form = VerificacionForm()
+            return render(request, 'verificacion.html',{'form': form, 'error': 'Escriba su email en la caja de texto antes de pulsar en reenviar.'})
+        else:
+            num=random.randint(0,9999)
+            user = Verificacion.objects.get(email=request.POST['email'])
+            user.code = num
+            user.save()
+            send_mail(
+                subject='Código de Verificación',
+                message=str(num),
+                from_email='herstorygincanas@gmail.com',
+                recipient_list=[request.POST['email']]
+            )
+            return redirect('verificacion')
 
 @login_required
 def gincanas(request):
@@ -198,17 +247,27 @@ def signin(request):
                 'form': AuthenticationForm
             })
         else:
-            user = authenticate(request, username=request.POST['username'], 
-                password=request.POST['password'])
-
-            if user is None:
-                return render(request, 'signin.html',{
+            profesor = get_object_or_404(Profesor,pk=request.POST['username'])
+            if profesor.usuario_verificado == False:
+                """
+                return render(request, 'signin.html', {
                     'form': AuthenticationForm,
-                    'error': 'El usuario o la contraseña es incorrecto'
+                    'error': 'El usuario no esta verificado.'
                 })
+                """
+                return redirect('verificacion')
             else:
-                login(request, user)
-                return redirect('home')
+                user = authenticate(request, username=request.POST['username'], 
+                    password=request.POST['password'])
+
+                if user is None:
+                    return render(request, 'signin.html',{
+                        'form': AuthenticationForm,
+                        'error': 'El usuario o la contraseña es incorrecto'
+                    })
+                else:
+                    login(request, user)
+                    return redirect('home')
         
 def informacion(request):
     if request.user.is_authenticated:
@@ -229,6 +288,13 @@ def profesor(request, email_id):
         except ValueError:
             return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores, 
                 'error': "Error actualizando el Perfil"})
+
+@login_required    
+def profesor_eliminar(request, email_id):
+    profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
+    if request.method == "POST":
+        profesor.delete()
+        return redirect('signin')
 
 @login_required
 def editar_profesor(request, email_id):

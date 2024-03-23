@@ -1,5 +1,24 @@
 from django import forms
-from .models import Gincana, Profesor
+from .models import Gincana, Profesor, Verificacion
+
+class VerificacionForm(forms.ModelForm):
+    class Meta:
+        model = Verificacion
+        fields = ['email', 'code']
+        widget = {
+            'email': forms.EmailInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Correo Electrónico'
+                }
+            ),
+            'code': forms.NumberInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su código'
+                }
+            )
+        }
 
 class GincanaForm(forms.ModelForm):
     class Meta:
