@@ -63,7 +63,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    password2 = forms.CharField(label = 'Contraseña de confirmación', widget = forms.PasswordInput(
+    password2 = forms.CharField(label = 'Confirme su Contraseña', widget = forms.PasswordInput(
         attrs = {
             'class': 'form-control',
             'placeholder': 'Ingrese nuevamente su contraseña...',
@@ -195,7 +195,7 @@ class PasswordCambioForm(forms.Form):
         }
     ))
 
-    password2 = forms.CharField(label = 'Contraseña de confirmación', widget = forms.PasswordInput(
+    password2 = forms.CharField(label = 'Confirme su Contraseña', widget = forms.PasswordInput(
         attrs = {
             'class': 'form-control',
             'placeholder': 'Ingrese nuevamente su contraseña...',
