@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
-from django.db import IntegrityError
 from django.utils.datastructures import MultiValueDictKeyError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm
 from .models import Gincana, Profesor, Verificacion
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -62,7 +61,7 @@ def signup(request):
                             recipient_list=[user.email]
                         )
                         
-                        return redirect('verificacion')
+                        return redirect('verificacion', email=user.email)
                     else:
                         return render(request, 'signup.html', {
                             'form': ProfesorForm,
@@ -74,15 +73,16 @@ def signup(request):
                         'error': 'Las contraseñas no coinciden'
                     })
                 
-def verificacion(request):
+def verificacion(request, email):
     if request.method == 'GET':
             return render(request, 'verificacion.html', {
-                'form': VerificacionForm
+                'form': VerificacionForm,
+                'email': email
             })
     else:
         form = VerificacionForm(request.POST)
-        if Verificacion.objects.filter(code=request.POST['code'],email=request.POST['email']):
-            user = get_object_or_404(Profesor, pk=request.POST['email'])
+        if Verificacion.objects.filter(code=request.POST['code'],email=email):
+            user = get_object_or_404(Profesor, pk=email)
             user.usuario_verificado=True
             user.save()
             code = get_object_or_404(Verificacion, email=user.email)
@@ -91,25 +91,83 @@ def verificacion(request):
             return redirect('home')
         else:
             form = VerificacionForm()
-            return render(request, 'verificacion.html',{'form': form, 'error': 'No es el código de verificación.'})
+            return render(request, 'verificacion.html',{'form': form, 'error': 'No es el código de verificación.', 'email': email})
 
-def verificacion_reenviar(request):
+def verificacion_reenviar(request, email):
     if request.method == "POST":
-        if request.POST['email'] is None:
-            form = VerificacionForm()
-            return render(request, 'verificacion.html',{'form': form, 'error': 'Escriba su email en la caja de texto antes de pulsar en reenviar.'})
+        num=random.randint(0,9999)
+        user = Verificacion.objects.get(email=email)
+        user.code = num
+        user.save()
+        send_mail(
+            subject='Código de Verificación',
+            message=str(num),
+            from_email='herstorygincanas@gmail.com',
+            recipient_list=[email]
+        )
+        return redirect('verificacion', email=email)
+    
+def password(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        if request.method == 'GET':
+            return render(request, 'password.html', {
+                'form': PasswordForm
+            })
         else:
-            num=random.randint(0,9999)
-            user = Verificacion.objects.get(email=request.POST['email'])
-            user.code = num
-            user.save()
-            send_mail(
-                subject='Código de Verificación',
-                message=str(num),
-                from_email='herstorygincanas@gmail.com',
-                recipient_list=[request.POST['email']]
-            )
-            return redirect('verificacion')
+            profesor = get_object_or_404(Profesor, pk=request.POST['email'])
+            if not Profesor.objects.filter(email=request.POST['email']):
+                return render(request, 'password.html', {
+                    'form': PasswordForm,
+                    'error': 'El usuario no existe.'
+                })
+            elif profesor.usuario_verificado == False:
+                return redirect('verificacion', email=request.POST['email'])
+            else:
+                send_mail(
+                    subject='Cambio de Contraseña',
+                    message='http://127.0.0.1:8000/password/' + request.POST['email'] + '/',
+                    from_email='herstorygincanas@gmail.com',
+                    recipient_list=[request.POST['email']]
+                )
+                
+                return redirect('password')
+        
+def password_cambio(request, email):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        if request.method == 'GET':
+            return render(request, 'password_cambiar.html', {
+                'form': PasswordCambioForm
+            })
+        else:
+            if not Profesor.objects.filter(email=email):
+                return render(request, 'password.html', {
+                    'form': PasswordForm,
+                    'error': 'El usuario no existe.'
+                })
+            else:
+                if request.POST['password1'] == request.POST['password2']:
+                    profesor = get_object_or_404(Profesor, pk=email)
+                    user = Profesor.objects.create_user(email=profesor.email,
+                            nombre=profesor.nombre,
+                            apellidos=profesor.apellidos,
+                            fecha_nacimiento=profesor.fecha_nacimiento,
+                            genero=profesor.genero,
+                            pais=profesor.pais,
+                            ciudad=profesor.ciudad,
+                            organizacion=profesor.organizacion,
+                            password=request.POST['password1'])
+                    user.usuario_verificado=True
+                    user.save()
+                    return redirect('signin')
+                else:
+                    return render(request, 'password_cambiar.html', {
+                        'form': PasswordCambioForm,
+                        'error': 'Las contraseñas no coinciden'
+                    })
 
 @login_required
 def gincanas(request):
@@ -249,13 +307,7 @@ def signin(request):
         else:
             profesor = get_object_or_404(Profesor,pk=request.POST['username'])
             if profesor.usuario_verificado == False:
-                """
-                return render(request, 'signin.html', {
-                    'form': AuthenticationForm,
-                    'error': 'El usuario no esta verificado.'
-                })
-                """
-                return redirect('verificacion')
+                return redirect('verificacion', email=request.POST['username'])
             else:
                 user = authenticate(request, username=request.POST['username'], 
                     password=request.POST['password'])

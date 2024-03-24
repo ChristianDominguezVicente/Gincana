@@ -4,14 +4,8 @@ from .models import Gincana, Profesor, Verificacion
 class VerificacionForm(forms.ModelForm):
     class Meta:
         model = Verificacion
-        fields = ['email', 'code']
+        fields = ['code']
         widget = {
-            'email': forms.EmailInput(
-                attrs = {
-                    'class': 'form-control',
-                    'placeholder': 'Correo Electrónico'
-                }
-            ),
             'code': forms.NumberInput(
                 attrs = {
                     'class': 'form-control',
@@ -177,3 +171,35 @@ class EditarProfesorForm(forms.ModelForm):
                 }
             )
         }
+
+class PasswordForm(forms.ModelForm):
+    class Meta:
+        model = Profesor
+        fields = ['email']
+        widget = {
+            'email': forms.EmailInput(
+                attrs = {
+                    'class': 'form-control',
+                    'placeholder': 'Correo Electrónico'
+                }
+            )
+        }
+
+class PasswordCambioForm(forms.Form):
+    password1 = forms.CharField(label = 'Contraseña', widget = forms.PasswordInput(
+        attrs = {
+            'class': 'form-control',
+            'placeholder': 'Ingrese su contraseña...',
+            'id': 'password1',
+            'required': 'required'
+        }
+    ))
+
+    password2 = forms.CharField(label = 'Contraseña de confirmación', widget = forms.PasswordInput(
+        attrs = {
+            'class': 'form-control',
+            'placeholder': 'Ingrese nuevamente su contraseña...',
+            'id': 'password2',
+            'required': 'required'
+        }
+    ))

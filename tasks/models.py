@@ -351,7 +351,7 @@ class GincanaJugada(models.Model):
         return self.gincana.titulo + ' - ' + self.edición
 
 class Verificacion(models.Model):
-    code = models.IntegerField('Código', default=10000, null=True, blank=True)
+    code = models.IntegerField('Código', null=True, blank=True)
     email = models.EmailField("Correo Electrónico", unique = True, max_length=254, primary_key=True)
 
     def __str__(self):
