@@ -11,7 +11,7 @@
     {% csrf_token %}
     {{form.as_p}}
     <p>
-        <a href="{% url 'signin' %}">He olvidado mi contraseña</a>
+        <a href="{% url 'password' %}">He olvidado mi contraseña</a>
         <a href="{% url 'signup' %}">Crear una cuenta</a>
         <a href="{% url 'informacion' %}">
             <img src="{% static 'media/info.png' %}">
