@@ -336,19 +336,88 @@ def profesor(request, email_id):
     else:
         try:
             profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
-            return redirect('profesor')
+            return redirect('verificacion_password', email_id=request.user.email)
         except ValueError:
             return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores, 
                 'error': "Error actualizando el Perfil"})
 
-@login_required    
-def profesor_eliminar(request, email_id):
-    profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
-    if request.method == "POST":
-        profesor.delete()
-        return redirect('signin')
+@login_required     
+def verificacion_password(request, email_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    if request.method == 'GET':
+        return render(request, 'verificacion_password.html', {
+            'form': AuthenticationForm, 'email_id': email_id, 
+            'profesor': profesor, 'profesores': profesores
+        })
+    else:
+        profesor = get_object_or_404(Profesor, pk=email_id)
+        user = authenticate(request, username=request.POST['username'], 
+                    password=request.POST['password'])
+        if user is None:
+            return render(request, 'verificacion_password.html', {
+                'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
+                'profesor': profesor,'profesores': profesores
+            })
+        else:
+            return redirect('editar_profesor', email_id=email_id)
+        
+@login_required     
+def verificacion_password2(request, email_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    if request.method == 'GET':
+        return render(request, 'verificacion_password.html', {
+            'form': AuthenticationForm, 'email_id': email_id, 
+            'profesor': profesor, 'profesores': profesores
+        })
+    else:
+        try:
+            profesor = get_object_or_404(Profesor, pk=email_id)
+            user = authenticate(request, username=request.POST['username'], 
+                        password=request.POST['password'])
+            if user is None:
+                return render(request, 'verificacion_password.html', {
+                    'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
+                    'profesor': profesor,'profesores': profesores
+                })
+            else:
+                return redirect('profesor_password', email_id=email_id)
+        except MultiValueDictKeyError:
+            return render(request, 'verificacion_password.html', {
+                'form': AuthenticationForm, 'email_id': email_id, 
+            'profesor': profesor, 'profesores': profesores
+            })
 
-@login_required
+@login_required     
+def profesor_eliminar(request, email_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    if request.method == 'GET':
+        return render(request, 'verificacion_password.html', {
+            'form': AuthenticationForm, 'email_id': email_id, 
+            'profesor': profesor, 'profesores': profesores
+        })
+    else:
+        try:
+            profesor = get_object_or_404(Profesor, pk=email_id)
+            user = authenticate(request, username=request.POST['username'], 
+                        password=request.POST['password'])
+            if user is None:
+                return render(request, 'verificacion_password.html', {
+                    'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
+                    'profesor': profesor,'profesores': profesores
+                })
+            else:
+                profesor.delete()
+                return redirect('signin')
+        except MultiValueDictKeyError:
+            return render(request, 'verificacion_password.html', {
+                'form': AuthenticationForm, 'email_id': email_id, 
+            'profesor': profesor, 'profesores': profesores
+            })
+
+@login_required 
 def editar_profesor(request, email_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == 'GET':
@@ -362,8 +431,9 @@ def editar_profesor(request, email_id):
             d = datetime.datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
             edad = date.today().year - d.year -((date.today().month, date.today().day) <(d.month, d.day))
             if edad >= 18:
+                profesor.fecha_nacimiento=request.POST['fecha_nacimiento']
                 form.save()
-                return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores})
+                return redirect('profesor', email_id=request.user.email)
             else:
                 return render(request, 'editar_profesor.html', {
                     'profesor': profesor, 'profesores': profesores,
@@ -373,3 +443,42 @@ def editar_profesor(request, email_id):
         except MultiValueDictKeyError:
             return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form,
                 'profesores': profesores, 'error': "Error actualizando el Perfil"})
+    
+@login_required
+def profesor_password(request, email_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    if request.method == 'GET':
+        return render(request, 'profesor_password.html', {
+            'form': PasswordCambioForm,
+            'profesor': profesor, 'profesores': profesores
+        })
+    else:
+        try:
+            if request.POST['password1'] == request.POST['password2']:
+                profesor = get_object_or_404(Profesor, pk=email_id)
+                logout(request)
+                user = Profesor.objects.create_user(email=profesor.email,
+                        nombre=profesor.nombre,
+                        apellidos=profesor.apellidos,
+                        fecha_nacimiento=profesor.fecha_nacimiento,
+                        genero=profesor.genero,
+                        pais=profesor.pais,
+                        ciudad=profesor.ciudad,
+                        organizacion=profesor.organizacion,
+                        password=request.POST['password1'])
+                user.usuario_verificado=True
+                user.save()
+                login(request, user)
+                return redirect('profesor', email_id=user.email)
+            else:
+                return render(request, 'profesor_password.html', {
+                    'form': PasswordCambioForm,
+                    'error': 'Las contraseñas no coinciden',
+                    'profesor': profesor, 'profesores': profesores
+                })
+        except MultiValueDictKeyError:
+            return render(request, 'profesor_password.html', {
+                'form': PasswordCambioForm,
+                'profesor': profesor, 'profesores': profesores
+            })

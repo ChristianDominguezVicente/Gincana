@@ -11,7 +11,19 @@
     <p>{{profesor.ciudad}}</p>
     <p>{{profesor.organizacion}}</p>
  
-    <a href="{% url 'editar_profesor' profesor.email %}">Editar</a>
+    <form method="POST">
+        {% csrf_token %}
+        <button>
+            Editar
+        </button>
+    </form>
+
+    <form action="{% url 'verificacion_password2' profesor.email %}" method="POST">
+        {% csrf_token %}
+        <button>
+            Cambiar Contraseña
+        </button>
+    </form>
 
     <form action="{% url 'profesor_eliminar' profesor.email %}" method="POST">
         {% csrf_token %}
