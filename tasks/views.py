@@ -7,9 +7,10 @@ from .models import Gincana, Profesor, Verificacion
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from datetime import date
-import datetime, random
-
 from django.core.mail import send_mail
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+import datetime, random
 
 # Create your views here.
 
@@ -40,28 +41,46 @@ def signup(request):
                     d = datetime.datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
                     edad = date.today().year - d.year -((date.today().month, date.today().day) <(d.month, d.day))
                     if edad >= 18:
-                        user = Profesor.objects.create_user(email=request.POST['email'],
-                            nombre=request.POST['nombre'],
-                            apellidos=request.POST['apellidos'],
-                            fecha_nacimiento=request.POST['fecha_nacimiento'],
-                            genero=request.POST['genero'],
-                            pais=request.POST['pais'],
-                            ciudad=request.POST['ciudad'],
-                            organizacion=request.POST['organizacion'],
-                            password=request.POST['password1'])
+                        try:
+                            temp = Profesor.objects.create_temp_user(email=request.POST['email'],
+                                nombre=request.POST['nombre'],
+                                apellidos=request.POST['apellidos'],
+                                fecha_nacimiento=request.POST['fecha_nacimiento'],
+                                genero=request.POST['genero'],
+                                pais=request.POST['pais'],
+                                ciudad=request.POST['ciudad'],
+                                organizacion=request.POST['organizacion'],
+                                password=request.POST['password1'])
 
-                        user.save()
-                        num=random.randint(0,9999)
-                        Verificacion.objects.create(code=num, email=user.email)
+                            if validate_password(request.POST['password1'], temp) is None:
 
-                        send_mail(
-                            subject='Código de Verificación',
-                            message=str(num),
-                            from_email='herstorygincanas@gmail.com',
-                            recipient_list=[user.email]
-                        )
-                        
-                        return redirect('verificacion', email=user.email)
+                                user = Profesor.objects.create_user(email=request.POST['email'],
+                                    nombre=request.POST['nombre'],
+                                    apellidos=request.POST['apellidos'],
+                                    fecha_nacimiento=request.POST['fecha_nacimiento'],
+                                    genero=request.POST['genero'],
+                                    pais=request.POST['pais'],
+                                    ciudad=request.POST['ciudad'],
+                                    organizacion=request.POST['organizacion'],
+                                    password=request.POST['password1'])
+
+                                user.save()
+                                num=random.randint(0,9999)
+                                Verificacion.objects.create(code=num, email=user.email)
+
+                                send_mail(
+                                    subject='Código de Verificación',
+                                    message=str(num),
+                                    from_email='herstorygincanas@gmail.com',
+                                    recipient_list=[user.email]
+                                )
+                                
+                                return redirect('verificacion', email=user.email)
+                        except ValidationError as e:
+                            return render(request, 'signup.html', {
+                                'form': ProfesorForm,
+                                'error': e
+                            })
                     else:
                         return render(request, 'signup.html', {
                             'form': ProfesorForm,
@@ -151,18 +170,35 @@ def password_cambio(request, email):
             else:
                 if request.POST['password1'] == request.POST['password2']:
                     profesor = get_object_or_404(Profesor, pk=email)
-                    user = Profesor.objects.create_user(email=profesor.email,
-                            nombre=profesor.nombre,
-                            apellidos=profesor.apellidos,
-                            fecha_nacimiento=profesor.fecha_nacimiento,
-                            genero=profesor.genero,
-                            pais=profesor.pais,
-                            ciudad=profesor.ciudad,
-                            organizacion=profesor.organizacion,
-                            password=request.POST['password1'])
-                    user.usuario_verificado=True
-                    user.save()
-                    return redirect('signin')
+                    try:
+                        temp = Profesor.objects.create_temp_user(email=profesor.email,
+                                nombre=profesor.nombre,
+                                apellidos=profesor.apellidos,
+                                fecha_nacimiento=profesor.fecha_nacimiento,
+                                genero=profesor.genero,
+                                pais=profesor.pais,
+                                ciudad=profesor.ciudad,
+                                organizacion=profesor.organizacion,
+                                password=request.POST['password1'])
+
+                        if validate_password(request.POST['password1'], temp) is None:
+                            user = Profesor.objects.create_user(email=profesor.email,
+                                    nombre=profesor.nombre,
+                                    apellidos=profesor.apellidos,
+                                    fecha_nacimiento=profesor.fecha_nacimiento,
+                                    genero=profesor.genero,
+                                    pais=profesor.pais,
+                                    ciudad=profesor.ciudad,
+                                    organizacion=profesor.organizacion,
+                                    password=request.POST['password1'])
+                            user.usuario_verificado=True
+                            user.save()
+                            return redirect('signin')
+                    except ValidationError as e:
+                        return render(request, 'password_cambiar.html', {
+                            'form': PasswordCambioForm,
+                            'error': e
+                        })
                 else:
                     return render(request, 'password_cambiar.html', {
                         'form': PasswordCambioForm,
@@ -457,20 +493,37 @@ def profesor_password(request, email_id):
         try:
             if request.POST['password1'] == request.POST['password2']:
                 profesor = get_object_or_404(Profesor, pk=email_id)
-                logout(request)
-                user = Profesor.objects.create_user(email=profesor.email,
-                        nombre=profesor.nombre,
-                        apellidos=profesor.apellidos,
-                        fecha_nacimiento=profesor.fecha_nacimiento,
-                        genero=profesor.genero,
-                        pais=profesor.pais,
-                        ciudad=profesor.ciudad,
-                        organizacion=profesor.organizacion,
-                        password=request.POST['password1'])
-                user.usuario_verificado=True
-                user.save()
-                login(request, user)
-                return redirect('profesor', email_id=user.email)
+                try:
+                    temp = Profesor.objects.create_temp_user(email=profesor.email,
+                            nombre=profesor.nombre,
+                            apellidos=profesor.apellidos,
+                            fecha_nacimiento=profesor.fecha_nacimiento,
+                            genero=profesor.genero,
+                            pais=profesor.pais,
+                            ciudad=profesor.ciudad,
+                            organizacion=profesor.organizacion,
+                            password=request.POST['password1'])
+                    if validate_password(request.POST['password1'], temp) is None:
+                        logout(request)
+                        user = Profesor.objects.create_user(email=profesor.email,
+                                nombre=profesor.nombre,
+                                apellidos=profesor.apellidos,
+                                fecha_nacimiento=profesor.fecha_nacimiento,
+                                genero=profesor.genero,
+                                pais=profesor.pais,
+                                ciudad=profesor.ciudad,
+                                organizacion=profesor.organizacion,
+                                password=request.POST['password1'])
+                        user.usuario_verificado=True
+                        user.save()
+                        login(request, user)
+                        return redirect('profesor', email_id=user.email)
+                except ValidationError as e:
+                    return render(request, 'profesor_password.html', {
+                        'form': PasswordCambioForm,
+                        'error': e,
+                        'profesor': profesor, 'profesores': profesores
+                    })
             else:
                 return render(request, 'profesor_password.html', {
                     'form': PasswordCambioForm,

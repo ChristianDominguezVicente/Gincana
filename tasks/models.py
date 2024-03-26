@@ -3,6 +3,24 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
 class Usuario(BaseUserManager):
+    def create_temp_user(self, email, nombre, apellidos, fecha_nacimiento, genero, pais, ciudad, organizacion, password = None):
+        if not email:
+            raise ValueError('El usuario debe tener un correo electrónico.')
+        
+        usuario = self.model(
+            email = self.normalize_email(email),
+            nombre = nombre, 
+            apellidos = apellidos,
+            fecha_nacimiento = fecha_nacimiento,
+            genero = genero,
+            pais = pais,
+            ciudad = ciudad,
+            organizacion = organizacion
+        )
+
+        usuario.set_password(password)
+        return usuario
+    
     def create_user(self, email, nombre, apellidos, fecha_nacimiento, genero, pais, ciudad, organizacion, password = None):
         if not email:
             raise ValueError('El usuario debe tener un correo electrónico.')
@@ -300,7 +318,7 @@ class Profesor(AbstractBaseUser):
     email = models.EmailField("Correo Electrónico", unique = True, max_length=254, primary_key=True)
     nombre = models.CharField("Nombre" ,max_length=200, null=True, blank=False)
     apellidos = models.CharField("Apellidos", max_length=200, null=True, blank=False)
-    imagen = models.ImageField("Imagen de Perfil", upload_to='perfil/', max_length=200, blank = True, null = True)
+    imagen = models.ImageField("Imagen de Perfil", default="usuario.png" , null=True, blank=True)
     usuario_activo = models.BooleanField(default = True)
     usuario_administrador = models.BooleanField(default=False)
     usuario_verificado = models.BooleanField(default=False)
