@@ -463,11 +463,12 @@ def editar_profesor(request, email_id):
     else:
         try:
             profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
-            form = EditarProfesorForm(request.POST, instance=profesor)
+            form = EditarProfesorForm(request.POST, request.FILES, instance=profesor)
             d = datetime.datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
             edad = date.today().year - d.year -((date.today().month, date.today().day) <(d.month, d.day))
             if edad >= 18:
                 profesor.fecha_nacimiento=request.POST['fecha_nacimiento']
+                profesor.imagen=request.FILES['imagen']
                 form.save()
                 return redirect('profesor', email_id=request.user.email)
             else:

@@ -318,7 +318,7 @@ class Profesor(AbstractBaseUser):
     email = models.EmailField("Correo Electrónico", unique = True, max_length=254, primary_key=True)
     nombre = models.CharField("Nombre" ,max_length=200, null=True, blank=False)
     apellidos = models.CharField("Apellidos", max_length=200, null=True, blank=False)
-    imagen = models.ImageField("Imagen de Perfil", default="usuario.png" , null=True, blank=True)
+    imagen = models.ImageField("Imagen de Perfil", default="usuario.png", upload_to='', null=True, blank=True)
     usuario_activo = models.BooleanField(default = True)
     usuario_administrador = models.BooleanField(default=False)
     usuario_verificado = models.BooleanField(default=False)

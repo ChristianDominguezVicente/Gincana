@@ -2,6 +2,7 @@
 
 {% block content %}
 
+    <h1><img class="profile-pic" src="{{ profesor.imagen.url }}" ></h1>
     <h1>{{profesor.email}}</h1>
     <p>{{profesor.nombre}}</p>
     <p>{{profesor.apellidos}}</p>
@@ -10,10 +11,10 @@
     <p>{{profesor.pais}}</p>
     <p>{{profesor.ciudad}}</p>
     <p>{{profesor.organizacion}}</p>
- 
-    <form method="POST">
+
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <button>
+        <button type="submit">
             Editar
         </button>
     </form>
