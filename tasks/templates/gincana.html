@@ -61,7 +61,7 @@
             {% for profesor in profesores %}
             <li>
                 <a href="{% url 'profesor' profesor.email %}">
-                    <img src="{% static 'media/usuario.png' %}">
+                    <img class="profile-pic" src="{{ profesor.imagen.url }}" >
                 </a>
             </li>
             {% endfor %}

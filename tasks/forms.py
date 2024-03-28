@@ -121,6 +121,11 @@ class ProfesorForm(forms.ModelForm):
         }
 
 class EditarProfesorForm(forms.ModelForm):
+    imagen = forms.ImageField(label = 'Imagen de Perfil', widget = forms.FileInput(
+        attrs = {
+            'id': 'imagen'
+        }
+    ))
     fecha_nacimiento = forms.DateField(label = 'Fecha de nacimiento', widget = forms.DateInput(
         attrs = {
             'class': 'form-control',
