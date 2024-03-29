@@ -8,3 +8,7 @@ https://www.youtube.com/watch?v=lNxQkW1kjto
 https://www.youtube.com/watch?v=HTIr44gLvxY
 https://www.youtube.com/watch?v=UTJ_Dr5I5sQ
 https://www.youtube.com/watch?v=Owg7ZzSRvUw
+
+Sidebar con bootstrap:
+https://www.youtube.com/watch?v=i7uJAOFEd4g
+https://getbootstrap.com/docs/5.0/examples/sidebars/#
