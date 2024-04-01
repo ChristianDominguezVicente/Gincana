@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tasks',
     'django_password_validators',
+    'bootstrap5'
 ]
 
 MIDDLEWARE = [
