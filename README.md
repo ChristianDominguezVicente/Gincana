@@ -13,3 +13,5 @@ Sidebar con bootstrap:
 https://www.youtube.com/watch?v=i7uJAOFEd4g
 https://getbootstrap.com/docs/5.0/examples/sidebars/#
 https://dev.to/codeply/bootstrap-5-sidebar-examples-38pb
+https://getbootstrap.com/docs/5.0/customize/color/
+https://www.youtube.com/watch?v=fiv1_J-TmEI
