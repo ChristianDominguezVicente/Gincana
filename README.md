@@ -15,3 +15,6 @@ https://getbootstrap.com/docs/5.0/examples/sidebars/#
 https://dev.to/codeply/bootstrap-5-sidebar-examples-38pb
 https://getbootstrap.com/docs/5.0/customize/color/
 https://www.youtube.com/watch?v=fiv1_J-TmEI
+
+Desabilitar Caché:
+https://stackoverflow.com/questions/11474345/force-browser-to-refresh-css-javascript-etc
