@@ -3,31 +3,37 @@
 {% block content %}
 
 {% load static %}
-<img src="{% static 'media/Logo.png' %}">
 
-{{error}}
+<div class="container">
+    <img src="{% static 'media/Logo.png' %}" class="rounded" alt="Logo" width="600" height="400">
 
-<form action="{% url 'signin' %}" method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-    <p>
-        <a href="{% url 'password' %}">He olvidado mi contraseña</a>
-        <a href="{% url 'signup' %}">Crear una cuenta</a>
-        <a href="{% url 'informacion' %}">
-            <img src="{% static 'media/info.png' %}">
-        </a>
-    </p>
-    <button>
-        Iniciar Sesión
-    </button>
-    <!--
-    <p>
-        <img src="{% static 'media/LogoEU.png' %}">
-        Corem ipsum dolor sit amet, consectetur adipiscing elit. 
-        Etiam eu turpis molestie, dictum est a, mattis tellus. 
-        Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
-    </p>
-    -->
-</form>
+    {{error}}
+
+    <form action="{% url 'signin' %}" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <div class="link-container">
+            <a href="{% url 'password' %}" class="left-link">He olvidado mi contraseña</a>
+            <a href="{% url 'signup' %}" class="right-link">Crear una cuenta</a>
+            <a href="{% url 'informacion' %}">
+                <i style="color:green" class="fs-4 bi-info-circle" ></i>
+            </a>
+        </div>
+        <button>
+            Iniciar Sesión
+        </button>
+    </form>
+</div>
+
+<div class="container2">
+    <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="360" height="100">
+    <div class="text">
+        <p>
+            Corem ipsum dolor sit amet, consectetur adipiscing elit. 
+            Etiam eu turpis molestie, dictum est a, mattis tellus. 
+            Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+        </p>
+    </div>
+</div>
 
 {% endblock %}
