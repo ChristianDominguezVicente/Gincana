@@ -1,6 +1,27 @@
 from django import forms
 from .models import Gincana, Profesor, Verificacion
 
+class AuthenticationForm(forms.Form):
+    username = forms.CharField(
+        max_length=254,
+        widget=forms.TextInput(
+            attrs={
+                'class': "signin",
+                'placeholder': "Ingrese su Corro Electrónico",
+            }
+        )
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                'class': "signin",
+                'placeholder': "Ingrese su Contraseña"
+            }
+        )
+    )
+    username.label=""
+    password.label=""
+
 class VerificacionForm(forms.ModelForm):
     class Meta:
         model = Verificacion
