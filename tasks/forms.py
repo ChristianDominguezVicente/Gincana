@@ -6,7 +6,7 @@ class AuthenticationForm(forms.Form):
         max_length=254,
         widget=forms.TextInput(
             attrs={
-                'class': "signin",
+                'class': "input-box",
                 'placeholder': "Ingrese su Corro Electrónico",
             }
         )
@@ -14,7 +14,7 @@ class AuthenticationForm(forms.Form):
     password = forms.CharField(
         widget=forms.PasswordInput(
             attrs={
-                'class': "signin",
+                'class': "input-box",
                 'placeholder': "Ingrese su Contraseña"
             }
         )
