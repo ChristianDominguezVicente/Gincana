@@ -6,25 +6,48 @@
 <a href="{% url 'signup' %}">
     <img src="{% static 'media/flecha.png' %}">
 </a>
+<div class="container">
+    <div class="content-box">
+        <div class="content">
+            <div>
+                <h1>Gincana</h1>
+            </div>
+            <div>
+                <h2>Registro</h2>
+            </div>
 
-<h1>Gincana</h1>
-<h2>Verificación</h2>
+            {{error}}
 
-{{error}}
+            <form method="POST">
+                {% csrf_token%}
+                {{form.as_p}}
+                <button class="btn-signin">
+                    Siguiente
+                </button>
+            </form>
 
-<form method="POST">
-    {% csrf_token%}
-    {{form.as_p}}
-    <button>
-        Siguiente
-    </button>
-</form>
-
-<form action="{% url 'verificacion_reenviar' email %}" method="POST">
-    {% csrf_token %}
-    <button>
-        Reenviar Código
-    </button>
-</form>
+            <form action="{% url 'verificacion_reenviar' email %}" method="POST">
+                {% csrf_token %}
+                <button class="btn-signin">
+                    Reenviar Código
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+<footer class="footer">
+    <div class="footer-group">
+        <div class="footer-box">
+            <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+        </div>
+        <div class="footer-box">
+            <p>
+                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
+                Etiam eu turpis molestie, dictum est a, mattis tellus. 
+                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            </p>
+        </div>
+    </div>
+</div>
 
 {% endblock %}   
