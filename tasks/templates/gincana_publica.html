@@ -2,18 +2,35 @@
 
 {% block content %}
 
-    <h1>{{gincana.titulo}}</h1>
+{% load static %}
 
-    {{error}}
-    
-    <p>{{gincana.descripcion}}</p>
-    <p>{{gincana.email_profesor}}</p>
+<h1>{{gincana.titulo}}</h1>
 
-    <form action="{% url 'gincana_copiar' gincana.id %}" method="POST">
-        {% csrf_token %}
-        <button>
-                Copiar
-        </button>
-    </form>
+{{error}}
+
+<p>{{gincana.descripcion}}</p>
+<p>{{gincana.email_profesor}}</p>
+
+<form action="{% url 'gincana_copiar' gincana.id %}" method="POST">
+    {% csrf_token %}
+    <button class="btn-signin">
+            Copiar
+    </button>
+</form>
+
+<footer class="footer">
+    <div class="footer-group">
+        <div class="footer-box">
+            <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+        </div>
+        <div class="footer-box">
+            <p>
+                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
+                Etiam eu turpis molestie, dictum est a, mattis tellus. 
+                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            </p>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

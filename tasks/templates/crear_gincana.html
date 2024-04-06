@@ -1,19 +1,38 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Crear Gincana</h1>
 
-    {{error}}
+{% load static %}
 
-    <form action="{% url 'crear_gincana' %}" method="POST">
-        {% csrf_token %}
 
-        {{form}}
+<h1>Crear Gincana</h1>
 
-        <button>
-            Guardar
-        </button>
-        
-    </form>
+{{error}}
+
+<form action="{% url 'crear_gincana' %}" method="POST">
+    {% csrf_token %}
+
+    {{form}}
+
+    <button class="btn-signin">
+        Guardar
+    </button>
+    
+</form>
+
+<footer class="footer">
+    <div class="footer-group">
+        <div class="footer-box">
+            <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+        </div>
+        <div class="footer-box">
+            <p>
+                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
+                Etiam eu turpis molestie, dictum est a, mattis tellus. 
+                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            </p>
+        </div>
+    </div>
+</div> 
 
 {% endblock %}

@@ -3,13 +3,12 @@
 {% block content %}
 
 {% load static %}
+<a href="{% url 'signin' %}" class="flecha">
+    <img src="{% static 'media/flecha.png' %}">
+</a>
 <div class="container">
     <div class="content-box">
         <div class="content">
-            <a href="{% url 'signin' %}">
-                <img src="{% static 'media/flecha.png' %}">
-            </a>
-
             <h1>Gincana</h1>
             <h2>Información sobre la página web</h2>
             <p>
