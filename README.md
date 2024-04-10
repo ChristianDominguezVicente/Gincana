@@ -18,3 +18,6 @@ https://www.youtube.com/watch?v=fiv1_J-TmEI
 
 Desabilitar Caché:
 https://stackoverflow.com/questions/11474345/force-browser-to-refresh-css-javascript-etc
+
+Modal añadir paradas:
+https://www.youtube.com/watch?v=BJ5M9RYpdt4
