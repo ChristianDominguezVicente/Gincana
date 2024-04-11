@@ -536,3 +536,7 @@ def profesor_password(request, email_id):
                 'form': PasswordCambioForm,
                 'profesor': profesor, 'profesores': profesores
             })
+        
+@login_required
+def parada(request):
+        return render(request, 'parada.html')
