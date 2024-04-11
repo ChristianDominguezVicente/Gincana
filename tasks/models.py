@@ -374,3 +374,27 @@ class Verificacion(models.Model):
 
     def __str__(self):
         return self.code + ' - ' + self.email_profesor.email
+    
+class Parada(models.Model):
+    latitud = models.FloatField()
+    longitud = models.FloatField()
+    gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.latitud + ' - ' + self.longitud + ' - ' + self.gincana.titulo
+    
+class Pregunta(models.Model):
+    enunciado = models.TextField()
+    parada = models.ForeignKey(Parada, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.enunciado + ' - ' + self.parada.gincana.titulo
+    
+class Respuesta(models.Model):
+    respuesta = models.CharField(max_length=254)
+    puntos = models.IntegerField()
+    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.respuesta + ' - ' + self.pregunta.parada.gincana.titulo
+

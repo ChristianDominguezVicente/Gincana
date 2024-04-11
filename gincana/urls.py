@@ -47,6 +47,7 @@ urlpatterns = [
     path('profesor/<str:email_id>/verificacion2/', views.verificacion_password2, name='verificacion_password2'),
     path('profesor/<str:email_id>/eliminar/', views.profesor_eliminar, name='profesor_eliminar'),
     path('profesor/<str:email_id>/editar/', views.editar_profesor, name='editar_profesor'),
+    path('parada/', views.parada, name='parada'),
     path('', views.signin, name='signin')
 ]
 
