@@ -24,46 +24,53 @@
                         </a>
                         <li class="nav-item">
                             <a href="{% url 'gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-geo-alt-fill"></i> <span class="ms-1 d-none d-sm-inline">{{gincana.titulo}}</span>
+                                <i class="fs-4 bi-geo-alt-fill"></i> <span class="ms-1 d-none d-md-inline">{{gincana.titulo}}</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'editar_gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-pen-fill"></i> <span class="ms-1 d-none d-sm-inline">Editar {{gincana.titulo}}</span> </a>
+                                <i class="fs-4 bi-pen-fill"></i> <span class="ms-1 d-none d-md-inline">Editar {{gincana.titulo}}</span> </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'configuracion_gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-sliders"></i> <span class="ms-1 d-none d-sm-inline">Configuración</span></a>
+                                <i class="fs-4 bi-sliders"></i> <span class="ms-1 d-none d-md-inline">Configuración</span></a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'puntuacion_gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-trophy-fill"></i> <span class="ms-1 d-none d-sm-inline">Puntuaciones</span> </a>
+                                <i class="fs-4 bi-trophy-fill"></i> <span class="ms-1 d-none d-md-inline">Puntuaciones</span> </a>
                         </li>
-                        <img src="{% static 'media/separador.png' %}">
+                        <img class="separador" src="{% static 'media/separador.png' %}">
                         <li class="nav-item">
                             <a href="{% url 'home' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                                <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-md-inline">Home</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'crear_gincana' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-plus-square-fill"></i> <span class="ms-1 d-none d-sm-inline">Crear Gincana</span> </a>
+                                <i class="fs-4 bi-plus-square-fill"></i> <span class="ms-1 d-none d-md-inline">Crear Gincana</span> </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'mis_gincanas' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-map-fill"></i> <span class="ms-1 d-none d-sm-inline">Mis Gincanas</span></a>
+                                <i class="fs-4 bi-map-fill"></i> <span class="ms-1 d-none d-md-inline">Mis Gincanas</span></a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'gincanas_publicas' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-globe-europe-africa"></i> <span class="ms-1 d-none d-sm-inline">Gincanas Públicas</span> </a>
+                                <div class="d-flex align-items-center">
+                                    <i class="fs-4 bi-globe-europe-africa"></i> 
+                                    <div class="d-flex flex-column ">
+                                        <span class="ms-1 d-none d-md-inline">Gincanas</span> 
+                                        <span class="ms-1 d-none d-md-inline">Públicas</span>
+                                    </div>
+                                </div>
+                            </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'home' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-gear-fill"></i> <span class="ms-1 d-none d-sm-inline">Ajustes</span></a>
+                                <i class="fs-4 bi-gear-fill"></i> <span class="ms-1 d-none d-md-inline">Ajustes</span></a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'logout' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-box-arrow-in-left"></i> <span class="ms-1 d-none d-sm-inline">Cerrar Sesión</span></a>
+                                <i class="fs-4 bi-box-arrow-in-left"></i> <span class="ms-1 d-none d-md-inline">Cerrar Sesión</span></a>
                         </li>
                     </ul>
                     <hr>
