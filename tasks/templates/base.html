@@ -16,36 +16,43 @@
     <div class="container-fluid">
         <div class="row flex-nowrap">
             {% if user.is_authenticated %}
-            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-boton">
+            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0  bg-boton">
                 <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start position-fixed" id="menu">
                         <a href="{% url 'home' %}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                            <span class="fs-5 d-none d-sm-inline">HerStory Gincanas</span>
+                            <span class="fs-5 d-none d-md-inline">HerStory Gincanas</span>
                         </a>
                         <li class="nav-item">
                             <a href="{% url 'home' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                                <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-md-inline">Home</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'crear_gincana' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-plus-square-fill"></i> <span class="ms-1 d-none d-sm-inline">Crear Gincana</span> </a>
+                                <i class="fs-4 bi-plus-square-fill"></i> <span class="ms-1 d-none d-md-inline">Crear Gincana</span> </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'mis_gincanas' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-map-fill"></i> <span class="ms-1 d-none d-sm-inline">Mis Gincanas</span></a>
+                                <i class="fs-4 bi-map-fill"></i> <span class="ms-1 d-none d-md-inline">Mis Gincanas</span></a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'gincanas_publicas' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-globe-europe-africa"></i> <span class="ms-1 d-none d-sm-inline">Gincanas Públicas</span> </a>
+                                <div class="d-flex align-items-center">
+                                    <i class="fs-4 bi-globe-europe-africa"></i> 
+                                    <div class="d-flex flex-column ">
+                                        <span class="ms-1 d-none d-md-inline">Gincanas</span> 
+                                        <span class="ms-1 d-none d-md-inline">Públicas</span>
+                                    </div>
+                                </div>
+                            </a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'home' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-gear-fill"></i> <span class="ms-1 d-none d-sm-inline">Ajustes</span></a>
+                                <i class="fs-4 bi-gear-fill"></i> <span class="ms-1 d-none d-md-inline">Ajustes</span></a>
                         </li>
-                        <li>
+                        <li class="nav-item">
                             <a href="{% url 'logout' %}" class="btn btn-boton align-middle px-0 text-white">
-                                <i class="fs-4 bi-box-arrow-in-left"></i> <span class="ms-1 d-none d-sm-inline">Cerrar Sesión</span></a>
+                                <i class="fs-4 bi-box-arrow-in-left"></i> <span class="ms-1 d-none d-md-inline">Cerrar Sesión</span></a>
                         </li>
                     </ul>
                     <hr>
