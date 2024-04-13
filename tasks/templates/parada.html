@@ -4,13 +4,15 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title">Modal title</h2>
-      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+      <button style="float: right;" type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <div class="modal-body">
 
       <div id="map2" style="height: 600px; width: 700px;"></div>
+
+      {{ paradas|json_script:"paradas_json" }}
 
       <script>
         var map = L.map('map2').setView([51.505, -0.09], 13);
@@ -19,6 +21,17 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
         map.invalidateSize();
+
+        let paradas2 = JSON.parse(document.getElementById('paradas_json').textContent)
+
+        paradas2.forEach(parada =>{
+            L.marker([parada.latitud, parada.longitud]).addTo(map)
+        })
+
+        map.on('click', (event) => {
+          L.marker([event.latlng.lat, event.latlng.lng]).addTo(map)
+        })
+
       </script>
 
     </div>

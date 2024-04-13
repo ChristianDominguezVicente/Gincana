@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-#from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.utils.datastructures import MultiValueDictKeyError
 from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm
-from .models import Gincana, Profesor, Verificacion
+from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from datetime import date
@@ -257,7 +256,9 @@ def gincana(request, gincana_id):
 def editar_gincana(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     profesores = Profesor.objects.filter(email=request.user.email)
-    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores})
+    paradas = Parada.objects.filter(gincana=gincana)
+    paradas_gincana = list(paradas.values('latitud', 'longitud'))
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
 
 @login_required        
 def configuracion_gincana(request, gincana_id):  
@@ -538,5 +539,8 @@ def profesor_password(request, email_id):
             })
         
 @login_required
-def parada(request):
-        return render(request, 'parada.html')
+def parada(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    paradas = Parada.objects.filter(gincana=gincana)
+    paradas_gincana = list(paradas.values('latitud', 'longitud'))
+    return render(request, 'parada.html', {'gincana': gincana, 'paradas': paradas_gincana})
