@@ -42,7 +42,7 @@
                             <a href="{% url 'puntuacion_gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
                                 <i class="fs-4 bi-trophy-fill"></i> <span class="ms-1 d-none d-md-inline">Puntuaciones</span> </a>
                         </li>
-                        <img class="separador" src="{% static 'media/separador.png' %}">
+                        <img class="separador" src="{% static 'media/separador.png' %}" >
                         <li class="nav-item">
                             <a href="{% url 'home' %}" class="btn btn-boton align-middle px-0 text-white">
                                 <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-md-inline">Home</span>
@@ -100,16 +100,25 @@
 
                 <div id="map" style="height: 600px; width: 600px;"></div>
                 
+                {{ paradas|json_script:"paradas_json" }}
+
                 <script>
                     var map = L.map('map').setView([51.505, -0.09], 13);
 
                     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     }).addTo(map);
+
+                    let paradas = JSON.parse(document.getElementById('paradas_json').textContent)
+
+                    paradas.forEach(parada =>{
+                        L.marker([parada.latitud, parada.longitud]).addTo(map)
+                    })
+
                 </script>
                 
 
-                <button class="btn-pass" onclick="abrir_modal_parada('{% url 'parada' %}')" data-toggle="modal" data-target="#add">
+                <button class="btn-pass" onclick="abrir_modal_parada('{% url 'parada' gincana.id %}')" data-toggle="modal" data-target="#add">
                     Añadir
                 </button>
 
