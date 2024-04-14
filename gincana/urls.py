@@ -48,6 +48,7 @@ urlpatterns = [
     path('profesor/<str:email_id>/eliminar/', views.profesor_eliminar, name='profesor_eliminar'),
     path('profesor/<str:email_id>/editar/', views.editar_profesor, name='editar_profesor'),
     path('mis_gincanas/<int:gincana_id>/editar/parada/', views.parada, name='parada'),
+    path('mis_gincanas/<int:gincana_id>/editar/parada/guardar/', views.parada_guardar, name='parada_guardar'),
     path('', views.signin, name='signin')
 ]
 
