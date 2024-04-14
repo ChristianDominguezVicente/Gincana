@@ -9,7 +9,7 @@ from datetime import date
 from django.core.mail import send_mail
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-import datetime, random
+import datetime, random, json
 
 # Create your views here.
 
@@ -544,3 +544,19 @@ def parada(request, gincana_id):
     paradas = Parada.objects.filter(gincana=gincana)
     paradas_gincana = list(paradas.values('latitud', 'longitud'))
     return render(request, 'parada.html', {'gincana': gincana, 'paradas': paradas_gincana})
+
+@login_required
+def parada_guardar(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+
+    paradas_data = json.loads(request.POST.get('parada'))
+    for latitud, longitud in paradas_data.items():
+        if not Parada.objects.filter(latitud=latitud, longitud=longitud, gincana_id=gincana_id).exists():
+            parada= Parada.objects.create(
+                latitud=latitud,
+                longitud=longitud,
+                gincana_id=gincana_id
+            )
+            parada.save()
+
+    return render(request, 'editar_gincana.html', {'gincana': gincana})
