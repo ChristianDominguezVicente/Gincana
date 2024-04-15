@@ -98,7 +98,7 @@
                 {% endif %}
                 <h1>Editar {{gincana.titulo}}</h1>
 
-                <div id="map" style="height: 600px; width: 600px;"></div>
+                <div id="map" style="height: 600px; width: 600px; margin: 0 auto;"></div>
                 
                 {{ paradas|json_script:"paradas_json" }}
 
@@ -109,14 +109,24 @@
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     }).addTo(map);
 
-                    let paradas = JSON.parse(document.getElementById('paradas_json').textContent)
+                    let paradas = JSON.parse(document.getElementById('paradas_json').textContent);
 
                     paradas.forEach(parada =>{
-                        L.marker([parada.latitud, parada.longitud]).addTo(map)
-                    })
+                        L.marker([parada.latitud, parada.longitud]).addTo(map);
+                    });
 
                 </script>
-                
+                <ul id="sortable-list" class="list-group">
+                    {% for parada in db %}
+                        <li class="list-group-item d-flex justify-content-between aling-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">{{parada.id}}</div>
+                                {{parada.latitud}}
+                                {{parada.longitud}}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
 
                 <button type="button" class="btn-pass" onclick="abrir_modal_parada('{% url 'parada' gincana.id %}')" data-toggle="modal" data-target="#add">
                     Añadir

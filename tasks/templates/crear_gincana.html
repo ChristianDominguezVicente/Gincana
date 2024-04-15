@@ -7,7 +7,7 @@
 
 <h1>Crear Gincana</h1>
 
-{{error}}
+<p style="color: red;">{{error}}</p>
 
 <form action="{% url 'crear_gincana' %}" method="POST">
     {% csrf_token %}
