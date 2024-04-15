@@ -194,11 +194,13 @@ h2{
     height: 3px;
   }
 }
-
-@media (min-width: 768px) {
+@media (max-width: 768px) {
   .container .logo{
     display: none;
   }
+}
+
+@media (min-width: 768px) {
   .container .content-box{
     width: 100%;
   }

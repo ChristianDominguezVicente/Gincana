@@ -311,6 +311,7 @@ def gincana_copiar(request, gincana_id):
     gincanas = Gincana.objects.filter(email_profesor=request.user)
     profesores = Profesor.objects.filter(email=request.user.email)
     nueva_Gincana = Gincana.objects.get(pk=gincana_id)
+    paradas = Parada.objects.filter(gincana=gincana_id)
     if nueva_Gincana.email_profesor == request.user:
         return render(request, 'gincana_publica.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores,
             'error': "Esta Gincana ya te pernetece."})
@@ -318,12 +319,18 @@ def gincana_copiar(request, gincana_id):
         nueva_Gincana.pk = None
         nueva_Gincana.email_profesor = request.user
         nueva_Gincana.save()
+        for parada in paradas:
+            nueva_parada = Parada.objects.create(
+                latitud=parada.latitud,
+                longitud=parada.longitud,
+                gincana=nueva_Gincana
+            )
+            nueva_parada.save()
         return render(request, 'mis_gincanas.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores})
 
 @login_required    
 def gincana_eliminar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-    profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == "POST":
         gincana.delete()
         return redirect('mis_gincanas')

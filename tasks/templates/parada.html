@@ -1,11 +1,8 @@
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
 <div class="modal-dialog modal-xl" role="document">
   <div class="modal-content">
-    <div class="modal-header">
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
       <h2 class="modal-title">Modal title</h2>
-      <button style="float: right;" type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
@@ -43,7 +40,10 @@
           $.ajax({
             url:"parada/guardar/",
             type:"POST",
-            data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'parada': JSON.stringify(dict_values)}
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'parada': JSON.stringify(dict_values)},
+            success: function(response) {
+              window.location.reload();
+            }
           });
         }
 
@@ -52,10 +52,12 @@
       </script>
 
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-      <button type="submit" class="btn btn-primary" id="guardar">
+    <div class="modal-footer" style="display: flex; justify-content: center;">
+      <button type="button" class="btn btn-danger" data-bs-dismiss="modal" style="margin-right: 10px;">
+        Cancelar
+      </button>
+      
+      <button type="submit" class="btn btn-success" id="guardar" >
         Guardar Paradas
       </button>
     </div>
