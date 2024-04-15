@@ -21,3 +21,6 @@ https://stackoverflow.com/questions/11474345/force-browser-to-refresh-css-javasc
 
 Modal añadir paradas:
 https://www.youtube.com/watch?v=BJ5M9RYpdt4
+
+Localizaciones:
+https://www.youtube.com/watch?v=ZLuXPwug490&list=PLxooeC3-xaNfmKrHLU6IFpEYa3RVbh-Y6&index=4
