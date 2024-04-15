@@ -11,7 +11,7 @@
     <div class="content-box">
         <div class="content">
             <h2>Iniciar Sesión</h2>
-            {{error}}
+            <p style="color: red;">{{error}}</p>
             <form action="{% url 'signin' %}" method="POST">
                 {% csrf_token %}
                 {{form.as_p}}

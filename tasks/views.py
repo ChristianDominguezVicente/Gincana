@@ -258,7 +258,7 @@ def editar_gincana(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     paradas = Parada.objects.filter(gincana=gincana)
     paradas_gincana = list(paradas.values('latitud', 'longitud'))
-    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana, 'db': paradas})
 
 @login_required        
 def configuracion_gincana(request, gincana_id):  
