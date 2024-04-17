@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
 <body>
     <div class="container-fluid">
@@ -111,32 +112,54 @@
                     }).addTo(map);
 
                     let paradas = JSON.parse(document.getElementById('paradas_json').textContent);
-
+                    
+                    var contador = 0;
+                    var anterior_parada;
                     paradas.forEach(parada =>{
-                        L.marker([parada.latitud, parada.longitud]).addTo(map);
+                        if (contador === 0) {
+                            var marker = L.marker([parada.latitud, parada.longitud]).addTo(map);
+                        }
+                        else{
+                            var marker =  L.marker([parada.latitud, parada.longitud]).addTo(map);
+                            let polyline = L.polyline([anterior_parada,[parada.latitud, parada.longitud]]).addTo(map);
+                        }
+                        marker.bindPopup('Parada ' + (contador+1) + '<br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud);
+
+                        contador++;
+                        anterior_parada=[parada.latitud, parada.longitud];
+
                     });
 
                 </script>
+
                 <ul id="sortable-list" class="list-group">
                     {% for parada in db %}
-                        <li class="list-group-item d-flex justify-content-between aling-items-start">
+                        <li id="{{ parada.id }}" class="list-group-item d-flex justify-content-between aling-items-start">
                             <div class="ms-2 me-auto">
-                                <div class="fw-bold">{{parada.id}}</div>
+                                <div class="fw-bold">Parada {{parada.orden}}</div>
                                 {{parada.latitud}}
                                 {{parada.longitud}}
                             </div>
+                            <button type="button" class="btn btn-primary" style="margin-right: 10px;" id="editar">
+                                Editar Pregunta
+                            </button>
+                            <button type="button" class="btn btn-danger" id="borrar_{{parada.id}}">
+                                Borrar
+                            </button>
                         </li>
                     {% endfor %}
                 </ul>
 
-                <button type="button" class="btn-pass" onclick="abrir_modal_parada('{% url 'parada' gincana.id %}')" data-toggle="modal" data-target="#add">
-                    Añadir
-                </button>
-
-                <div class="modal fade" id="add" role="dialog">
-
+                <div style="display: flex; justify-content: center;">
+                    <button type="button" class="btn-pass" onclick="abrir_modal_parada('{% url 'parada' gincana.id %}')" data-toggle="modal" data-target="#add">
+                        Añadir
+                    </button>
+                    <button type="button" class="btn-pass" id="guardar_cambios">
+                        Guardar Cambios
+                    </button>
                 </div>
 
+                <div class="modal fade" id="add" role="dialog"></div>
 
                 <footer class="footer">
                     <div class="footer-group">
@@ -155,8 +178,6 @@
             </div>
         </div>
     </div>
-
-    
     
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
@@ -171,9 +192,56 @@
     </script>
 
     <script type="text/javascript">
-        var sortable = new Sortable(document.getElementById('sortable-list'), {
-            animation: 150,
-            ghostClass: 'sortable-ghost'
+        $(document).ready(function() {
+            var sortable = new Sortable(document.getElementById('sortable-list'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost'
+            });
+        
+            function sendSortableData() {
+                var orderedIds = [];
+                $('#sortable-list li').each(function(index) {
+                    var id = $(this).attr('id');
+                    orderedIds.push(id);
+                });
+
+                $.ajax({
+                    url: "{% url 'guardar_cambios_gincana' gincana.id %}",
+                    type: "POST",
+                    data: {
+                        'ordered_ids[]': orderedIds,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        window.location.reload();
+                    }
+                });
+            }
+        
+            $('#guardar_cambios').on('click', {}, sendSortableData);
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            function sendData(parada_id) {
+                $.ajax({
+                    url: "{% url 'borrar_parada' gincana.id %}",
+                    type: "POST",
+                    data: {
+                        parada_id: parada_id,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        window.location.reload(); 
+                    }
+                });
+            }
+
+            $('button[id^="borrar_"]').on('click', function() {
+                var parada_id = $(this).attr('id').split('_')[1];
+                sendData(parada_id);
+            });
         });
     </script>
 

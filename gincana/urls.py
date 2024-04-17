@@ -49,6 +49,9 @@ urlpatterns = [
     path('profesor/<str:email_id>/editar/', views.editar_profesor, name='editar_profesor'),
     path('mis_gincanas/<int:gincana_id>/editar/parada/', views.parada, name='parada'),
     path('mis_gincanas/<int:gincana_id>/editar/parada/guardar/', views.parada_guardar, name='parada_guardar'),
+    path('mis_gincanas/<int:gincana_id>/editar/guardar_cambios_gincana/', views.guardar_cambios_gincana, name='guardar_cambios_gincana'),
+    path('mis_gincanas/<int:gincana_id>/editar/borrar_parada/', views.borrar_parada, name='borrar_parada'),
+    path('mis_gincanas/<int:gincana_id>/editar/editar_parada/', views.editar_parada, name='editar_parada'),
     path('', views.signin, name='signin')
 ]
 

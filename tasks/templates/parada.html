@@ -1,8 +1,8 @@
 <div class="modal-dialog modal-xl" role="document">
   <div class="modal-content">
     <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
-      <h2 class="modal-title">Modal title</h2>
-      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+      <h2 class="modal-title">Añadir Paradas</h2>
+      <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
@@ -26,15 +26,36 @@
           } else {
             paradas2 = JSON.parse(document.getElementById('paradas_json').textContent);
           }
-          
+
+          var contador = 0;
+          var anterior_parada;
           paradas2.forEach(parada =>{
-              L.marker([parada.latitud, parada.longitud]).addTo(map);
+            if (contador === 0) {
+              var marker = L.marker([parada.latitud, parada.longitud]).addTo(map);
+            }
+            else{
+              var marker =  L.marker([parada.latitud, parada.longitud]).addTo(map);
+              let polyline = L.polyline([anterior_parada,[parada.latitud, parada.longitud]]).addTo(map);
+            }
+            marker.bindPopup('Parada ' + (contador+1) + '<br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud);
+            
+            contador++;
+            anterior_parada=[parada.latitud, parada.longitud];
+
           });
 
           var dict_values = {};
           map.on('click', (event) => {
             L.marker([event.latlng.lat, event.latlng.lng]).addTo(map);
             dict_values[event.latlng.lat]= event.latlng.lng;
+            if (contador === 0) {
+              anterior_parada=[event.latlng.lat, event.latlng.lng];
+              contador++;
+            }
+            else {
+              let polyline = L.polyline([anterior_parada,[event.latlng.lat, event.latlng.lng]]).addTo(map);
+              anterior_parada=[event.latlng.lat, event.latlng.lng];
+            }
           });
 
           function send_data() {
