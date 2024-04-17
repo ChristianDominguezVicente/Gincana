@@ -243,11 +243,15 @@ def gincana(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        paradas_gincana = list(paradas.values('latitud', 'longitud'))
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-            return redirect('gincana')
+            paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+            paradas_gincana = list(paradas.values('latitud', 'longitud'))
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
         except ValueError:
             return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 
                 'error': "Error actualizando la Gincana"})
@@ -257,6 +261,13 @@ def editar_gincana(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     profesores = Profesor.objects.filter(email=request.user.email)
     paradas = Parada.objects.filter(gincana=gincana)
+    contador = paradas.count()
+
+    if contador > 0 and contador != paradas.last().orden:
+        for index, parada in enumerate(paradas, start=1):
+            Parada.objects.filter(pk=parada.pk).update(orden=index)
+    
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
     paradas_gincana = list(paradas.values('latitud', 'longitud'))
     return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana, 'db': paradas})
 
@@ -287,7 +298,9 @@ def puntuacion_gincana(request, gincana_id):
 def gincana_publica(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     profesores = Profesor.objects.filter(email=request.user.email)
-    return render(request, 'gincana_publica.html', {'gincana': gincana, 'profesores': profesores})
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+    paradas_gincana = list(paradas.values('latitud', 'longitud'))
+    return render(request, 'gincana_publica.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
 
 @login_required
 def gincana_iniciar(request, gincana_id):
@@ -311,22 +324,24 @@ def gincana_copiar(request, gincana_id):
     gincanas = Gincana.objects.filter(email_profesor=request.user)
     profesores = Profesor.objects.filter(email=request.user.email)
     nueva_Gincana = Gincana.objects.get(pk=gincana_id)
-    paradas = Parada.objects.filter(gincana=gincana_id)
+    paradas = Parada.objects.filter(gincana=gincana_id).order_by('orden')
+    paradas_gincana = list(paradas.values('latitud', 'longitud'))
     if nueva_Gincana.email_profesor == request.user:
         return render(request, 'gincana_publica.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores,
-            'error': "Esta Gincana ya te pernetece."})
+            'paradas': paradas_gincana, 'error': "Esta Gincana ya te pernetece."})
     else:
         nueva_Gincana.pk = None
         nueva_Gincana.email_profesor = request.user
         nueva_Gincana.save()
         for parada in paradas:
             nueva_parada = Parada.objects.create(
+                orden=parada.orden,
                 latitud=parada.latitud,
                 longitud=parada.longitud,
                 gincana=nueva_Gincana
             )
             nueva_parada.save()
-        return render(request, 'mis_gincanas.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores})
+        return render(request, 'mis_gincanas.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores, 'paradas': paradas_gincana})
 
 @login_required    
 def gincana_eliminar(request, gincana_id):
@@ -548,22 +563,59 @@ def profesor_password(request, email_id):
 @login_required
 def parada(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    paradas = Parada.objects.filter(gincana=gincana)
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
     paradas_gincana = list(paradas.values('latitud', 'longitud'))
     return render(request, 'parada.html', {'gincana': gincana, 'paradas': paradas_gincana})
 
 @login_required
 def parada_guardar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-
+    contador = Parada.objects.filter(gincana=gincana).count()
     paradas_data = json.loads(request.POST.get('parada'))
     for latitud, longitud in paradas_data.items():
+        contador += 1
         if not Parada.objects.filter(latitud=latitud, longitud=longitud, gincana_id=gincana_id).exists():
             parada= Parada.objects.create(
+                orden=contador,
                 latitud=latitud,
                 longitud=longitud,
                 gincana_id=gincana_id
             )
             parada.save()
 
+    return render(request, 'editar_gincana.html', {'gincana': gincana})
+
+@login_required
+def guardar_cambios_gincana(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    ordered_ids = request.POST.getlist('ordered_ids[]')
+
+    ordered_ids = [int(id) for id in ordered_ids]
+
+    for index, parada_id in enumerate(ordered_ids, start=1):
+        Parada.objects.filter(id=parada_id, gincana=gincana).update(orden=index)
+    
+    return render(request, 'editar_gincana.html', {'gincana': gincana})
+
+@login_required
+def borrar_parada(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    parada_id = request.POST.get('parada_id')
+
+    parada = Parada.objects.get(id=parada_id)
+
+    parada.delete()
+    
+    return render(request, 'editar_gincana.html', {'gincana': gincana})
+
+@login_required
+def editar_parada(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    ordered_ids = request.POST.getlist('ordered_ids[]')
+
+    ordered_ids = [int(id) for id in ordered_ids]
+
+    for index, parada_id in enumerate(ordered_ids, start=1):
+        Parada.objects.filter(id=parada_id, gincana=gincana).update(orden=index)
+    
     return render(request, 'editar_gincana.html', {'gincana': gincana})

@@ -14,26 +14,28 @@
 <p>{{profesor.ciudad}}</p>
 <p>{{profesor.organizacion}}</p>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <button class="btn-signin">
-        Editar
-    </button>
-</form>
+<div style="display: flex; justify-content: center;">
+    <form method="POST" enctype="multipart/form-data" style="margin-right: 10px;">
+        {% csrf_token %}
+        <button class="btn-signin">
+            Editar
+        </button>
+    </form>
 
-<form action="{% url 'verificacion_password2' profesor.email %}" method="POST">
-    {% csrf_token %}
-    <button class="btn-pass">
-        Cambiar Contraseña
-    </button>
-</form>
+    <form action="{% url 'verificacion_password2' profesor.email %}" method="POST" style="margin-right: 10px;">
+        {% csrf_token %}
+        <button class="btn-pass">
+            Cambiar Contraseña
+        </button>
+    </form>
 
-<form action="{% url 'profesor_eliminar' profesor.email %}" method="POST">
-    {% csrf_token %}
-    <button class="btn-signin">
-        Eliminar
-    </button>
-</form>
+    <form action="{% url 'profesor_eliminar' profesor.email %}" method="POST">
+        {% csrf_token %}
+        <button class="btn-signin">
+            Eliminar
+        </button>
+    </form>
+</div>
 
 <footer class="footer">
     <div class="footer-group">

@@ -376,6 +376,7 @@ class Verificacion(models.Model):
         return self.code + ' - ' + self.email_profesor.email
     
 class Parada(models.Model):
+    orden = models.IntegerField(default=1)
     latitud = models.FloatField()
     longitud = models.FloatField()
     gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
@@ -397,4 +398,3 @@ class Respuesta(models.Model):
 
     def __str__(self):
         return self.respuesta + ' - ' + self.pregunta.parada.gincana.titulo
-
