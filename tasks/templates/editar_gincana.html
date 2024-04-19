@@ -140,7 +140,7 @@
                                 {{parada.latitud}}
                                 {{parada.longitud}}
                             </div>
-                            <button type="button" class="btn btn-primary" style="margin-right: 10px;" id="editar">
+                            <button type="button" class="btn btn-primary" id="editar_{{parada.id}}" style="margin-right: 10px;" onclick="abrir_modal_editar('{% url 'editar_parada' gincana.id parada.id %}')" data-toggle="modal" data-target="#editar">
                                 Editar Pregunta
                             </button>
                             <button type="button" class="btn btn-danger" id="borrar_{{parada.id}}">
@@ -160,6 +160,8 @@
                 </div>
 
                 <div class="modal fade" id="add" role="dialog"></div>
+
+                <div class="modal fade" id="editar" role="dialog"></div>
 
                 <footer class="footer">
                     <div class="footer-group">
@@ -243,6 +245,15 @@
                 sendData(parada_id);
             });
         });
+    </script>
+
+    <script type="text/javascript">
+        var $ = jQuery.noConflict();
+        function abrir_modal_editar(url){
+            $('#editar').load(url, function (){
+                $(this).modal('show');
+            });
+        }
     </script>
 
 </body>

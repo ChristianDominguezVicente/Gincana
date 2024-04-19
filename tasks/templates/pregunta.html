@@ -1,0 +1,51 @@
+<div class="modal-dialog modal-xl" role="document">
+  <div class="modal-content">
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 class="modal-title">Editar Pregunta {{parada.orden}}</h2>
+      <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <form action="{% url 'editar_guardar' gincana.id parada.id %}" method="POST">
+        {% csrf_token %}
+        {{ preguntaForm.as_p }}
+
+        <div id="respuestas_fields">
+
+        </div>
+      
+        <div class="modal-footer" style="display: flex; justify-content: center;">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" style="margin-right: 10px;">
+            Cancelar
+          </button>
+          
+          <button class="btn btn-success" id="guardar">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#id_num_respuestas').on('change', function() {
+      var num_respuestas = $(this).val();
+      var respuestas_fields = $('#respuestas_fields');
+      respuestas_fields.empty();
+      for (var i = 0; i < num_respuestas; i++) {
+        var respuesta_form = '<div class="respuesta_form">' +
+          '<input type="text" name="respuesta_' + i + '_respuesta" placeholder="Respuesta">' +
+          '<input type="number" name="respuesta_' + i + '_puntos" placeholder="Puntos">' +
+          '<input type="checkbox" name="respuesta_' + i + '_es_correcta"> Correcta/Fallo<br>' +
+        '</div>';
+        respuestas_fields.append(respuesta_form);
+      }
+    });
+
+    $('#id_num_respuestas').change();
+  });
+</script>

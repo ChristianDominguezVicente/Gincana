@@ -51,7 +51,8 @@ urlpatterns = [
     path('mis_gincanas/<int:gincana_id>/editar/parada/guardar/', views.parada_guardar, name='parada_guardar'),
     path('mis_gincanas/<int:gincana_id>/editar/guardar_cambios_gincana/', views.guardar_cambios_gincana, name='guardar_cambios_gincana'),
     path('mis_gincanas/<int:gincana_id>/editar/borrar_parada/', views.borrar_parada, name='borrar_parada'),
-    path('mis_gincanas/<int:gincana_id>/editar/editar_parada/', views.editar_parada, name='editar_parada'),
+    path('mis_gincanas/<int:gincana_id>/editar/<int:parada_id>/', views.editar_parada, name='editar_parada'),
+    path('mis_gincanas/<int:gincana_id>/editar/<int:parada_id>/guardar/', views.editar_guardar, name='editar_guardar'),
     path('', views.signin, name='signin')
 ]
 

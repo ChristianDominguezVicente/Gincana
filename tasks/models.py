@@ -323,8 +323,8 @@ class Profesor(AbstractBaseUser):
     usuario_administrador = models.BooleanField(default=False)
     usuario_verificado = models.BooleanField(default=False)
     fecha_nacimiento = models.DateField('Fecha de nacimiento', null=True, blank=False)
-    genero = models.CharField("Género", max_length=1 ,choices=GENDER_CHOICES ,default='H', null=True)
-    pais = models.CharField("País", max_length=2 ,choices=COUNTRY_CHOICES , null=True)
+    genero = models.CharField("Género", max_length=1 , choices=GENDER_CHOICES, default='H', null=True)
+    pais = models.CharField("País", max_length=2 , choices=COUNTRY_CHOICES, null=True)
     ciudad = models.CharField("Ciudad", max_length=200, null=True, blank=True)
     organizacion = models.CharField("Organizacion", max_length=200, null=True, blank=False)
     objects = Usuario()
@@ -382,10 +382,23 @@ class Parada(models.Model):
     gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.latitud + ' - ' + self.longitud + ' - ' + self.gincana.titulo
+        return str(self.latitud) + ' - ' + str(self.longitud) + ' - ' + self.gincana.titulo
     
 class Pregunta(models.Model):
+    NUM = (
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+        (5, '5'),
+        (6, '6'),
+        (7, '7'),
+        (8, '8'),
+        (9, '9'),
+        (10, '10')
+    )
+
     enunciado = models.TextField()
+    num_respuestas = models.IntegerField(choices=NUM, default=2)
     parada = models.ForeignKey(Parada, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -394,6 +407,7 @@ class Pregunta(models.Model):
 class Respuesta(models.Model):
     respuesta = models.CharField(max_length=254)
     puntos = models.IntegerField()
+    es_correcta = models.BooleanField(default=False)
     pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
 
     def __str__(self):
