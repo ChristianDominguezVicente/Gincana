@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.utils.datastructures import MultiValueDictKeyError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm
 from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -609,13 +609,41 @@ def borrar_parada(request, gincana_id):
     return render(request, 'editar_gincana.html', {'gincana': gincana})
 
 @login_required
-def editar_parada(request, gincana_id):
+def editar_parada(request, gincana_id, parada_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    ordered_ids = request.POST.getlist('ordered_ids[]')
+    parada = get_object_or_404(Parada, pk=parada_id)
+    preguntaForm = PreguntaForm(request.POST)
+    respuestaForm = RespuestaForm(request.POST)
+    return render(request, 'pregunta.html', {'gincana': gincana, 'preguntaForm': preguntaForm, 'respuestaForm': respuestaForm, 'parada': parada})
 
-    ordered_ids = [int(id) for id in ordered_ids]
+@login_required
+def editar_guardar(request, gincana_id, parada_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
 
-    for index, parada_id in enumerate(ordered_ids, start=1):
-        Parada.objects.filter(id=parada_id, gincana=gincana).update(orden=index)
-    
+    if request.method == 'POST':
+        pregunta_form = PreguntaForm(request.POST)
+        print(request.POST)
+        if pregunta_form.is_valid():
+            pregunta = pregunta_form.save(commit=False)
+            pregunta.parada_id = parada_id
+            pregunta.save()
+
+            num_respuestas = int(request.POST.get('num_respuestas', 0))
+            for i in range(num_respuestas):
+                respuesta_texto = request.POST.get(f'respuesta_{i}_respuesta')
+                puntos = request.POST.get(f'respuesta_{i}_puntos')
+                es_correcta = request.POST.get(f'respuesta_{i}_es_correcta')
+
+                respuesta = Respuesta(
+                    respuesta=respuesta_texto,
+                    puntos=int(puntos),
+                    es_correcta=bool(es_correcta),
+                    pregunta=pregunta
+                )
+                respuesta.save()
+
+            return redirect('editar_gincana', gincana_id=gincana_id)
+    else:
+        pregunta_form = PreguntaForm()
+
     return render(request, 'editar_gincana.html', {'gincana': gincana})

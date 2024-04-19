@@ -1,5 +1,5 @@
 from django import forms
-from .models import Gincana, Profesor, Verificacion
+from .models import Gincana, Profesor, Verificacion, Pregunta, Respuesta
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField(
@@ -396,3 +396,13 @@ class PasswordCambioForm(forms.Form):
 
     password1.label=""
     password2.label=""
+
+class PreguntaForm(forms.ModelForm):
+    class Meta:
+        model = Pregunta
+        fields = ['enunciado', 'num_respuestas']
+
+class RespuestaForm(forms.ModelForm):
+    class Meta:
+        model = Respuesta
+        fields = ['respuesta', 'puntos', 'es_correcta']
