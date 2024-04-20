@@ -622,11 +622,13 @@ def editar_guardar(request, gincana_id, parada_id):
 
     if request.method == 'POST':
         pregunta_form = PreguntaForm(request.POST)
-        print(request.POST)
+
         if pregunta_form.is_valid():
-            pregunta = pregunta_form.save(commit=False)
-            pregunta.parada_id = parada_id
+            pregunta, created = Pregunta.objects.get_or_create(parada_id=parada_id)
+            pregunta.enunciado = pregunta_form.cleaned_data['enunciado']
             pregunta.save()
+
+            Respuesta.objects.filter(pregunta=pregunta).delete()
 
             num_respuestas = int(request.POST.get('num_respuestas', 0))
             for i in range(num_respuestas):
@@ -641,6 +643,7 @@ def editar_guardar(request, gincana_id, parada_id):
                     pregunta=pregunta
                 )
                 respuesta.save()
+
 
             return redirect('editar_gincana', gincana_id=gincana_id)
     else:
