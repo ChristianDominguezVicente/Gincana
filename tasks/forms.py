@@ -398,11 +398,74 @@ class PasswordCambioForm(forms.Form):
     password2.label=""
 
 class PreguntaForm(forms.ModelForm):
+    enunciado = forms.CharField(widget = forms.TextInput(
+        attrs = {
+            'class': 'input-box',
+            'placeholder': 'Enunciado de la Pregunta'
+        }
+    ))
+
+    num_respuestas = forms.ChoiceField(
+        choices=Pregunta.NUM,
+        widget=forms.Select(
+            attrs={
+                'class': 'input-box'
+            }
+        )
+    )
+
+    enunciado.label=""
+    num_respuestas.label="Número de Respuestas"
+
     class Meta:
         model = Pregunta
         fields = ['enunciado', 'num_respuestas']
+        widget = {
+            'enunciado': forms.TextInput(
+                attrs = {
+                    'class': 'input-box',
+                    'placeholder': 'Enunciado de la Pregunta'
+                }
+            ),
+            'num_respuestas': forms.TextInput(
+                attrs = {
+                    'class': 'input-box'
+                }
+            )
+        }
 
 class RespuestaForm(forms.ModelForm):
+    respuesta = forms.CharField(label = 'Respuesta', widget = forms.TextInput(
+        attrs = {
+            'class': 'input-box',
+            'placeholder': 'Respuesta'
+        }
+    ))
+
+    puntos = forms.IntegerField(label = 'Puntos', widget = forms.NumberInput(
+        attrs = {
+            'class': 'input-box',
+            'placeholder': 'Puntos'
+        }
+    ))
+
+    respuesta.label=""
+    puntos.label=""
+
     class Meta:
         model = Respuesta
         fields = ['respuesta', 'puntos', 'es_correcta']
+        widget = {
+            'respuesta': forms.TextInput(
+                attrs = {
+                    'class': 'input-box',
+                    'placeholder': 'Respuesta'
+                }
+            ),
+            'puntos': forms.NumberInput(
+                attrs = {
+                    'class': 'input-box',
+                    'placeholder': 'Puntos'
+                }
+            )
+        }
