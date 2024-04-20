@@ -269,6 +269,14 @@ def editar_gincana(request, gincana_id):
     
     paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
     paradas_gincana = list(paradas.values('latitud', 'longitud'))
+
+    for parada in paradas:
+        pregunta = parada.pregunta_set.first()
+        respuestas = pregunta.respuesta_set.all() if pregunta else []
+
+        parada.pregunta = pregunta
+        parada.respuestas = respuestas
+
     return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana, 'db': paradas})
 
 @login_required        
@@ -612,9 +620,17 @@ def borrar_parada(request, gincana_id):
 def editar_parada(request, gincana_id, parada_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     parada = get_object_or_404(Parada, pk=parada_id)
-    preguntaForm = PreguntaForm(request.POST)
-    respuestaForm = RespuestaForm(request.POST)
-    return render(request, 'pregunta.html', {'gincana': gincana, 'preguntaForm': preguntaForm, 'respuestaForm': respuestaForm, 'parada': parada})
+
+    if Pregunta.objects.filter(parada_id=parada_id).exists():
+        pregunta = Pregunta.objects.get(parada_id=parada_id)
+        preguntaForm = PreguntaForm(instance=pregunta)
+        respuestas = Respuesta.objects.filter(pregunta_id=pregunta.id)
+        respuestasForms = [RespuestaForm(instance=respuesta) for respuesta in respuestas]
+    else:
+        preguntaForm = PreguntaForm()
+        respuestasForms = [RespuestaForm() for _ in range(10)]
+
+    return render(request, 'pregunta.html', {'gincana': gincana, 'preguntaForm': preguntaForm, 'respuestaForm': respuestasForms, 'parada': parada})
 
 @login_required
 def editar_guardar(request, gincana_id, parada_id):

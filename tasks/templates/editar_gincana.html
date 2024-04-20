@@ -123,7 +123,17 @@
                             var marker =  L.marker([parada.latitud, parada.longitud]).addTo(map);
                             let polyline = L.polyline([anterior_parada,[parada.latitud, parada.longitud]]).addTo(map);
                         }
-                        marker.bindPopup('Parada ' + (contador+1) + '<br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud);
+                        var popupContent = 'Parada ' + (contador+1) + '<br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
+                        if (parada.pregunta) {
+                            popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta.enunciado + '<br>';
+                            popupContent += '<strong>Respuestas:</strong><br>';
+                            parada.respuestas.forEach(respuesta => {
+                                popupContent += respuesta.respuesta + ' - Puntos: ' + respuesta.puntos + ' - Correcta: ' + respuesta.es_correcta + '<br>';
+                            });
+                        } else {
+                            popupContent += '<br>No hay pregunta asociada a esta parada.';
+                        }
+                        marker.bindPopup(popupContent);
 
                         contador++;
                         anterior_parada=[parada.latitud, parada.longitud];
@@ -139,13 +149,29 @@
                                 <div class="fw-bold">Parada {{parada.orden}}</div>
                                 {{parada.latitud}}
                                 {{parada.longitud}}
+                                {% if parada.pregunta %}
+                                    <div class="fw-bold">Pregunta:</div>
+                                    <div>{{ parada.pregunta.enunciado }}</div>
+                                    <div>Numero de Respuestas: {{ parada.pregunta.num_respuestas }}</div>
+                                    
+                                    <div class="fw-bold">Respuestas:</div>
+                                    {% for respuesta in parada.respuestas %}
+                                        <div>{{ respuesta.respuesta }}</div>
+                                        <div>Puntos: {{ respuesta.puntos }}</div>
+                                        <div>Es Correcta: {{ respuesta.es_correcta }}</div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div>No hay pregunta asociada a esta parada.</div>
+                                {% endif %}
                             </div>
-                            <button type="button" class="btn btn-primary" id="editar_{{parada.id}}" style="margin-right: 10px;" onclick="abrir_modal_editar('{% url 'editar_parada' gincana.id parada.id %}')" data-toggle="modal" data-target="#editar">
-                                Editar Pregunta
-                            </button>
-                            <button type="button" class="btn btn-danger" id="borrar_{{parada.id}}">
-                                Borrar
-                            </button>
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="btn btn-primary" id="editar_{{parada.id}} me-2" style="margin-right: 10px; height: auto;" onclick="abrir_modal_editar('{% url 'editar_parada' gincana.id parada.id %}')" data-toggle="modal" data-target="#editar">
+                                    Editar Pregunta
+                                </button>
+                                <button type="button" class="btn btn-danger" id="borrar_{{parada.id}}" style="height: auto;">
+                                    Borrar
+                                </button>
+                            </div>
                         </li>
                     {% endfor %}
                 </ul>
