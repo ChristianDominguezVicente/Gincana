@@ -5,42 +5,47 @@
 {% load static %}
 
 <h1>Mis Gincanas</h1>
-<ul>
+<ul class="row">
     {% for mi_gincana in mis_gincanas %}
-    <li>
-        <a href=" {% url 'gincana' mi_gincana.id %}">
-            {% if mi_gincana.visibilidad %}
-                <strong>{{mi_gincana.titulo}}</strong>
-            {% else %}
-                {{mi_gincana.titulo}}
-            {% endif %}
-
-            <p>{{mi_gincana.descripcion}}</p>
-            <p>{{mi_gincana.email_profesor}}</p>
-
-            <p>{{mi_gincana.edicion|date:'M j Y:i'}}</p>
+        {% if forloop.counter0|divisibleby:4 %}
+            </ul><ul class="row">
+        {% endif %}
+        <li class="col">
+            <a href="{% url 'gincana' mi_gincana.id %}">
+                {% if mi_gincana.visibilidad %}
+                    <strong>{{mi_gincana.titulo}}</strong>
+                {% else %}
+                    {{mi_gincana.titulo}}
+                {% endif %}
+            </a>
+        </li>
+    {% endfor %}
+    {% if mis_gincanas|length|divisibleby:4 %}
+        </ul>
+        <ul class="row">
+    {% endif %}
+    <li class="col">
+        <a href="{% url 'crear_gincana' %}">
+            <strong>Crear Gincana</strong>
         </a>
     </li>
-    {% endfor %}
 </ul>
 
 <h1>Gincanas Públicas</h1>
-<ul>
+<ul class="row">
     {% for gincana_publica in gincanas_publicas %}
-    <li>
-        <a href=" {% url 'gincana_publica' gincana_publica.id %}">
-            {% if gincana_publica.visibilidad %}
-                <strong>{{gincana_publica.titulo}}</strong>
-            {% else %}
-                {{gincana_publica.titulo}}
-            {% endif %}
-
-            <p>{{gincana_publica.descripcion}}</p>
-            <p>{{gincana_publica.email_profesor}}</p>
-
-            <p>{{gincana_publica.edicion|date:'M j Y:i'}}</p>
-        </a>
-    </li>
+        {% if forloop.counter0|divisibleby:4 %}
+            </ul><ul class="row">
+        {% endif %}
+        <li class="col">
+            <a href="{% url 'gincana_publica' gincana_publica.id %}">
+                {% if gincana_publica.visibilidad %}
+                    <strong>{{gincana_publica.titulo}}</strong>
+                {% else %}
+                    {{gincana_publica.titulo}}
+                {% endif %}
+            </a>
+        </li>
     {% endfor %}
 </ul>
 
