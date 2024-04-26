@@ -123,9 +123,9 @@
                             var marker =  L.marker([parada.latitud, parada.longitud]).addTo(map);
                             let polyline = L.polyline([anterior_parada,[parada.latitud, parada.longitud]]).addTo(map);
                         }
-                        var popupContent = 'Parada ' + (contador+1) + '<br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
+                        var popupContent = '<strong>Parada ' + (contador+1) + '</strong><br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
                         if (parada.pregunta) {
-                            popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta.enunciado + '<br>';
+                            popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta + '<br>';
                             popupContent += '<strong>Respuestas:</strong><br>';
                             parada.respuestas.forEach(respuesta => {
                                 popupContent += respuesta.respuesta + ' - Puntos: ' + respuesta.puntos + ' - Correcta: ' + respuesta.es_correcta + '<br>';

@@ -20,7 +20,6 @@ def home(request):
     profesores = Profesor.objects.filter(email=request.user.email)
     return render(request, 'home.html',{'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores})
 
-
 def signup(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -244,14 +243,34 @@ def gincana(request, gincana_id):
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
         paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-        paradas_gincana = list(paradas.values('latitud', 'longitud'))
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
+        paradas_data = []
+        for parada in paradas:
+            pregunta = parada.pregunta_set.first()
+            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+            parada_data = {
+                'latitud': parada.latitud,
+                'longitud': parada.longitud,
+                'pregunta': pregunta.enunciado if pregunta else None,
+                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+            }
+            paradas_data.append(parada_data)
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
             paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-            paradas_gincana = list(paradas.values('latitud', 'longitud'))
-            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
+            paradas_data = []
+            for parada in paradas:
+                pregunta = parada.pregunta_set.first()
+                respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+                parada_data = {
+                    'latitud': parada.latitud,
+                    'longitud': parada.longitud,
+                    'pregunta': pregunta.enunciado if pregunta else None,
+                    'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+                }
+                paradas_data.append(parada_data)
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
         except ValueError:
             return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 
                 'error': "Error actualizando la Gincana"})
@@ -268,7 +287,17 @@ def editar_gincana(request, gincana_id):
             Parada.objects.filter(pk=parada.pk).update(orden=index)
     
     paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    paradas_gincana = list(paradas.values('latitud', 'longitud'))
+    paradas_data = []
+    for parada in paradas:
+        pregunta = parada.pregunta_set.first()
+        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+        parada_data = {
+            'latitud': parada.latitud,
+            'longitud': parada.longitud,
+            'pregunta': pregunta.enunciado if pregunta else None,
+            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+        }
+        paradas_data.append(parada_data)
 
     for parada in paradas:
         pregunta = parada.pregunta_set.first()
@@ -277,21 +306,45 @@ def editar_gincana(request, gincana_id):
         parada.pregunta = pregunta
         parada.respuestas = respuestas
 
-    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana, 'db': paradas})
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'db': paradas})
 
 @login_required        
 def configuracion_gincana(request, gincana_id):  
     profesores = Profesor.objects.filter(email=request.user.email)
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        paradas_data = []
+        for parada in paradas:
+            pregunta = parada.pregunta_set.first()
+            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+            parada_data = {
+                'latitud': parada.latitud,
+                'longitud': parada.longitud,
+                'pregunta': pregunta.enunciado if pregunta else None,
+                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+            }
+            paradas_data.append(parada_data)
         form = GincanaConfiguracionForm(instance=gincana)
-        return render(request, 'configuracion_gincana.html', {'gincana': gincana,'form': form, 'profesores': profesores})
+        return render(request, 'configuracion_gincana.html', {'gincana': gincana,'form': form, 'profesores': profesores, 'paradas': paradas_data})
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+            paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+            paradas_data = []
+            for parada in paradas:
+                pregunta = parada.pregunta_set.first()
+                respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+                parada_data = {
+                    'latitud': parada.latitud,
+                    'longitud': parada.longitud,
+                    'pregunta': pregunta.enunciado if pregunta else None,
+                    'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+                }
+                paradas_data.append(parada_data)
             form = GincanaConfiguracionForm(request.POST, instance=gincana)
             form.save()
-            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
         except ValueError:
             return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
                 'profesores': profesores, 'error': "Error actualizando la Gincana"})
@@ -307,8 +360,18 @@ def gincana_publica(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     profesores = Profesor.objects.filter(email=request.user.email)
     paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    paradas_gincana = list(paradas.values('latitud', 'longitud'))
-    return render(request, 'gincana_publica.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_gincana})
+    paradas_data = []
+    for parada in paradas:
+        pregunta = parada.pregunta_set.first()
+        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+        parada_data = {
+            'latitud': parada.latitud,
+            'longitud': parada.longitud,
+            'pregunta': pregunta.enunciado if pregunta else None,
+            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+        }
+        paradas_data.append(parada_data)
+    return render(request, 'gincana_publica.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
 
 @login_required
 def gincana_iniciar(request, gincana_id):
@@ -572,8 +635,18 @@ def profesor_password(request, email_id):
 def parada(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    paradas_gincana = list(paradas.values('latitud', 'longitud'))
-    return render(request, 'parada.html', {'gincana': gincana, 'paradas': paradas_gincana})
+    paradas_data = []
+    for parada in paradas:
+        pregunta = parada.pregunta_set.first()
+        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+        parada_data = {
+            'latitud': parada.latitud,
+            'longitud': parada.longitud,
+            'pregunta': pregunta.enunciado if pregunta else None,
+            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+        }
+        paradas_data.append(parada_data)
+    return render(request, 'parada.html', {'gincana': gincana, 'paradas': paradas_data})
 
 @login_required
 def parada_guardar(request, gincana_id):
