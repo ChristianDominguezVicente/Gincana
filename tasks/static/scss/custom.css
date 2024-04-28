@@ -188,6 +188,37 @@ h2{
     margin-bottom: 10px;
 }
 
+.gincana{
+  text-decoration: none;
+  color: black;
+  text-align: center;
+}
+
+.gincana-img {
+  position: relative; 
+  width: 300px;
+  overflow: hidden;
+  margin: 0 auto;
+  border-radius: 25px;
+}
+
+.gincana-img img {
+  border-radius: 25px;
+  border: 2px solid transparent; 
+  width: 100%; 
+  height: auto;
+}
+
+.gincana-img:hover img {
+  border-radius: 25px;
+  border: 2px solid rgba(44, 94, 75, 1); 
+}
+
+.gincana:hover{
+  text-decoration: underline;
+  color: rgba(44, 94, 75, 1);
+}
+
 @media (min-width: 300px) {
   .separador {
     width: 10%;
