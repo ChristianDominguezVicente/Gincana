@@ -353,7 +353,7 @@ class Gincana(models.Model):
     duracion = models.TimeField('Duración', null=True, blank=True)
     visibilidad = models.BooleanField('Visibilidad de la gincana', default=False)
     activa = models.BooleanField('Actividad de la gincana', default=False)
-    imagen = models.ImageField("Imagen de la gincana", upload_to='gincana/', max_length=200, blank = True, null = True)
+    imagen = models.ImageField("Imagen de la gincana", default="mapa.png", upload_to='', null=True, blank=True)
     email_profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -376,9 +376,9 @@ class Verificacion(models.Model):
         return self.code + ' - ' + self.email_profesor.email
     
 class Parada(models.Model):
-    orden = models.IntegerField(default=1)
-    latitud = models.FloatField()
-    longitud = models.FloatField()
+    orden = models.IntegerField('Orden', default=1)
+    latitud = models.FloatField('Latitud')
+    longitud = models.FloatField('Longitud')
     gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -397,17 +397,17 @@ class Pregunta(models.Model):
         (10, '10')
     )
 
-    enunciado = models.TextField()
-    num_respuestas = models.IntegerField(choices=NUM, default=2)
+    enunciado = models.TextField('Enunciado')
+    num_respuestas = models.IntegerField('Numero de Respuestas',choices=NUM, default=2)
     parada = models.ForeignKey(Parada, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.enunciado + ' - ' + self.parada.gincana.titulo
     
 class Respuesta(models.Model):
-    respuesta = models.CharField(max_length=254)
-    puntos = models.IntegerField()
-    es_correcta = models.BooleanField(default=False)
+    respuesta = models.CharField('Respuesta',max_length=254)
+    puntos = models.IntegerField('Puntos')
+    es_correcta = models.BooleanField('Es Correcta/Fallo', default=False)
     pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
 
     def __str__(self):

@@ -9,7 +9,10 @@ from datetime import date
 from django.core.mail import send_mail
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-import datetime, random, json
+import datetime, random, json, folium, time, os
+from selenium import webdriver
+from django.conf import settings
+import shutil
 
 # Create your views here.
 
@@ -653,6 +656,7 @@ def parada_guardar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     contador = Parada.objects.filter(gincana=gincana).count()
     paradas_data = json.loads(request.POST.get('parada'))
+
     for latitud, longitud in paradas_data.items():
         contador += 1
         if not Parada.objects.filter(latitud=latitud, longitud=longitud, gincana_id=gincana_id).exists():
@@ -663,6 +667,64 @@ def parada_guardar(request, gincana_id):
                 gincana_id=gincana_id
             )
             parada.save()
+
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+    map = folium.Map(location=[51.505, -0.09], zoom_start=13)
+
+    for parada in paradas:
+        folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
+
+    for i in range(len(paradas) - 1):
+        parada_actual = paradas[i]
+        parada_siguiente = paradas[i + 1]
+        folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
+
+    map.save(f'mapa_gincana_{gincana_id}.html')
+    
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless') 
+    
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.headless = True
+    
+    edge_options = webdriver.EdgeOptions()
+    edge_options.use_chromium = True
+    edge_options.add_argument('--headless')
+
+    try:
+        driver = webdriver.Chrome(options=chrome_options)
+    except:
+        try:
+            driver = webdriver.Firefox(options=firefox_options)
+        except:
+            try:
+                driver = webdriver.Edge(options=edge_options)
+            except:
+                driver = None
+
+    user_agent = request.META['HTTP_USER_AGENT']
+    if 'Chrome' in user_agent:
+        driver = webdriver.Chrome(options=chrome_options)
+    elif 'Firefox' in user_agent:
+        driver = webdriver.Firefox()
+    elif 'Edg' in user_agent:  
+        driver = webdriver.Edge()
+    else:
+        driver = None
+
+    if driver:
+        driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+        time.sleep(2)
+        driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+        driver.quit()
+
+    os.remove(f'mapa_gincana_{gincana_id}.html')
+    
+    nombre_archivo = f"mapa_{gincana.id}.png"
+    ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+    shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+    gincana.imagen = nombre_archivo
+    gincana.save()
 
     return render(request, 'editar_gincana.html', {'gincana': gincana})
 

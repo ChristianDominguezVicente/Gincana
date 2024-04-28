@@ -88,7 +88,7 @@ class GincanaConfiguracionForm(forms.ModelForm):
 
     class Meta:
         model = Gincana
-        fields = ['titulo', 'descripcion', 'visibilidad', 'duracion', 'imagen']
+        fields = ['titulo', 'descripcion', 'visibilidad', 'duracion']
         widget = {
             'titulo': forms.TextInput(
                 attrs = {
