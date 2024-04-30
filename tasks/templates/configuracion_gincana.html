@@ -93,16 +93,19 @@
                     </div>
                 </nav>
                 {% endif %}
-                <h1>Configuración</h1>
+                <div class="container-in">
+                    <h1>Configuración</h1>
 
-                <form method="POST">
-                    {% csrf_token %}
-                    {{form.as_p}}
-                    <button class="btn-signin">
-                        Guardar Cambios
-                    </button>
-                </form>
-
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form">
+                            {{form.as_p}}
+                        </div>
+                        <button class="btn-signin">
+                            Guardar Cambios
+                        </button>
+                    </form>
+                </div>
                 <footer class="footer">
                     <div class="footer-group">
                         <div class="footer-box">

@@ -3,28 +3,30 @@
 {% block content %}
 
 {% load static %}
-
-<h1>Gincanas Públicas</h1>
-
-<ul>
-    {% for gincana in gincanas %}
-    <li>
-        <a href=" {% url 'gincana_publica' gincana.id %}">
-            {% if gincana.visibilidad %}
-                <strong>{{gincana.titulo}}</strong>
-            {% else %}
-                {{gincana.titulo}}
+<div class="container-in">
+    <h1>Gincanas Públicas</h1>
+    <ul class="row">
+        {% for gincana in gincanas %}
+            {% if forloop.counter0|divisibleby:4 %}
+                </ul><ul class="row">
             {% endif %}
-
-            <p>{{gincana.descripcion}}</p>
-            <p>{{gincana.email_profesor}}</p>
-
-            <p>{{gincana.edicion|date:'M j Y:i'}}</p>
-        </a>
-    </li>
-    {% endfor %}
-</ul>
-
+            <div class="col">
+                <a href=" {% url 'gincana_publica' gincana.id %}" class="gincana">
+                    <div class="gincana-img">
+                        <img src="{{ gincana.imagen.url }}" alt="{{ gincana.titulo }}" class="img-gincana">
+                    </div>
+                    <div class="gincana-titulo">
+                        {% if gincana.visibilidad %}
+                            <strong>{{gincana.titulo}}</strong>
+                        {% else %}
+                            {{gincana.titulo}}
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </ul>
+</div>
 <footer class="footer">
     <div class="footer-group">
         <div class="footer-box">

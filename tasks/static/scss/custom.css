@@ -188,6 +188,15 @@ h2{
     margin-bottom: 10px;
 }
 
+.container-in {
+  margin: 10px;
+}
+
+.container-in .form {
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
 .gincana{
   text-decoration: none;
   color: black;
