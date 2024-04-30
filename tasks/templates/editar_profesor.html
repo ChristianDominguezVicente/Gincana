@@ -3,19 +3,21 @@
 {% block content %}
 
 {% load static %}
+<div class="container-in">
+    <h1>{{profesor.email}}</h1>
 
-<h1>{{profesor.email}}</h1>
+    <p style="color: red;">{{error}}</p>
 
-<p style="color: red;">{{error}}</p>
-
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button class="btn-signin">
-        Guardar
-    </button>
-</form>
-
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form">
+            {{form.as_p}}
+        </div>
+        <button class="btn-signin">
+            Guardar
+        </button>
+    </form>
+</div>
 <footer class="footer">
     <div class="footer-group">
         <div class="footer-box">

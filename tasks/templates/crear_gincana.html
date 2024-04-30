@@ -4,22 +4,20 @@
 
 {% load static %}
 
+<div class="container-in">
+    <h1>Crear Gincana</h1>
+    <p style="color: red;">{{error}}</p>
 
-<h1>Crear Gincana</h1>
-
-<p style="color: red;">{{error}}</p>
-
-<form action="{% url 'crear_gincana' %}" method="POST">
-    {% csrf_token %}
-
-    {{form}}
-
-    <button class="btn-signin">
-        Guardar
-    </button>
-    
-</form>
-
+    <form action="{% url 'crear_gincana' %}" method="POST">
+        {% csrf_token %}
+        <div class="form">
+            {{form.as_p}}
+        </div>
+        <button class="btn-signin">
+            Guardar
+        </button>
+    </form>
+</div>
 <footer class="footer">
     <div class="footer-group">
         <div class="footer-box">
