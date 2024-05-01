@@ -16,7 +16,7 @@
                 <h2>Registro</h2>
             </div>
 
-            <p style="color: red;">{{error}}</p>
+            <p style="color: red; font-weight: bold;">{{error}}</p>
 
             <form method="POST">
                 {% csrf_token%}
@@ -28,7 +28,7 @@
 
             <form action="{% url 'verificacion_reenviar' email %}" method="POST">
                 {% csrf_token %}
-                <button class="btn-signin">
+                <button class="btn-signin" formaction="{% url 'verificacion_reenviar' email %}" formmethod="POST">
                     Reenviar Código
                 </button>
             </form>
