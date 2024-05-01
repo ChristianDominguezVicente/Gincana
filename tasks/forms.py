@@ -69,9 +69,9 @@ class GincanaConfiguracionForm(forms.ModelForm):
         }
     ))
 
-    descripcion = forms.CharField(label = 'Descripción de la Gincana', widget = forms.TextInput(
+    descripcion = forms.CharField(label = 'Descripción de la Gincana', widget = forms.Textarea(
         attrs = {
-            'class': 'input-box',
+            'class': 'input-des',
             'placeholder': 'Ingrese una descripcion',
             'id': 'descripcion'
         }
@@ -96,9 +96,9 @@ class GincanaConfiguracionForm(forms.ModelForm):
                     'placeholder': 'Nombre'
                 }
             ),
-            'descripcion': forms.TextInput(
+            'descripcion': forms.Textarea(
                 attrs = {
-                    'class': 'input-box',
+                    'class': 'input-des',
                     'placeholder': 'Ingrese una descripción '
                 }
             ),
@@ -398,9 +398,9 @@ class PasswordCambioForm(forms.Form):
     password2.label=""
 
 class PreguntaForm(forms.ModelForm):
-    enunciado = forms.CharField(widget = forms.TextInput(
+    enunciado = forms.CharField(widget = forms.Textarea(
         attrs = {
-            'class': 'input-box',
+            'class': 'input-des',
             'placeholder': 'Enunciado de la Pregunta'
         }
     ))
@@ -421,9 +421,9 @@ class PreguntaForm(forms.ModelForm):
         model = Pregunta
         fields = ['enunciado', 'num_respuestas']
         widget = {
-            'enunciado': forms.TextInput(
+            'enunciado': forms.Textarea(
                 attrs = {
-                    'class': 'input-box',
+                    'class': 'input-des',
                     'placeholder': 'Enunciado de la Pregunta'
                 }
             ),

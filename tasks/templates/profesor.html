@@ -5,7 +5,7 @@
 {% load static %}
 
 <h1><img class="profile-pic" src="{{ profesor.imagen.url }}" ></h1>
-<h1>{{profesor.email}}</h1>
+<h1 class="titulo">{{profesor.email}}</h1>
 <p>{{profesor.nombre}}</p>
 <p>{{profesor.apellidos}}</p>
 <p>{{profesor.fecha_nacimiento}}</p>
@@ -14,21 +14,22 @@
 <p>{{profesor.ciudad}}</p>
 <p>{{profesor.organizacion}}</p>
 
-<div style="display: flex; justify-content: center;">
-    <form method="POST" enctype="multipart/form-data" style="margin-right: 10px;">
+<div >
+    <div class="input-registro">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <button class="btn-signin">
             Editar
         </button>
     </form>
-
-    <form action="{% url 'verificacion_password2' profesor.email %}" method="POST" style="margin-right: 10px;">
+    <span style="margin-right: 10px;"></span>
+    <form action="{% url 'verificacion_password2' profesor.email %}" method="POST">
         {% csrf_token %}
         <button class="btn-pass">
             Cambiar Contraseña
         </button>
     </form>
-
+    <span style="margin-right: 10px;"></span>
     <form action="{% url 'profesor_eliminar' profesor.email %}" method="POST">
         {% csrf_token %}
         <button class="btn-signin">

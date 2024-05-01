@@ -100,14 +100,20 @@
                 <div class="container-in">
                     <h1>{{gincana.titulo}}</h1>
 
-                    <p style="color: red;">{{error}}</p>
+                    <p style="color: red; font-weight: bold;">{{error}}</p>
 
-                    <div id="map" style="height: 600px; width: max; margin: 10px;"></div>
+                    <div id="map" class="map"></div>
                     
                     {{ paradas|json_script:"paradas_json" }}
 
                     <script>
-                        var map = L.map('map').setView([51.505, -0.09], 13);
+                        var screenWidth = window.innerWidth;
+
+                        if (screenWidth <= 570) {
+                            var map = L.map('map').setView([51.505, -0.09], 12);
+                        } else {
+                            var map = L.map('map').setView([51.505, -0.09], 13);
+                        }
 
                         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -144,8 +150,8 @@
 
                     </script>
 
-                    <div style="display: flex; justify-content: center;">
-                        <form action="{% url 'gincana_iniciar' gincana.id %}" method="POST" style="margin-right: 10px;">
+                    <div class="input-registro">
+                        <form action="{% url 'gincana_iniciar' gincana.id %}" method="POST">
                             {% csrf_token %}
                             {% if gincana.activa == False %}
                                 <button class="btn-signin">
@@ -157,7 +163,7 @@
                                 </button>
                             {% endif %}
                         </form>
-
+                        <span style="margin-right: 10px;"></span>
                         <form action="{% url 'gincana_eliminar' gincana.id %}" method="POST">
                             {% csrf_token %}
                             <button class="btn-signin">

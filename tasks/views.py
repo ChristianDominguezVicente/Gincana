@@ -415,6 +415,25 @@ def gincana_copiar(request, gincana_id):
                 gincana=nueva_Gincana
             )
             nueva_parada.save()
+
+            if Pregunta.objects.filter(parada_id=parada.id).exists():
+                pregunta = Pregunta.objects.get(parada_id=parada.id)
+                nueva_pregunta = Pregunta.objects.create(
+                    enunciado=pregunta.enunciado,
+                    parada_id=nueva_parada.id,
+                    num_respuestas=pregunta.num_respuestas
+                )
+                nueva_pregunta.save()
+
+                respuestas = Respuesta.objects.filter(pregunta_id=pregunta.id)
+                for respuesta in respuestas:
+                    nueva_respuesta = Respuesta.objects.create(
+                        respuesta=respuesta.respuesta,
+                        puntos=respuesta.puntos,
+                        pregunta_id=nueva_pregunta.id,
+                        es_correcta=respuesta.es_correcta
+                    )
+                    nueva_respuesta.save()
         return render(request, 'mis_gincanas.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores, 'paradas': paradas_gincana})
 
 @login_required    
@@ -485,15 +504,21 @@ def verificacion_password(request, email_id):
         })
     else:
         profesor = get_object_or_404(Profesor, pk=email_id)
-        user = authenticate(request, username=request.POST['username'], 
-                    password=request.POST['password'])
-        if user is None:
-            return render(request, 'verificacion_password.html', {
-                'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
-                'profesor': profesor,'profesores': profesores
-            })
+        if profesor.email == request.POST['username']:
+            user = authenticate(request, username=request.POST['username'], 
+                        password=request.POST['password'])
+            if user is None:
+                return render(request, 'verificacion_password.html', {
+                    'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
+                    'profesor': profesor,'profesores': profesores
+                })
+            else:
+                return redirect('editar_profesor', email_id=email_id)
         else:
-            return redirect('editar_profesor', email_id=email_id)
+            return render(request, 'verificacion_password.html', {
+                    'form': AuthenticationForm, 'email_id': email_id, 'error': 'Introduzca su Correo Electrónico',
+                    'profesor': profesor,'profesores': profesores
+                })
         
 @login_required     
 def verificacion_password2(request, email_id):
@@ -507,15 +532,21 @@ def verificacion_password2(request, email_id):
     else:
         try:
             profesor = get_object_or_404(Profesor, pk=email_id)
-            user = authenticate(request, username=request.POST['username'], 
-                        password=request.POST['password'])
-            if user is None:
+            if profesor.email == request.POST['username']:
+                user = authenticate(request, username=request.POST['username'], 
+                            password=request.POST['password'])
+                if user is None:
+                    return render(request, 'verificacion_password.html', {
+                        'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
+                        'profesor': profesor,'profesores': profesores
+                    })
+                else:
+                    return redirect('profesor_password', email_id=email_id)
+            else:
                 return render(request, 'verificacion_password.html', {
-                    'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
+                    'form': AuthenticationForm, 'email_id': email_id, 'error': 'Introduzca su Correo Electrónico',
                     'profesor': profesor,'profesores': profesores
                 })
-            else:
-                return redirect('profesor_password', email_id=email_id)
         except MultiValueDictKeyError:
             return render(request, 'verificacion_password.html', {
                 'form': AuthenticationForm, 'email_id': email_id, 

@@ -101,12 +101,18 @@
                 <div class="container-in">
                     <h1>Editar {{gincana.titulo}}</h1>
 
-                    <div id="map" style="height: 600px; width: max; margin: 10px;"></div>
+                    <div id="map" class="map"></div>
                     
                     {{ paradas|json_script:"paradas_json" }}
 
                     <script>
-                        var map = L.map('map').setView([51.505, -0.09], 13);
+                        var screenWidth = window.innerWidth;
+
+                        if (screenWidth <= 570) {
+                            var map = L.map('map').setView([51.505, -0.09], 12);
+                        } else {
+                            var map = L.map('map').setView([51.505, -0.09], 13);
+                        }
 
                         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -143,7 +149,7 @@
 
                     </script>
 
-                    <ul id="sortable-list" class="list-group" style="margin: 10px;">
+                    <ul id="sortable-list" class="list-group">
                         {% for parada in db %}
                             <li id="{{ parada.id }}" class="list-group-item d-flex justify-content-between aling-items-start">
                                 <div class="ms-2 me-auto">
@@ -174,10 +180,11 @@
                         {% endfor %}
                     </ul>
 
-                    <div style="display: flex; justify-content: center;">
+                    <div class="input-registro">
                         <button type="button" class="btn-pass" onclick="abrir_modal_parada('{% url 'parada' gincana.id %}')" data-toggle="modal" data-target="#add">
                             Añadir
                         </button>
+                        <span style="margin-right: 10px;"></span>
                         <button type="button" class="btn-pass" id="guardar_cambios">
                             Guardar Cambios
                         </button>

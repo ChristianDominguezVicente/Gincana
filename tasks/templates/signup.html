@@ -16,11 +16,29 @@
                 <h2>Registro</h2>
             </div>
 
-            <p style="color: red;">{{error}}</p>
+            <p style="color: red; font-weight: bold;">{{error}}</p>
 
             <form method="POST">
                 {% csrf_token%}
-                {{form.as_p}}
+                {{form.email}}
+                <div class="input-registro">
+                    {{form.nombre}}
+                    <span style="margin-right: 10px;"></span> 
+                    {{form.apellidos}}
+                </div>
+                <div class="input-registro">
+                    {{form.fecha_nacimiento}}
+                    <span style="margin-right: 10px;"></span> 
+                    {{form.genero}}
+                </div>
+                <div class="input-registro">
+                    {{form.pais}}
+                    <span style="margin-right: 10px;"></span> 
+                    {{form.ciudad}}
+                </div>
+                {{form.organizacion}}
+                {{form.password1}}
+                {{form.password2}}
                 <button class="btn-signin">
                     Siguiente
                 </button>
