@@ -24,3 +24,6 @@ https://www.youtube.com/watch?v=BJ5M9RYpdt4
 
 Localizaciones:
 https://www.youtube.com/watch?v=ZLuXPwug490&list=PLxooeC3-xaNfmKrHLU6IFpEYa3RVbh-Y6&index=4
+
+Reloj:
+https://github.com/monim67/django-bootstrap-datepicker-plus
