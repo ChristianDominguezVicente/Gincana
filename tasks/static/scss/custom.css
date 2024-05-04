@@ -97,6 +97,21 @@ h2{
   cursor: pointer;
 }
 
+.input-reloj{
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  outline: none;
+  border: 2px solid rgba(60, 128, 103, 1); 
+  background-color: rgba(60, 128, 103, 0.1); 
+  color: #333; 
+  font-size: 1rem;
+  font-weight: bold;
+  resize: none; 
+  cursor: pointer;
+}
+
 .input-des::placeholder{
   padding-left: 0px;
   font-weight: bold;

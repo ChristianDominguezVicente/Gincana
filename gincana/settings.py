@@ -40,7 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tasks',
     'django_password_validators',
-    'bootstrap5'
+    'bootstrap5',
+    'bootstrap_datepicker_plus',
+    'django_celery_results',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -164,3 +167,17 @@ EMAIL_HOST_PASSWORD = 'fdorgalukdwmjgdt'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 # 5mkH0oVL9Un6K6veK4E7ZojoYN8laBup3FE0UrJ6ow5K5nVoYZ
+
+
+# CELERY SETTINGS
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Madrid'
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+# CELERY BEAT SETTINGS
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
