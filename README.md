@@ -27,3 +27,6 @@ https://www.youtube.com/watch?v=ZLuXPwug490&list=PLxooeC3-xaNfmKrHLU6IFpEYa3RVbh
 
 Reloj:
 https://github.com/monim67/django-bootstrap-datepicker-plus
+
+Se usa Celery para comprobaciones periodicas en el servidor:
+https://www.youtube.com/playlist?list=PLLz6Bi1mIXhHKA1Szy2aj9Jbs6nw9fhNY
