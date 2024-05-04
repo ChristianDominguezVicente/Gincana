@@ -351,7 +351,7 @@ class Gincana(models.Model):
     fecha = models.DateTimeField('Fecha de creación', auto_now_add=True)
     edicion = models.DateTimeField('Edición de la gincana', null=True, blank=True)
     duracion = models.TimeField('Duración', null=True, blank=True)
-    visibilidad = models.BooleanField('Visibilidad de la gincana', default=False)
+    visibilidad = models.BooleanField('Visibilidad de la gincana: ', default=False)
     activa = models.BooleanField('Actividad de la gincana', default=False)
     imagen = models.ImageField("Imagen de la gincana", default="mapa.png", upload_to='', null=True, blank=True)
     email_profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)

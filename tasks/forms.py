@@ -1,5 +1,6 @@
 from django import forms
 from .models import Gincana, Profesor, Verificacion, Pregunta, Respuesta
+from bootstrap_datepicker_plus.widgets import TimePickerInput
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField(
@@ -61,7 +62,7 @@ class GincanaForm(forms.ModelForm):
         fields = ['titulo']
 
 class GincanaConfiguracionForm(forms.ModelForm):
-    titulo = forms.CharField(label = 'Titulo', widget = forms.TextInput(
+    titulo = forms.CharField(label = 'Título:', widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese el título de la Gincana',
@@ -69,7 +70,7 @@ class GincanaConfiguracionForm(forms.ModelForm):
         }
     ))
 
-    descripcion = forms.CharField(label = 'Descripción de la Gincana', widget = forms.Textarea(
+    descripcion = forms.CharField(label = 'Descripción de la Gincana:', widget = forms.Textarea(
         attrs = {
             'class': 'input-des',
             'placeholder': 'Ingrese una descripcion',
@@ -77,9 +78,13 @@ class GincanaConfiguracionForm(forms.ModelForm):
         }
     ))
 
-    duracion = forms.CharField(label = 'Duración de la Gincana', widget = forms.TextInput(
-        attrs = {
-            'class': 'input-box',
+    duracion = forms.TimeField(label='Duración de la Gincana', widget=TimePickerInput(
+        options={
+            "format": "HH:mm",  
+            "stepping": 1,       
+        },
+        attrs={
+            'class': 'input-reloj',
             'placeholder': 'Ingrese la duración',
             'id': 'duracion'
         }

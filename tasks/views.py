@@ -380,18 +380,35 @@ def gincana_publica(request, gincana_id):
 def gincana_iniciar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
     profesores = Profesor.objects.filter(email=request.user.email)
-    if request.method == "POST" and gincana.activa == False and gincana.duracion is not None :
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+    paradas_data = []
+    for parada in paradas:
+        pregunta = parada.pregunta_set.first()
+        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+        parada_data = {
+            'latitud': parada.latitud,
+            'longitud': parada.longitud,
+            'pregunta': pregunta.enunciado if pregunta else None,
+            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+        }
+        paradas_data.append(parada_data)
+
+    paradas_gincana = Parada.objects.filter(gincana=gincana)
+    ids_paradas = paradas_gincana.values_list('id', flat=True)
+    todas_con_pregunta = all(Pregunta.objects.filter(parada_id=parada_id).exists() for parada_id in ids_paradas)
+    
+    if request.method == "POST" and gincana.activa == False and gincana.duracion is not None and todas_con_pregunta:
         gincana.activa = True
         gincana.save()
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
-    elif request.method == "POST" and gincana.activa == True and gincana.duracion is not None :
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+    elif request.method == "POST" and gincana.activa == True and gincana.duracion is not None and todas_con_pregunta:
         gincana.activa = False
         gincana.edicion = timezone.now()
         gincana.save()
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores})
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
     else:
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 
-            'error': "Se necesita primero establecer una duración a la gincana."})
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 
+            'error': "Se necesita primero configurar la hora de finalización de la Gincana y añadir a todas las Paradas sus Preguntas y Respuestas."})
 
 @login_required
 def gincana_copiar(request, gincana_id):
