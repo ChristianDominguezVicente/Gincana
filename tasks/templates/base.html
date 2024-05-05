@@ -16,7 +16,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 </head>
-<body>
+<body class="bg-ligth">
     <div class="container-fluid">
         <div class="row flex-nowrap">
             {% if user.is_authenticated %}
@@ -67,15 +67,21 @@
                 {% if user.is_authenticated %}
                 <nav class="navbar sticky-top bg-white">
                     <div class="container-fluid">
-                        <form class="d-flex" role="search">
-                            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        <form class="d-flex" role="search" action="{% url 'buscar_gincanas' %}" method="GET">
+                            <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar" name="q">
+                            <button class="btn btn-outline-success" type="submit">Buscar</button>
                         </form>
-                        {% for profesor in profesores %}
-                        <a href="{% url 'profesor' profesor.email %}" class="d-flex align-items-center text-white text-decoration-none">
-                            <img alt="hugenerd" width="30" height="30" class="rounded-circle" src="{{ profesor.imagen.url }}" >
-                        </a>
-                        {% endfor %}
+                        <div style="display: flex; justify-content: center;">
+                            {% for profesor in profesores %}
+                                <button id="dark-mode" style="border: none; background-color: transparent;">
+                                    <img width="30" height="30" class="rounded-circle" src="{% static 'media/Modo_oscuro.png' %}" >
+                                </button>
+                                
+                                <a href="{% url 'profesor' profesor.email %}" class="d-flex align-items-center text-white text-decoration-none">
+                                    <img width="30" height="30" class="rounded-circle" src="{{ profesor.imagen.url }}" >
+                                </a>
+                            {% endfor %}
+                        </div>
                     </div>
                 </nav>
                 {% endif %}

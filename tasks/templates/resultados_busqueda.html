@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+<div class="container-in">
+    <h1>Mis Gincanas</h1>
+    <ul class="row">
+        {% for mi_gincana in mis_gincanas %}
+            {% if forloop.counter0 < 3 %}
+                <div class="col">
+                    <a href="{% url 'gincana' mi_gincana.id %}" class="gincana">
+                        <div class="gincana-img">
+                            <img src="{{ mi_gincana.imagen.url }}" alt="{{ mi_gincana.titulo }}" class="img-gincana">
+                        </div>
+                        <div class="gincana-titulo">
+                            {% if mi_gincana.visibilidad %}
+                                <strong>{{mi_gincana.titulo}}</strong>
+                            {% else %}
+                                {{mi_gincana.titulo}}
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            {% endif %}
+        {% endfor %}
+        <div class="col">
+            <a href="{% url 'crear_gincana' %}" class="gincana">
+                <div class="gincana-img">
+                    <img src="{% static 'media/crear.png' %}" alt="Crear Gincana" class="img-gincana">
+                </div>
+                <div class="gincana-titulo">
+                    <strong>Crear Gincana</strong>
+                </div>
+            </a>
+        </div>
+    </ul>
+
+    <h1>Gincanas Públicas</h1>
+    <ul class="row">
+        {% for gincana_publica in gincanas_publicas %}
+            {% if forloop.counter0|divisibleby:4 %}
+                </ul><ul class="row">
+            {% endif %}
+            {% if forloop.counter0 < 12 %}
+                <div class="col">
+                    <a href="{% url 'gincana_publica' gincana_publica.id %}" class="gincana">
+                        <div class="gincana-img">
+                            <img src="{{ gincana_publica.imagen.url }}" alt="{{ gincana_publica.titulo }}" class="img-gincana">
+                        </div>
+                        <div class="gincana-titulo">
+                            {% if gincana_publica.visibilidad %}
+                                <strong>{{gincana_publica.titulo}}</strong>
+                            {% else %}
+                                {{gincana_publica.titulo}}
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <div class="col">
+        <a href="{% url 'gincanas_publicas' %}" class="gincana">
+            <div class="gincana-titulo">
+                <strong>Gincanas Públicas</strong>
+            </div>
+        </a>
+    </div>
+</div>
+<footer class="footer">
+    <div class="footer-group">
+        <div class="footer-box">
+            <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+        </div>
+        <div class="footer-box">
+            <p>
+                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
+                Etiam eu turpis molestie, dictum est a, mattis tellus. 
+                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
