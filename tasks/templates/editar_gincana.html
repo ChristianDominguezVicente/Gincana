@@ -103,6 +103,10 @@
 
                     <div id="map" class="map"></div>
                     
+                    <div class="loading-screen" id="loading-screen">
+                        <div class="loading-spinner"></div>
+                    </div>
+
                     {{ paradas|json_script:"paradas_json" }}
 
                     <script>
@@ -230,6 +234,11 @@
                 animation: 150,
                 ghostClass: 'sortable-ghost'
             });
+
+            function mostrarCarga(parada_id) {
+                document.getElementById('loading-screen').style.display = 'flex';
+                sendSortableData(); 
+            }
         
             function sendSortableData() {
                 var orderedIds = [];
@@ -246,17 +255,23 @@
                         csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
                     success: function(response) {
+                        document.getElementById('loading-screen').style.display = 'none';
                         window.location.reload();
                     }
                 });
             }
         
-            $('#guardar_cambios').on('click', {}, sendSortableData);
+            $('#guardar_cambios').on('click', {}, mostrarCarga);
         });
     </script>
 
     <script type="text/javascript">
         $(document).ready(function() {
+            function mostrarCarga(parada_id) {
+                document.getElementById('loading-screen').style.display = 'flex';
+                sendData(parada_id); 
+            }
+
             function sendData(parada_id) {
                 $.ajax({
                     url: "{% url 'borrar_parada' gincana.id %}",
@@ -266,14 +281,15 @@
                         csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
                     success: function(response) {
-                        window.location.reload(); 
+                        document.getElementById('loading-screen').style.display = 'none';
+                        window.location.reload();
                     }
                 });
             }
 
             $('button[id^="borrar_"]').on('click', function() {
                 var parada_id = $(this).attr('id').split('_')[1];
-                sendData(parada_id);
+                mostrarCarga(parada_id);
             });
         });
     </script>

@@ -786,6 +786,64 @@ def guardar_cambios_gincana(request, gincana_id):
     for index, parada_id in enumerate(ordered_ids, start=1):
         Parada.objects.filter(id=parada_id, gincana=gincana).update(orden=index)
     
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+    map = folium.Map(location=[51.505, -0.09], zoom_start=13)
+
+    for parada in paradas:
+        folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
+
+    for i in range(len(paradas) - 1):
+        parada_actual = paradas[i]
+        parada_siguiente = paradas[i + 1]
+        folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
+
+    map.save(f'mapa_gincana_{gincana_id}.html')
+    
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless') 
+    
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.headless = True
+    
+    edge_options = webdriver.EdgeOptions()
+    edge_options.use_chromium = True
+    edge_options.add_argument('--headless')
+
+    try:
+        driver = webdriver.Chrome(options=chrome_options)
+    except:
+        try:
+            driver = webdriver.Firefox(options=firefox_options)
+        except:
+            try:
+                driver = webdriver.Edge(options=edge_options)
+            except:
+                driver = None
+
+    user_agent = request.META['HTTP_USER_AGENT']
+    if 'Chrome' in user_agent:
+        driver = webdriver.Chrome(options=chrome_options)
+    elif 'Firefox' in user_agent:
+        driver = webdriver.Firefox()
+    elif 'Edg' in user_agent:  
+        driver = webdriver.Edge()
+    else:
+        driver = None
+
+    if driver:
+        driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+        time.sleep(2)
+        driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+        driver.quit()
+
+    os.remove(f'mapa_gincana_{gincana_id}.html')
+    
+    nombre_archivo = f"mapa_{gincana.id}.png"
+    ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+    shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+    gincana.imagen = nombre_archivo
+    gincana.save()
+
     return render(request, 'editar_gincana.html', {'gincana': gincana})
 
 @login_required
@@ -796,6 +854,64 @@ def borrar_parada(request, gincana_id):
     parada = Parada.objects.get(id=parada_id)
 
     parada.delete()
+
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+    map = folium.Map(location=[51.505, -0.09], zoom_start=13)
+
+    for parada in paradas:
+        folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
+
+    for i in range(len(paradas) - 1):
+        parada_actual = paradas[i]
+        parada_siguiente = paradas[i + 1]
+        folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
+
+    map.save(f'mapa_gincana_{gincana_id}.html')
+    
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless') 
+    
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.headless = True
+    
+    edge_options = webdriver.EdgeOptions()
+    edge_options.use_chromium = True
+    edge_options.add_argument('--headless')
+
+    try:
+        driver = webdriver.Chrome(options=chrome_options)
+    except:
+        try:
+            driver = webdriver.Firefox(options=firefox_options)
+        except:
+            try:
+                driver = webdriver.Edge(options=edge_options)
+            except:
+                driver = None
+
+    user_agent = request.META['HTTP_USER_AGENT']
+    if 'Chrome' in user_agent:
+        driver = webdriver.Chrome(options=chrome_options)
+    elif 'Firefox' in user_agent:
+        driver = webdriver.Firefox()
+    elif 'Edg' in user_agent:  
+        driver = webdriver.Edge()
+    else:
+        driver = None
+
+    if driver:
+        driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+        time.sleep(2)
+        driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+        driver.quit()
+
+    os.remove(f'mapa_gincana_{gincana_id}.html')
+    
+    nombre_archivo = f"mapa_{gincana.id}.png"
+    ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+    shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+    gincana.imagen = nombre_archivo
+    gincana.save()
     
     return render(request, 'editar_gincana.html', {'gincana': gincana})
 
@@ -849,3 +965,14 @@ def editar_guardar(request, gincana_id, parada_id):
         pregunta_form = PreguntaForm()
 
     return render(request, 'editar_gincana.html', {'gincana': gincana})
+
+@login_required
+def buscar_gincanas(request):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    if request.method == 'GET':
+        query = request.GET.get('q')
+        mis_gincanas = Gincana.objects.filter(titulo__icontains=query, email_profesor=request.user)
+        gincanas_publicas = Gincana.objects.filter(titulo__icontains=query).exclude(email_profesor=request.user)
+        return render(request, 'resultados_busqueda.html', {'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores})
+    else:
+        return render(request, 'resultados_busqueda.html', {'profesores': profesores})

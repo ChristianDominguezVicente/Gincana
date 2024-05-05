@@ -7,8 +7,11 @@
       </button>
     </div>
     <div class="modal-body">
-
       <div id="map2" class="map"></div>
+
+      <div class="loading-screen" id="loading-screen2">
+        <div class="loading-spinner"></div>
+      </div>
 
       {{ paradas|json_script:"paradas_json" }}
 
@@ -74,31 +77,39 @@
             }
           });
 
-          function send_data() {
+          function mostrarCarga() {
+            document.getElementById('loading-screen2').style.display = 'flex';
+            enviarSolicitud(); 
+          }
+
+          function enviarSolicitud() {
             $.ajax({
-              url:"parada/guardar/",
-              type:"POST",
+              url: "parada/guardar/",
+              type: "POST",
               data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'parada': JSON.stringify(dict_values)},
               success: function(response) {
-                window.location.reload();
+                  document.getElementById('loading-screen2').style.display = 'none';
+                  window.location.reload();
               }
             });
           }
 
-          $('#guardar').on('click', {}, send_data);
+          $('#guardar').on('click', {}, mostrarCarga);
         });
-
       </script>
 
-    </div>
-    <div class="modal-footer" style="display: flex; justify-content: center;">
-      <button type="button" class="btn btn-danger" data-bs-dismiss="modal" style="margin-right: 10px;">
-        Cancelar
-      </button>
+      <div class="modal-footer" style="display: flex; justify-content: center;">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" style="margin-right: 10px;">
+          Cancelar
+        </button>
+        
+        <button type="submit" class="btn btn-success" id="guardar">
+          Guardar Paradas
+        </button>
+      </div>
+
       
-      <button type="submit" class="btn btn-success" id="guardar" >
-        Guardar Paradas
-      </button>
+
     </div>
   </div>
 </div>
