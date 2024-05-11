@@ -13,7 +13,11 @@
             <div class="col">
                 <a href=" {% url 'gincana' gincana.id %}" class="gincana">
                     <div class="gincana-img">
-                        <img src="{{ gincana.imagen.url }}" alt="{{ gincana.titulo }}" class="img-gincana">
+                        {% if darkModeEnabled == 'true' %}
+                            <img src="{{ gincana.imagen_oscura.url }}" alt="{{ gincana.titulo }}" class="img-gincana">
+                        {% elif darkModeEnabled == 'false' %}
+                            <img src="{{ gincana.imagen.url }}" alt="{{ gincana.titulo }}" class="img-gincana">
+                        {% endif %}
                     </div>
                     <div class="gincana-titulo">
                         {% if gincana.visibilidad %}
@@ -30,7 +34,11 @@
 <footer class="footer">
     <div class="footer-group">
         <div class="footer-box">
-            <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+            {% if darkModeEnabled == 'true' %}
+                <img class="img" src="{% static 'media/LogoEUN.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+            {% elif darkModeEnabled == 'false' %}
+                <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+            {% endif %}  
         </div>
         <div class="footer-box">
             <p>
