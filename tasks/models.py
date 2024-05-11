@@ -354,6 +354,7 @@ class Gincana(models.Model):
     visibilidad = models.BooleanField('Visibilidad de la gincana: ', default=False)
     activa = models.BooleanField('Actividad de la gincana', default=False)
     imagen = models.ImageField("Imagen de la gincana", default="mapa.png", upload_to='', null=True, blank=True)
+    imagen_oscura = models.ImageField("Imagen oscura de la gincana", default="mapa_oscuro.png", upload_to='', null=True, blank=True)
     email_profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)
 
     def __str__(self):

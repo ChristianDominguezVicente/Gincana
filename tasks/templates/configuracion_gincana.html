@@ -8,6 +8,7 @@
     <link rel="icon" href="{% static 'media/Logo.png' %}">
     <title>HerStory Gincanas</title>
     <link rel="stylesheet" href="{% static 'scss/custom.css' %}">
+    <link id="modo" rel="stylesheet" href="{% static 'scss/modo_claro.css' %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -84,17 +85,23 @@
             {% endif %}
             <div class="col py-3">
                 {% if user.is_authenticated %}
-                <nav class="navbar sticky-top bg-white">
+                <nav class="navbar sticky-top navegador">
                     <div class="container-fluid">
-                        <form class="d-flex" role="search">
-                            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        <form class="d-flex" role="search" action="{% url 'buscar_gincanas' %}" method="GET">
+                            <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar" name="q">
+                            <button class="btn btn-success" type="submit">Buscar</button>
                         </form>
-                        {% for profesor in profesores %}
-                        <a href="{% url 'profesor' profesor.email %}" class="d-flex align-items-center text-white text-decoration-none">
-                            <img alt="hugenerd" width="30" height="30" class="rounded-circle" src="{{ profesor.imagen.url }}" >
-                        </a>
-                        {% endfor %}
+                        <div style="display: flex; justify-content: center;">
+                            {% for profesor in profesores %}
+                                <button id="dark-mode-toggle" style="border: none; background-color: transparent;">
+                                    <img id="dark-mode-image" width="30" height="30" class="rounded-circle" src="{% static 'media/Modo_oscuro.png' %}" >
+                                </button>
+                                <span style="margin-right: 10px;"></span>
+                                <a href="{% url 'profesor' profesor.email %}" class="d-flex align-items-center text-white text-decoration-none">
+                                    <img width="30" height="30" class="rounded-circle" src="{{ profesor.imagen.url }}" >
+                                </a>
+                            {% endfor %}
+                        </div>
                     </div>
                 </nav>
                 {% endif %}
@@ -129,7 +136,11 @@
                 <footer class="footer">
                     <div class="footer-group">
                         <div class="footer-box">
-                            <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+                            {% if darkModeEnabled == 'true' %}
+                                <img class="img" src="{% static 'media/LogoEUN.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+                            {% elif darkModeEnabled == 'false' %}
+                                <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+                            {% endif %}  
                         </div>
                         <div class="footer-box">
                             <p>
@@ -146,5 +157,58 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+    <script>
+        document.getElementById('dark-mode-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+        
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkModeEnabled', 'true');
+            } else {
+                localStorage.setItem('darkModeEnabled', 'false');
+            }
+            var darkModeEnabled = localStorage.getItem('darkModeEnabled');
+        
+            $.ajax({
+                url: "{% url 'update_dark_mode' %}",
+                type: "POST",
+                data: {
+                    'darkModeEnabled': darkModeEnabled,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    location.reload();
+                }
+            });
+        });
+    </script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            var darkModeEnabled = localStorage.getItem('darkModeEnabled');
+            var link = document.getElementById('modo');
+        
+            if (darkModeEnabled === 'true') {
+                link.href = "{% static 'scss/modo_oscuro.css' %}";
+                document.body.classList.add('dark-mode');
+                document.getElementById('dark-mode-image').src = "{% static 'media/Modo_claro.png' %}";
+            } else {
+                link.href = "{% static 'scss/modo_claro.css' %}";
+                document.getElementById('dark-mode-image').src = "{% static 'media/Modo_oscuro.png' %}"; 
+            }
+            var darkModeEnabled = localStorage.getItem('darkModeEnabled');
+
+            $.ajax({
+                url: "{% url 'update_dark_mode' %}",
+                type: "POST",
+                data: {
+                    'darkModeEnabled': darkModeEnabled,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'  
+                }
+            });
+
+            document.head.appendChild(link);
+        });
+    </script>
+
 </body>
 </html>

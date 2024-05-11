@@ -54,6 +54,7 @@ urlpatterns = [
     path('mis_gincanas/<int:gincana_id>/editar/<int:parada_id>/', views.editar_parada, name='editar_parada'),
     path('mis_gincanas/<int:gincana_id>/editar/<int:parada_id>/guardar/', views.editar_guardar, name='editar_guardar'),
     path('buscar/', views.buscar_gincanas, name='buscar_gincanas'),
+    path('update_dark_mode/', views.update_dark_mode, name='update_dark_mode'),
     path('', views.signin, name='signin')
 ]
 

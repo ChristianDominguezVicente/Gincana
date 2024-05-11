@@ -13,15 +13,34 @@ import datetime, random, json, folium, time, os
 from selenium import webdriver
 from django.conf import settings
 import shutil
+from django.http import JsonResponse
 
 # Create your views here.
+
+@login_required
+def update_dark_mode(request):
+    if request.method == 'POST':
+        dark_mode_enabled = request.POST.get('darkModeEnabled', False)
+        request.session['darkModeEnabled'] = dark_mode_enabled
+        response = JsonResponse({'success': True})
+
+        response.set_cookie('darkModeEnabled', dark_mode_enabled)
+
+        return response
+    else:
+        return JsonResponse({'success': False}, status=405) 
 
 @login_required
 def home(request):
     mis_gincanas = Gincana.objects.filter(email_profesor=request.user)
     gincanas_publicas = Gincana.objects.filter(visibilidad=True).order_by('-edicion')
     profesores = Profesor.objects.filter(email=request.user.email)
-    return render(request, 'home.html',{'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores})
+
+    dark_mode_cookie = request.COOKIES.get('darkModeEnabled')
+    dark_mode_enabled = dark_mode_cookie if dark_mode_cookie is not None else False
+
+
+    return render(request, 'home.html', {'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
 
 def signup(request):
     if request.user.is_authenticated:
@@ -210,21 +229,27 @@ def password_cambio(request, email):
 def gincanas(request):
     gincanas = Gincana.objects.filter(email_profesor=request.user)
     profesores = Profesor.objects.filter(email=request.user.email)
-    return render(request, 'mis_gincanas.html',{'gincanas': gincanas, 'profesores': profesores})
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+
+    return render(request, 'mis_gincanas.html',{'gincanas': gincanas, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def gincanas_publicas(request):
     gincanas = Gincana.objects.filter(visibilidad=True).order_by('-edicion')
     profesores = Profesor.objects.filter(email=request.user.email)
-    return render(request, 'gincanas_publicas.html',{'gincanas': gincanas, 'profesores': profesores})
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+
+    return render(request, 'gincanas_publicas.html',{'gincanas': gincanas, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def crear_gincana(request):
     profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         return render(request, 'crear_gincana.html',{
             'form': GincanaForm, 
-            'profesores': profesores
+            'profesores': profesores,
+            'darkModeEnabled': dark_mode_enabled
         })
     else:
         try:
@@ -237,12 +262,14 @@ def crear_gincana(request):
             return render(request, 'crear_gincana.html',{
                 'form': GincanaForm,
                 'error': 'Los datos no son válidos',
-                'profesores': profesores
+                'profesores': profesores,
+                'darkModeEnabled': dark_mode_enabled
             })
 
 @login_required
 def gincana(request, gincana_id):  
     profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
         paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
@@ -257,7 +284,7 @@ def gincana(request, gincana_id):
                 'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
             }
             paradas_data.append(parada_data)
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
@@ -273,10 +300,10 @@ def gincana(request, gincana_id):
                     'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
                 }
                 paradas_data.append(parada_data)
-            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
         except ValueError:
             return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 
-                'error': "Error actualizando la Gincana"})
+                'darkModeEnabled': dark_mode_enabled, 'error': "Error actualizando la Gincana"})
 
 @login_required        
 def editar_gincana(request, gincana_id):  
@@ -284,6 +311,7 @@ def editar_gincana(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     paradas = Parada.objects.filter(gincana=gincana)
     contador = paradas.count()
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
     if contador > 0 and contador != paradas.last().orden:
         for index, parada in enumerate(paradas, start=1):
@@ -309,11 +337,12 @@ def editar_gincana(request, gincana_id):
         parada.pregunta = pregunta
         parada.respuestas = respuestas
 
-    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'db': paradas})
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'db': paradas, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required        
 def configuracion_gincana(request, gincana_id):  
     profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
         paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
@@ -329,7 +358,7 @@ def configuracion_gincana(request, gincana_id):
             }
             paradas_data.append(parada_data)
         form = GincanaConfiguracionForm(instance=gincana)
-        return render(request, 'configuracion_gincana.html', {'gincana': gincana,'form': form, 'profesores': profesores, 'paradas': paradas_data})
+        return render(request, 'configuracion_gincana.html', {'gincana': gincana,'form': form, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
@@ -347,16 +376,18 @@ def configuracion_gincana(request, gincana_id):
                 paradas_data.append(parada_data)
             form = GincanaConfiguracionForm(request.POST, instance=gincana)
             form.save()
-            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
         except ValueError:
             return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
-                'profesores': profesores, 'error': "Error actualizando la Gincana"})
+                'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "Error actualizando la Gincana"})
 
 @login_required        
 def puntuacion_gincana(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     profesores = Profesor.objects.filter(email=request.user.email)
-    return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores})
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+
+    return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required        
 def gincana_publica(request, gincana_id):  
@@ -364,6 +395,7 @@ def gincana_publica(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
     paradas_data = []
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     for parada in paradas:
         pregunta = parada.pregunta_set.first()
         respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
@@ -374,7 +406,7 @@ def gincana_publica(request, gincana_id):
             'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
         }
         paradas_data.append(parada_data)
-    return render(request, 'gincana_publica.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+    return render(request, 'gincana_publica.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def gincana_iniciar(request, gincana_id):
@@ -382,6 +414,7 @@ def gincana_iniciar(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
     paradas_data = []
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     for parada in paradas:
         pregunta = parada.pregunta_set.first()
         respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
@@ -405,9 +438,9 @@ def gincana_iniciar(request, gincana_id):
         gincana.activa = False
         gincana.edicion = timezone.now()
         gincana.save()
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
     else:
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 
+        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled, 
             'error': "Se necesita primero configurar la hora de finalización de la Gincana y añadir a todas las Paradas sus Preguntas y Respuestas."})
 
 @login_required
@@ -417,8 +450,9 @@ def gincana_copiar(request, gincana_id):
     nueva_Gincana = Gincana.objects.get(pk=gincana_id)
     paradas = Parada.objects.filter(gincana=gincana_id).order_by('orden')
     paradas_gincana = list(paradas.values('latitud', 'longitud'))
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if nueva_Gincana.email_profesor == request.user:
-        return render(request, 'gincana_publica.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores,
+        return render(request, 'gincana_publica.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled,
             'paradas': paradas_gincana, 'error': "Esta Gincana ya te pernetece."})
     else:
         nueva_Gincana.pk = None
@@ -451,7 +485,7 @@ def gincana_copiar(request, gincana_id):
                         es_correcta=respuesta.es_correcta
                     )
                     nueva_respuesta.save()
-        return render(request, 'mis_gincanas.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores, 'paradas': paradas_gincana})
+        return render(request, 'mis_gincanas.html', {'gincana': nueva_Gincana, 'gincanas': gincanas, 'profesores': profesores, 'paradas': paradas_gincana, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required    
 def gincana_eliminar(request, gincana_id):
@@ -499,25 +533,29 @@ def informacion(request):
 @login_required
 def profesor(request, email_id):
     profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_cookie = request.COOKIES.get('darkModeEnabled')
+    dark_mode_enabled = dark_mode_cookie if dark_mode_cookie is not None else False
     if request.method == 'GET':
         profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
-        return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores})
+        return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
     else:
         try:
             profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
             return redirect('verificacion_password', email_id=request.user.email)
         except ValueError:
-            return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores, 
+            return render(request, 'profesor.html', {'profesor': profesor, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
                 'error': "Error actualizando el Perfil"})
 
 @login_required     
 def verificacion_password(request, email_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         return render(request, 'verificacion_password.html', {
             'form': AuthenticationForm, 'email_id': email_id, 
-            'profesor': profesor, 'profesores': profesores
+            'profesor': profesor, 'profesores': profesores,
+            'darkModeEnabled': dark_mode_enabled
         })
     else:
         profesor = get_object_or_404(Profesor, pk=email_id)
@@ -527,24 +565,27 @@ def verificacion_password(request, email_id):
             if user is None:
                 return render(request, 'verificacion_password.html', {
                     'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
-                    'profesor': profesor,'profesores': profesores
+                    'profesor': profesor,'profesores': profesores, 
+                    'darkModeEnabled': dark_mode_enabled
                 })
             else:
                 return redirect('editar_profesor', email_id=email_id)
         else:
             return render(request, 'verificacion_password.html', {
                     'form': AuthenticationForm, 'email_id': email_id, 'error': 'Introduzca su Correo Electrónico',
-                    'profesor': profesor,'profesores': profesores
+                    'profesor': profesor,'profesores': profesores, 'darkModeEnabled': dark_mode_enabled
                 })
         
 @login_required     
 def verificacion_password2(request, email_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         return render(request, 'verificacion_password.html', {
             'form': AuthenticationForm, 'email_id': email_id, 
-            'profesor': profesor, 'profesores': profesores
+            'profesor': profesor, 'profesores': profesores, 
+            'darkModeEnabled': dark_mode_enabled
         })
     else:
         try:
@@ -555,29 +596,32 @@ def verificacion_password2(request, email_id):
                 if user is None:
                     return render(request, 'verificacion_password.html', {
                         'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
-                        'profesor': profesor,'profesores': profesores
+                        'profesor': profesor,'profesores': profesores, 'darkModeEnabled': dark_mode_enabled
                     })
                 else:
                     return redirect('profesor_password', email_id=email_id)
             else:
                 return render(request, 'verificacion_password.html', {
                     'form': AuthenticationForm, 'email_id': email_id, 'error': 'Introduzca su Correo Electrónico',
-                    'profesor': profesor,'profesores': profesores
+                    'profesor': profesor,'profesores': profesores, 'darkModeEnabled': dark_mode_enabled
                 })
         except MultiValueDictKeyError:
             return render(request, 'verificacion_password.html', {
                 'form': AuthenticationForm, 'email_id': email_id, 
-            'profesor': profesor, 'profesores': profesores
+            'profesor': profesor, 'profesores': profesores, 
+            'darkModeEnabled': dark_mode_enabled
             })
 
 @login_required     
 def profesor_eliminar(request, email_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         return render(request, 'verificacion_password.html', {
             'form': AuthenticationForm, 'email_id': email_id, 
-            'profesor': profesor, 'profesores': profesores
+            'profesor': profesor, 'profesores': profesores, 
+            'darkModeEnabled': dark_mode_enabled
         })
     else:
         try:
@@ -587,7 +631,7 @@ def profesor_eliminar(request, email_id):
             if user is None:
                 return render(request, 'verificacion_password.html', {
                     'form': AuthenticationForm, 'email_id': email_id, 'error': 'La contraseña no es correcta',
-                    'profesor': profesor,'profesores': profesores
+                    'profesor': profesor,'profesores': profesores, 'darkModeEnabled': dark_mode_enabled
                 })
             else:
                 profesor.delete()
@@ -595,16 +639,18 @@ def profesor_eliminar(request, email_id):
         except MultiValueDictKeyError:
             return render(request, 'verificacion_password.html', {
                 'form': AuthenticationForm, 'email_id': email_id, 
-            'profesor': profesor, 'profesores': profesores
+                'profesor': profesor, 'profesores': profesores, 
+                'darkModeEnabled': dark_mode_enabled
             })
 
 @login_required 
 def editar_profesor(request, email_id):
     profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
         form = EditarProfesorForm(instance=profesor)
-        return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form, 'profesores': profesores})
+        return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
     else:
         try:
             profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
@@ -620,20 +666,23 @@ def editar_profesor(request, email_id):
                 return render(request, 'editar_profesor.html', {
                     'profesor': profesor, 'profesores': profesores,
                     'form': EditarProfesorForm,
-                    'error': 'Para registrarse necesita tener 18 años mínimo.'
+                    'error': 'Para registrarse necesita tener 18 años mínimo.', 
+                    'darkModeEnabled': dark_mode_enabled
                 })
         except MultiValueDictKeyError:
             return render(request, 'editar_profesor.html', {'profesor': profesor, 'form': form,
-                'profesores': profesores, 'error': "Error actualizando el Perfil"})
+                'profesores': profesores, 'error': "Error actualizando el Perfil", 'darkModeEnabled': dark_mode_enabled})
     
 @login_required
 def profesor_password(request, email_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         return render(request, 'profesor_password.html', {
             'form': PasswordCambioForm,
-            'profesor': profesor, 'profesores': profesores
+            'profesor': profesor, 'profesores': profesores, 
+            'darkModeEnabled': dark_mode_enabled
         })
     else:
         try:
@@ -668,18 +717,21 @@ def profesor_password(request, email_id):
                     return render(request, 'profesor_password.html', {
                         'form': PasswordCambioForm,
                         'error': e,
-                        'profesor': profesor, 'profesores': profesores
+                        'profesor': profesor, 'profesores': profesores, 
+                        'darkModeEnabled': dark_mode_enabled
                     })
             else:
                 return render(request, 'profesor_password.html', {
                     'form': PasswordCambioForm,
                     'error': 'Las contraseñas no coinciden',
-                    'profesor': profesor, 'profesores': profesores
+                    'profesor': profesor, 'profesores': profesores, 
+                    'darkModeEnabled': dark_mode_enabled
                 })
         except MultiValueDictKeyError:
             return render(request, 'profesor_password.html', {
                 'form': PasswordCambioForm,
-                'profesor': profesor, 'profesores': profesores
+                'profesor': profesor, 'profesores': profesores, 
+                'darkModeEnabled': dark_mode_enabled
             })
         
 @login_required
@@ -704,6 +756,7 @@ def parada_guardar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     contador = Parada.objects.filter(gincana=gincana).count()
     paradas_data = json.loads(request.POST.get('parada'))
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
     for latitud, longitud in paradas_data.items():
         contador += 1
@@ -728,6 +781,19 @@ def parada_guardar(request, gincana_id):
         folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
 
     map.save(f'mapa_gincana_{gincana_id}.html')
+    map.save(f'mapa_gincana_{gincana_id}_oscuro.html')
+
+    mapa_oscuro_file = f'mapa_gincana_{gincana_id}_oscuro.html'
+    with open(mapa_oscuro_file, 'r') as file:
+        mapa_oscuro_content = file.read()
+
+    pos_head_cierre = mapa_oscuro_content.find('</head>')
+
+    estilo_css = '<style>body { filter: invert(1) hue-rotate(180deg); }</style>'
+    mapa_oscuro_content = mapa_oscuro_content[:pos_head_cierre] + estilo_css + mapa_oscuro_content[pos_head_cierre:]
+
+    with open(mapa_oscuro_file, 'w') as file:
+        file.write(mapa_oscuro_content)
     
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless') 
@@ -741,44 +807,61 @@ def parada_guardar(request, gincana_id):
 
     try:
         driver = webdriver.Chrome(options=chrome_options)
+        driver2 = webdriver.Chrome(options=chrome_options)
     except:
         try:
             driver = webdriver.Firefox(options=firefox_options)
+            driver2 = webdriver.Firefox(options=firefox_options)
         except:
             try:
                 driver = webdriver.Edge(options=edge_options)
+                driver2 = webdriver.Edge(options=edge_options)
             except:
                 driver = None
+                driver2 = None
 
     user_agent = request.META['HTTP_USER_AGENT']
     if 'Chrome' in user_agent:
         driver = webdriver.Chrome(options=chrome_options)
+        driver2 = webdriver.Chrome(options=chrome_options)
     elif 'Firefox' in user_agent:
         driver = webdriver.Firefox()
+        driver2 = webdriver.Firefox()
     elif 'Edg' in user_agent:  
         driver = webdriver.Edge()
+        driver2 = webdriver.Edge()
     else:
         driver = None
+        driver2 = None
 
-    if driver:
+    if driver and driver2:
         driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+        driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
         time.sleep(2)
         driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+        driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
         driver.quit()
+        driver2.quit()
 
     os.remove(f'mapa_gincana_{gincana_id}.html')
+    os.remove(f'mapa_gincana_{gincana_id}_oscuro.html')
     
     nombre_archivo = f"mapa_{gincana.id}.png"
+    nombre_archivo2 = f"mapa_{gincana.id}_oscuro.png"
     ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+    ruta_imagen2 = os.path.join(settings.MEDIA_ROOT, nombre_archivo2)
     shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+    shutil.move(f'mapa_gincana_{gincana_id}_oscuro.png', ruta_imagen2)
     gincana.imagen = nombre_archivo
+    gincana.imagen_oscura = nombre_archivo2
     gincana.save()
 
-    return render(request, 'editar_gincana.html', {'gincana': gincana})
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def guardar_cambios_gincana(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     ordered_ids = request.POST.getlist('ordered_ids[]')
 
     ordered_ids = [int(id) for id in ordered_ids]
@@ -798,6 +881,19 @@ def guardar_cambios_gincana(request, gincana_id):
         folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
 
     map.save(f'mapa_gincana_{gincana_id}.html')
+    map.save(f'mapa_gincana_{gincana_id}_oscuro.html')
+
+    mapa_oscuro_file = f'mapa_gincana_{gincana_id}_oscuro.html'
+    with open(mapa_oscuro_file, 'r') as file:
+        mapa_oscuro_content = file.read()
+
+    pos_head_cierre = mapa_oscuro_content.find('</head>')
+
+    estilo_css = '<style>body { filter: invert(1) hue-rotate(180deg); }</style>'
+    mapa_oscuro_content = mapa_oscuro_content[:pos_head_cierre] + estilo_css + mapa_oscuro_content[pos_head_cierre:]
+
+    with open(mapa_oscuro_file, 'w') as file:
+        file.write(mapa_oscuro_content)
     
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless') 
@@ -811,44 +907,61 @@ def guardar_cambios_gincana(request, gincana_id):
 
     try:
         driver = webdriver.Chrome(options=chrome_options)
+        driver2 = webdriver.Chrome(options=chrome_options)
     except:
         try:
             driver = webdriver.Firefox(options=firefox_options)
+            driver2 = webdriver.Firefox(options=firefox_options)
         except:
             try:
                 driver = webdriver.Edge(options=edge_options)
+                driver2 = webdriver.Edge(options=edge_options)
             except:
                 driver = None
+                driver2 = None
 
     user_agent = request.META['HTTP_USER_AGENT']
     if 'Chrome' in user_agent:
         driver = webdriver.Chrome(options=chrome_options)
+        driver2 = webdriver.Chrome(options=chrome_options)
     elif 'Firefox' in user_agent:
         driver = webdriver.Firefox()
+        driver2 = webdriver.Firefox()
     elif 'Edg' in user_agent:  
         driver = webdriver.Edge()
+        driver2 = webdriver.Edge()
     else:
         driver = None
+        driver2 = None
 
-    if driver:
+    if driver and driver2:
         driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+        driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
         time.sleep(2)
         driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+        driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
         driver.quit()
+        driver2.quit()
 
     os.remove(f'mapa_gincana_{gincana_id}.html')
+    os.remove(f'mapa_gincana_{gincana_id}_oscuro.html')
     
     nombre_archivo = f"mapa_{gincana.id}.png"
+    nombre_archivo2 = f"mapa_{gincana.id}_oscuro.png"
     ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+    ruta_imagen2 = os.path.join(settings.MEDIA_ROOT, nombre_archivo2)
     shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+    shutil.move(f'mapa_gincana_{gincana_id}_oscuro.png', ruta_imagen2)
     gincana.imagen = nombre_archivo
+    gincana.imagen_oscura = nombre_archivo2
     gincana.save()
 
-    return render(request, 'editar_gincana.html', {'gincana': gincana})
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def borrar_parada(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     parada_id = request.POST.get('parada_id')
 
     parada = Parada.objects.get(id=parada_id)
@@ -913,12 +1026,13 @@ def borrar_parada(request, gincana_id):
     gincana.imagen = nombre_archivo
     gincana.save()
     
-    return render(request, 'editar_gincana.html', {'gincana': gincana})
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def editar_parada(request, gincana_id, parada_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     parada = get_object_or_404(Parada, pk=parada_id)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
     if Pregunta.objects.filter(parada_id=parada_id).exists():
         pregunta = Pregunta.objects.get(parada_id=parada_id)
@@ -929,11 +1043,12 @@ def editar_parada(request, gincana_id, parada_id):
         preguntaForm = PreguntaForm()
         respuestasForms = [RespuestaForm() for _ in range(10)]
 
-    return render(request, 'pregunta.html', {'gincana': gincana, 'preguntaForm': preguntaForm, 'respuestaForm': respuestasForms, 'parada': parada})
+    return render(request, 'pregunta.html', {'gincana': gincana, 'preguntaForm': preguntaForm, 'respuestaForm': respuestasForms, 'parada': parada, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def editar_guardar(request, gincana_id, parada_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
     if request.method == 'POST':
         pregunta_form = PreguntaForm(request.POST)
@@ -964,15 +1079,16 @@ def editar_guardar(request, gincana_id, parada_id):
     else:
         pregunta_form = PreguntaForm()
 
-    return render(request, 'editar_gincana.html', {'gincana': gincana})
+    return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def buscar_gincanas(request):
     profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     if request.method == 'GET':
         query = request.GET.get('q')
         mis_gincanas = Gincana.objects.filter(titulo__icontains=query, email_profesor=request.user)
         gincanas_publicas = Gincana.objects.filter(titulo__icontains=query).exclude(email_profesor=request.user)
-        return render(request, 'resultados_busqueda.html', {'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores})
+        return render(request, 'resultados_busqueda.html', {'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
     else:
-        return render(request, 'resultados_busqueda.html', {'profesores': profesores})
+        return render(request, 'resultados_busqueda.html', {'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})

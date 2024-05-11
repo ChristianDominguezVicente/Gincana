@@ -22,12 +22,30 @@
     <div class="container-fluid">
         <div class="row flex-nowrap">
             {% if user.is_authenticated %}
-            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0  bg-boton">
+            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-boton">
                 <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start position-fixed" id="menu">
                         <a href="{% url 'home' %}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                            <span class="fs-5 d-none d-md-inline">HerStory Gincanas</span>
+                            <span class="fs-5 d-none d-sm-inline">HerStory Gincanas</span>
                         </a>
+                        <li class="nav-item">
+                            <a href="{% url 'gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
+                                <i class="fs-4 bi-geo-alt-fill"></i> <span class="ms-1 d-none d-md-inline">{{gincana.titulo}}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'editar_gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
+                                <i class="fs-4 bi-pen-fill"></i> <span class="ms-1 d-none d-md-inline">Editar {{gincana.titulo}}</span> </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'configuracion_gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
+                                <i class="fs-4 bi-sliders"></i> <span class="ms-1 d-none d-md-inline">Configuración</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'puntuacion_gincana' gincana.id %}" class="btn btn-boton align-middle px-0 text-white">
+                                <i class="fs-4 bi-trophy-fill"></i> <span class="ms-1 d-none d-md-inline">Puntuaciones</span> </a>
+                        </li>
+                        <img class="separador" src="{% static 'media/separador.png' %}" >
                         <li class="nav-item">
                             <a href="{% url 'home' %}" class="btn btn-boton align-middle px-0 text-white">
                                 <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-md-inline">Home</span>
