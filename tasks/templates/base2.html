@@ -143,14 +143,21 @@
         window.addEventListener('DOMContentLoaded', function() {
             var darkModeEnabled = localStorage.getItem('darkModeEnabled');
             var link = document.getElementById('modo');
+            var listItems = document.querySelectorAll('.list-group-item');
         
             if (darkModeEnabled === 'true') {
                 link.href = "{% static 'scss/modo_oscuro.css' %}";
                 document.body.classList.add('dark-mode');
                 document.getElementById('dark-mode-image').src = "{% static 'media/Modo_claro.png' %}";
+                listItems.forEach(function(item) {
+                    item.classList.add('bg-dark');
+                });
             } else {
                 link.href = "{% static 'scss/modo_claro.css' %}";
-                document.getElementById('dark-mode-image').src = "{% static 'media/Modo_oscuro.png' %}"; 
+                document.getElementById('dark-mode-image').src = "{% static 'media/Modo_oscuro.png' %}";
+                listItems.forEach(function(item) {
+                    item.classList.remove('bg-dark');
+                }); 
             }
             var darkModeEnabled = localStorage.getItem('darkModeEnabled');
 

@@ -62,19 +62,20 @@
         {% for parada in db %}
             <li id="{{ parada.id }}" class="list-group-item d-flex justify-content-between aling-items-start">
                 <div class="ms-2 me-auto">
-                    <div class="fw-bold">Parada {{parada.orden}}</div>
-                    {{parada.latitud}}
-                    {{parada.longitud}}
+                    <div class="fw-bold {% if darkModeEnabled == 'true' %}text-white{% endif %}">Parada {{parada.orden}}</div>
+                    <div class="{% if darkModeEnabled == 'true' %}text-white{% endif %}">{{parada.latitud}} {{parada.longitud}}</div>
                     {% if parada.pregunta %}
-                        <div class="fw-bold">Pregunta:</div>
-                        <div>{{ parada.pregunta.enunciado }}</div>
+                        <div class="fw-bold {% if darkModeEnabled == 'true' %}text-white{% endif %}">Pregunta:</div>
+                        <div class="{% if darkModeEnabled == 'true' %}text-white{% endif %}">{{ parada.pregunta.enunciado }}</div>
                         
-                        <div class="fw-bold">Respuestas:</div>
+                        <div class="fw-bold {% if darkModeEnabled == 'true' %}text-white{% endif %}">Respuestas:</div>
                         {% for respuesta in parada.respuestas %}
-                            <div>{{ respuesta.respuesta }} - Puntos: {{ respuesta.puntos }} - Es Correcta: {{ respuesta.es_correcta }}</div>
+                            <div class="{% if darkModeEnabled == 'true' %}text-white{% endif %}">
+                                {{ respuesta.respuesta }} - Puntos: {{ respuesta.puntos }} - Es Correcta: {{ respuesta.es_correcta }}
+                            </div>
                         {% endfor %}
                     {% else %}
-                        <div>No hay pregunta asociada a esta parada.</div>
+                        <div class="{% if darkModeEnabled == 'true' %}text-white{% endif %}">No hay pregunta asociada a esta parada.</div>
                     {% endif %}
                 </div>
                 <div class="d-flex align-items-center">
@@ -175,10 +176,11 @@
 <script type="text/javascript">
     $(document).ready(function() {
         function mostrarCarga(parada_id) {
+            $('.navegador').removeClass('sticky-top');
             document.getElementById('loading-screen').style.display = 'flex';
             sendData(parada_id); 
         }
-
+    
         function sendData(parada_id) {
             $.ajax({
                 url: "{% url 'borrar_parada' gincana.id %}",
@@ -193,7 +195,7 @@
                 }
             });
         }
-
+    
         $('button[id^="borrar_"]').on('click', function() {
             var parada_id = $(this).attr('id').split('_')[1];
             mostrarCarga(parada_id);
