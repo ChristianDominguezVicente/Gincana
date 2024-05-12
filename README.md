@@ -31,6 +31,8 @@ https://github.com/monim67/django-bootstrap-datepicker-plus
 Se usa Celery para comprobaciones periodicas en el servidor:
 https://www.youtube.com/playlist?list=PLLz6Bi1mIXhHKA1Szy2aj9Jbs6nw9fhNY
 
+Enlace Imagen Docker: https://drive.google.com/file/d/1O39jeDr7VpnAvs_acjeiKVo0pKZ2WTrW/view?usp=drive_link
+
 Crear la imagen de Docker: docker build -t gincana .
 
 Iniciar Docker Container con la aplicación: docker run -d --name gincanaContainer -p 8000:8000 gincana
