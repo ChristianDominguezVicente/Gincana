@@ -295,7 +295,7 @@ h2{
   display: none; 
   justify-content: center;
   align-items: center;
-  z-index: 999; 
+  z-index: 1000; 
 }
 
 .loading-spinner {
@@ -405,6 +405,9 @@ h2{
     margin-right: 0px;
     margin-bottom: 0px;
     margin-top: 10px;
+  }
+  .text-white {
+    color: #fff; 
   }
 
   .footer .footer-group .footer-box img{
