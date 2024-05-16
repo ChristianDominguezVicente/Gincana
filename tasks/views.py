@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.utils.datastructures import MultiValueDictKeyError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm, ContactForm
 from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -1092,3 +1092,27 @@ def buscar_gincanas(request):
         return render(request, 'resultados_busqueda.html', {'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
     else:
         return render(request, 'resultados_busqueda.html', {'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
+
+@login_required
+def centro_de_ayuda(request):
+    profesores = Profesor.objects.filter(email=request.user.email)
+
+    dark_mode_cookie = request.COOKIES.get('darkModeEnabled')
+    dark_mode_enabled = dark_mode_cookie if dark_mode_cookie is not None else False
+
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            asunto = form.cleaned_data['asunto']
+            descripcion = form.cleaned_data['descripcion']
+            send_mail(
+                asunto,
+                descripcion,
+                from_email='herstorygincanas@gmail.com',
+                recipient_list=['herstorygincanas@gmail.com']
+            )
+            return render(request, 'centro_de_ayuda.html', {'profesores': profesores, 'form': form, 'darkModeEnabled': dark_mode_enabled, 'confirmacion': 'Se ha enviado el mensaje.'})    
+    else:
+        form = ContactForm()
+
+    return render(request, 'centro_de_ayuda.html', {'profesores': profesores, 'form': form, 'darkModeEnabled': dark_mode_enabled})
