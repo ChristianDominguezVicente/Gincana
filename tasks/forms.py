@@ -474,3 +474,18 @@ class RespuestaForm(forms.ModelForm):
                 }
             )
         }
+
+class ContactForm(forms.Form):
+    asunto = forms.CharField(max_length=100, widget = forms.TextInput(
+        attrs = {
+            'class': 'input-box',
+            'placeholder': 'Ingrese el asunto'
+        }
+    ))
+    descripcion = forms.CharField(label = 'Descripción de la Gincana:', widget = forms.Textarea(
+        attrs = {
+            'class': 'input-des',
+            'placeholder': 'Ingrese una descripcion'
+        }
+    ))
+    asunto.label=""

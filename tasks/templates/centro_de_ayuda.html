@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+
+<div class="container-in">
+    <h1>Centro de Ayuda</h1>
+    {% if darkModeEnabled == 'true' %}
+        <p style="color: white; font-weight: bold;">{{confirmacion}}</p>    
+    {% elif darkModeEnabled == 'false' %}
+        <p style="color: black; font-weight: bold;">{{confirmacion}}</p>
+    {% endif %}  
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="form">
+            {{form.as_p}}
+        </div>
+        <button class="btn-signin">
+            Enviar
+        </button>
+    </form>
+</div>
+<footer class="footer">
+    <div class="footer-group">
+        <div class="footer-box">
+            {% if darkModeEnabled == 'true' %}
+                <img class="img" src="{% static 'media/LogoEUN.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+            {% elif darkModeEnabled == 'false' %}
+                <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;">
+            {% endif %}  
+        </div>
+        <div class="footer-box">
+            <p>
+                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
+                Etiam eu turpis molestie, dictum est a, mattis tellus. 
+                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
