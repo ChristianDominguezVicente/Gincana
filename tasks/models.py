@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+import qrcode, os, hashlib
+from io import BytesIO
+from django.core.files import File
+from PIL import Image, ImageDraw
 
 # Create your models here.
 class Usuario(BaseUserManager):
@@ -413,3 +417,33 @@ class Respuesta(models.Model):
 
     def __str__(self):
         return self.respuesta + ' - ' + self.pregunta.parada.gincana.titulo
+
+class Invitado(models.Model):
+    usuario = models.CharField('Invitado', unique = True, max_length=200, primary_key=True)
+    qr_code = models.ImageField(upload_to='qr_codes', blank=True)
+    gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.usuario + ' - ' + self.gincana.titulo
+
+    def save(self, *args, **kwargs):
+        hash_object = hashlib.sha256(self.usuario.encode())
+        hashed_usuario = hash_object.hexdigest()
+        self.usuario = hashed_usuario
+
+        qrcode_img = qrcode.make(self.usuario)
+        canvas = Image.new('RGB', (290, 290), 'white')
+        draw = ImageDraw.Draw(canvas)
+        canvas.paste(qrcode_img)
+        fname = f'qr_code-{self.usuario}.png'
+        buffer = BytesIO()
+        canvas.save(buffer, 'PNG')
+        self.qr_code.save(fname, File(buffer), save=False)
+        canvas.close()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.qr_code:
+            if os.path.isfile(self.qr_code.path):
+                os.remove(self.qr_code.path)
+        super().delete(*args, **kwargs)

@@ -78,7 +78,7 @@
             </button>
         </form>
         <span style="margin-right: 10px;"></span>
-        <form action="{% url 'gincana_eliminar' gincana.id %}" method="POST">
+        <form action="{% url 'usuarios_invitados' gincana.id %}" method="POST">
             {% csrf_token %}
             <button class="btn-pass">
                 Crear Usuarios Invitados
