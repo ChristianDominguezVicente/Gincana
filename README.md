@@ -42,3 +42,5 @@ Detener Docker Container: docker stop gincana
 Borrar Docker Container: docker rm gincanaContainer
 
 Exportar Imagen Docker: docker save -o gincana.zip gincana
+
+QR: https://www.youtube.com/watch?v=xk8K3MNu81I
