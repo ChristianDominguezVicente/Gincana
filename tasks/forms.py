@@ -489,3 +489,14 @@ class ContactForm(forms.Form):
         }
     ))
     asunto.label=""
+
+class InvitadosForm(forms.Form):
+    usuarios = forms.ChoiceField(
+        choices=[(5, '5 Invitados'), (10, '10 Invitados'), (15, '15 Invitados'), (20, '20 Invitados'), (25, '25 Invitados')],
+        widget=forms.Select(
+            attrs={
+                'class': 'input-box'
+            }
+        ),
+        label='Número de Invitados'
+    )

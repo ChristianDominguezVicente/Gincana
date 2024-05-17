@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.utils.datastructures import MultiValueDictKeyError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm, ContactForm
-from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm, ContactForm, InvitadosForm
+from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta, Invitado
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from datetime import date
@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 import datetime, random, json, folium, time, os
 from selenium import webdriver
 from django.conf import settings
-import shutil
+import shutil, uuid
 from django.http import JsonResponse
 
 # Create your views here.
@@ -1116,3 +1116,37 @@ def centro_de_ayuda(request):
         form = ContactForm()
 
     return render(request, 'centro_de_ayuda.html', {'profesores': profesores, 'form': form, 'darkModeEnabled': dark_mode_enabled})
+
+def usuarios_invitados(request, gincana_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+    gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+    invitados = Invitado.objects.filter(gincana=gincana)
+    form = InvitadosForm()
+    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form})
+
+def crear_usuarios_invitados(request, gincana_id):
+    profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+    gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+    invitados = Invitado.objects.filter(gincana=gincana)
+    if request.method == 'POST':
+        form = InvitadosForm(request.POST)
+        if form.is_valid():
+            numero_invitados = int(form.cleaned_data['usuarios'])
+            count = Invitado.objects.filter(gincana=gincana).count()
+            for i in range(numero_invitados):
+                unique_id = uuid.uuid4().hex
+                usuario = f'invitado_{gincana_id}_{count + i + 1}_{unique_id}'
+                invitado = Invitado(usuario=usuario, gincana=gincana)
+                invitado.save()
+            return redirect('usuarios_invitados', gincana_id = gincana_id)
+    else:
+        form = InvitadosForm()
+    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form})
+
+def borrar_usuarios_invitados(request, gincana_id, usuario):
+    invitado = get_object_or_404(Invitado, usuario=usuario, gincana_id=gincana_id)
+    invitado.delete()
+    return redirect('usuarios_invitados', gincana_id = gincana_id)
+
