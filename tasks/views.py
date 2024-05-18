@@ -1123,18 +1123,19 @@ def usuarios_invitados(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
     invitados = Invitado.objects.filter(gincana=gincana)
     form = InvitadosForm()
-    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form})
+    count = Invitado.objects.filter(gincana=gincana).count()
+    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form, 'num': count})
 
 def crear_usuarios_invitados(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
     invitados = Invitado.objects.filter(gincana=gincana)
+    count = Invitado.objects.filter(gincana=gincana).count()
     if request.method == 'POST':
         form = InvitadosForm(request.POST)
         if form.is_valid():
             numero_invitados = int(form.cleaned_data['usuarios'])
-            count = Invitado.objects.filter(gincana=gincana).count()
             for i in range(numero_invitados):
                 unique_id = uuid.uuid4().hex
                 usuario = f'invitado_{gincana_id}_{count + i + 1}_{unique_id}'
@@ -1143,10 +1144,15 @@ def crear_usuarios_invitados(request, gincana_id):
             return redirect('usuarios_invitados', gincana_id = gincana_id)
     else:
         form = InvitadosForm()
-    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form})
+    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form, 'num': count})
 
 def borrar_usuarios_invitados(request, gincana_id, usuario):
     invitado = get_object_or_404(Invitado, usuario=usuario, gincana_id=gincana_id)
     invitado.delete()
     return redirect('usuarios_invitados', gincana_id = gincana_id)
 
+def selector(request):
+    return render(request, 'selector.html')
+
+def signin_invitado(request):
+    return render(request, 'signin_invitado.html')

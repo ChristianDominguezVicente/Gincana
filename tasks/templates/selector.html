@@ -3,31 +3,29 @@
 {% block content %}
 
 {% load static %}
-<a href="{% url 'selector' %}" class="flecha">
-    <img src="{% static 'media/flecha.png' %}">
-</a>
+
 <div class="container">
     <img class="logo" src="{% static 'media/Logo.png' %}" alt="Logo">
 </div>
 <div class="container">
     <div class="content-box">
         <div class="content">
-            <h2>Iniciar Sesión</h2>
-            <p style="color: red; font-weight: bold;">{{error}}</p>
-            <form action="{% url 'signin' %}" method="POST">
-                {% csrf_token %}
-                {{form.as_p}}
-                <div class="link-container">
-                    <a href="{% url 'password' %}" class="left-link">He olvidado mi contraseña</a>
-                    <a href="{% url 'signup' %}" class="right-link">Crear una cuenta</a>
-                    <a href="{% url 'informacion' %}">
-                        <i style="color:green" class="fs-4 bi-info-circle" ></i>
-                    </a>
-                </div>
-                <button class="btn-signin">
-                    Iniciar Sesión
-                </button>
-            </form>
+            <h2>Seleccione su rol</h2>
+            <div class="input-registro">
+                <form action="{% url 'signin'%}" method="GET">
+                    {% csrf_token %}
+                    <button class="btn-signin">
+                        Profesor
+                    </button>
+                </form>
+                <span style="margin-right: 10px;"></span>
+                <form action="{% url 'signin_invitado' %}" method="POST">
+                    {% csrf_token %}
+                    <button class="btn-signin">
+                        Invitado
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

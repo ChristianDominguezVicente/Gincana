@@ -8,9 +8,10 @@
 
     <div id="map" class="map"></div>
     
-    <div class="loading-screen" id="loading-screen">
+    <div class="loading-screen" id="loading-screen" style="flex-direction: column; align-items: center;">
         <div class="loading-spinner"></div>
-    </div>
+        <div style="font-weight: bold;">Regenerando mapa, espere por favor.</div>
+      </div>
 
     {{ paradas|json_script:"paradas_json" }}
 
@@ -144,8 +145,9 @@
         });
 
         function mostrarCarga(parada_id) {
+            $('.navegador').removeClass('sticky-top');
             document.getElementById('loading-screen').style.display = 'flex';
-            sendSortableData(); 
+            sendSortableData();
         }
     
         function sendSortableData() {

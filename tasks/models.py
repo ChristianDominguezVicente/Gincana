@@ -4,6 +4,8 @@ import qrcode, os, hashlib
 from io import BytesIO
 from django.core.files import File
 from PIL import Image, ImageDraw
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 # Create your models here.
 class Usuario(BaseUserManager):
@@ -432,7 +434,7 @@ class Invitado(models.Model):
         self.usuario = hashed_usuario
 
         qrcode_img = qrcode.make(self.usuario)
-        canvas = Image.new('RGB', (290, 290), 'white')
+        canvas = Image.new('RGB', (450, 450), 'white')
         draw = ImageDraw.Draw(canvas)
         canvas.paste(qrcode_img)
         fname = f'qr_code-{self.usuario}.png'
@@ -447,3 +449,11 @@ class Invitado(models.Model):
             if os.path.isfile(self.qr_code.path):
                 os.remove(self.qr_code.path)
         super().delete(*args, **kwargs)
+
+@receiver(pre_delete, sender=Gincana)
+def delete_related_invitados(sender, instance, **kwargs):
+    invitados = Invitado.objects.filter(gincana=instance)
+    for invitado in invitados:
+        if invitado.qr_code and os.path.isfile(invitado.qr_code.path):
+            os.remove(invitado.qr_code.path)
+        invitado.delete()
