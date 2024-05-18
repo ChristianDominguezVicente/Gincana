@@ -12,22 +12,8 @@
 <div class="container">
     <div class="content-box">
         <div class="content">
-            <h2>Iniciar Sesión</h2>
-            <p style="color: red; font-weight: bold;">{{error}}</p>
-            <form action="{% url 'signin' %}" method="POST">
-                {% csrf_token %}
-                {{form.as_p}}
-                <div class="link-container">
-                    <a href="{% url 'password' %}" class="left-link">He olvidado mi contraseña</a>
-                    <a href="{% url 'signup' %}" class="right-link">Crear una cuenta</a>
-                    <a href="{% url 'informacion' %}">
-                        <i style="color:green" class="fs-4 bi-info-circle" ></i>
-                    </a>
-                </div>
-                <button class="btn-signin">
-                    Iniciar Sesión
-                </button>
-            </form>
+            <h2>Introduzca su Usuario Invitado</h2>
+            
         </div>
     </div>
 </div>

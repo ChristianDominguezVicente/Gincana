@@ -59,7 +59,9 @@ urlpatterns = [
     path('buscar/', views.buscar_gincanas, name='buscar_gincanas'),
     path('update_dark_mode/', views.update_dark_mode, name='update_dark_mode'),
     path('centro_de_ayuda/', views.centro_de_ayuda, name='centro_de_ayuda'),
-    path('', views.signin, name='signin')
+    path('signin_profesor/', views.signin, name='signin'),
+    path('', views.selector, name='selector'),
+    path('signin_invitado/', views.signin_invitado, name='signin_invitado'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

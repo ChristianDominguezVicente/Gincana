@@ -9,8 +9,9 @@
     <div class="modal-body">
       <div id="map2" class="map"></div>
 
-      <div class="loading-screen" id="loading-screen2">
+      <div class="loading-screen" id="loading-screen2" style="flex-direction: column; align-items: center;">
         <div class="loading-spinner"></div>
+        <div style="font-weight: bold;">Regenerando mapa, espere por favor.</div>
       </div>
 
       {{ paradas|json_script:"paradas_json" }}
