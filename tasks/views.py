@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.utils.datastructures import MultiValueDictKeyError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm, ContactForm, InvitadosForm
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm, ContactForm, InvitadosForm, AuthenticationInvitadosForm
 from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta, Invitado
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -1117,6 +1117,7 @@ def centro_de_ayuda(request):
 
     return render(request, 'centro_de_ayuda.html', {'profesores': profesores, 'form': form, 'darkModeEnabled': dark_mode_enabled})
 
+@login_required
 def usuarios_invitados(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
@@ -1126,6 +1127,7 @@ def usuarios_invitados(request, gincana_id):
     count = Invitado.objects.filter(gincana=gincana).count()
     return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form, 'num': count})
 
+@login_required
 def crear_usuarios_invitados(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
@@ -1146,6 +1148,7 @@ def crear_usuarios_invitados(request, gincana_id):
         form = InvitadosForm()
     return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form, 'num': count})
 
+@login_required
 def borrar_usuarios_invitados(request, gincana_id, usuario):
     invitado = get_object_or_404(Invitado, usuario=usuario, gincana_id=gincana_id)
     invitado.delete()
@@ -1155,4 +1158,32 @@ def selector(request):
     return render(request, 'selector.html')
 
 def signin_invitado(request):
-    return render(request, 'signin_invitado.html')
+    if request.method == 'GET':
+            return render(request, 'signin_invitado.html',{
+                'form': AuthenticationInvitadosForm
+            })
+    else:
+        if Invitado.objects.filter(usuario=request.POST['usuario']).exists():
+            invitado = get_object_or_404(Invitado,pk=request.POST['usuario'])
+            return redirect('invitado_gincana', gincana_id = invitado.gincana_id, invitado=invitado.usuario)
+        else:
+            return render(request, 'signin_invitado.html',{
+                'form': AuthenticationInvitadosForm,
+                'error': 'El usuario invitado introducido no existe.'
+            })
+
+def invitado_gincana(request, gincana_id, invitado):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+    paradas_data = []
+    for parada in paradas:
+        pregunta = parada.pregunta_set.first()
+        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+        parada_data = {
+            'latitud': parada.latitud,
+            'longitud': parada.longitud,
+            'pregunta': pregunta.enunciado if pregunta else None,
+            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+        }
+        paradas_data.append(parada_data)
+    return render(request, 'invitado_gincana.html', {'gincana': gincana, 'paradas': paradas_data})
