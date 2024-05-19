@@ -500,3 +500,12 @@ class InvitadosForm(forms.Form):
         ),
         label='Número de Invitados'
     )
+
+class AuthenticationInvitadosForm(forms.Form):
+    usuario = forms.CharField(widget = forms.TextInput(
+        attrs = {
+            'class': 'input-box',
+            'placeholder': 'Ingrese su usuario'
+        }
+    ))
+    usuario.label=""

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+
+<div class="container-in">
+    <h1>{{gincana.titulo}}</h1>
+
+    <p style="color: red; font-weight: bold;">{{error}}</p>
+
+    <div id="map" class="map"></div>
+    
+    {{ paradas|json_script:"paradas_json" }}
+
+    <script>
+        var screenWidth = window.innerWidth;
+
+        if (screenWidth <= 570) {
+            var map = L.map('map').setView([51.505, -0.09], 12);
+        } else {
+            var map = L.map('map').setView([51.505, -0.09], 13);
+        }
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let paradas = JSON.parse(document.getElementById('paradas_json').textContent);
+        
+        var contador = 0;
+        var anterior_parada;
+        paradas.forEach(parada =>{
+            if (contador === 0) {
+                var marker = L.marker([parada.latitud, parada.longitud]).addTo(map);
+            }
+            else{
+                var marker =  L.marker([parada.latitud, parada.longitud]).addTo(map);
+                let polyline = L.polyline([anterior_parada,[parada.latitud, parada.longitud]]).addTo(map);
+            }
+            var popupContent = '<strong>Parada ' + (contador+1) + '</strong><br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
+            if (parada.pregunta) {
+                popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta + '<br>';
+                popupContent += '<strong>Respuestas:</strong><br>';
+                parada.respuestas.forEach(respuesta => {
+                    popupContent += respuesta.respuesta + ' - Puntos: ' + respuesta.puntos + ' - Correcta: ' + respuesta.es_correcta + '<br>';
+                });
+            } else {
+                popupContent += '<br>No hay pregunta asociada a esta parada.';
+            }
+            marker.bindPopup(popupContent);
+
+            contador++;
+            anterior_parada=[parada.latitud, parada.longitud];
+
+        });
+
+    </script>
+</div>
+<footer class="footer">
+    <div class="footer-group">
+        <div class="footer-box">
+            <img class="img" src="{% static 'media/LogoEU.png' %}" alt="Union Europea" width="max-width:100%;height:auton;"> 
+        </div>
+        <div class="footer-box">
+            <p>
+                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
+                Etiam eu turpis molestie, dictum est a, mattis tellus. 
+                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block extrajs %}
+    
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    function abrir_modal_parada(url){
+        $('#add').load(url, function (){
+            $(this).modal('show');
+        });
+    }
+</script>
+
+{% endblock extrajs %}
+
+</body>
+</html>

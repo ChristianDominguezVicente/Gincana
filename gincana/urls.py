@@ -62,6 +62,7 @@ urlpatterns = [
     path('signin_profesor/', views.signin, name='signin'),
     path('', views.selector, name='selector'),
     path('signin_invitado/', views.signin_invitado, name='signin_invitado'),
+    path('invitado_gincana/<int:gincana_id>/<str:invitado>/', views.invitado_gincana, name='invitado_gincana'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
