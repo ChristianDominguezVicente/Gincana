@@ -423,6 +423,7 @@ class Respuesta(models.Model):
 class Invitado(models.Model):
     usuario = models.CharField('Invitado', unique = True, max_length=200, primary_key=True)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True)
+    respondidas = models.IntegerField('Respondidas', default=0)
     gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -452,9 +453,17 @@ class Invitado(models.Model):
         super().delete(*args, **kwargs)
 
 @receiver(pre_delete, sender=Gincana)
-def delete_related_invitados(sender, instance, **kwargs):
+def delete_invitados(sender, instance, **kwargs):
     invitados = Invitado.objects.filter(gincana=instance)
     for invitado in invitados:
         if invitado.qr_code and os.path.isfile(invitado.qr_code.path):
             os.remove(invitado.qr_code.path)
         invitado.delete()
+
+class Puntuacion(models.Model):
+    puntuacion = models.IntegerField('puntuacion')
+    invitado = models.ForeignKey(Invitado, on_delete=models.CASCADE)
+    respuesta = models.ForeignKey(Respuesta, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.puntuacion + ' - ' + self.invitado.usuario + ' - ' + self.invitado.gincana.titulo

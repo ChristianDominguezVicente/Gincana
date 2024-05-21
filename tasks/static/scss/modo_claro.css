@@ -118,6 +118,12 @@ h2{
   cursor: pointer;
 }
 
+.input-reloj::placeholder{
+  padding-left: 0px;
+  font-weight: bold;
+  color: #333;
+}
+
 .input-des::placeholder{
   padding-left: 0px;
   font-weight: bold;
