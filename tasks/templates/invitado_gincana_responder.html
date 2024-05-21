@@ -13,11 +13,18 @@
 
                 <div id="map" class="map"></div>
 
+                <div><strong>{{pregunta}}</strong></div>
+                {% for respuesta in respuestas %}
+                    <div>
+                        {{ respuesta.respuesta }}
+                    </div>
+                {% endfor %}
+
                 <div class="input-registro">
                     <form action="{% url 'invitado_gincana_iniciar' gincana.id invitado.usuario %}" method="POST">
                         {% csrf_token %}
                         <button class="btn-signin">
-                            Empezar Gincana
+                            Responder
                         </button>
                     </form>
                 </div>

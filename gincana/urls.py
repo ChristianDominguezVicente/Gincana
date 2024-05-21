@@ -63,6 +63,8 @@ urlpatterns = [
     path('', views.selector, name='selector'),
     path('signin_invitado/', views.signin_invitado, name='signin_invitado'),
     path('invitado_gincana/<int:gincana_id>/<str:invitado>/', views.invitado_gincana, name='invitado_gincana'),
+    path('invitado_gincana/<int:gincana_id>/<str:invitado>/responder/', views.invitado_gincana_iniciar, name='invitado_gincana_iniciar'),
+    path('invitado_gincana/<int:gincana_id>/<str:invitado>/responder/<int:parada>/', views.invitado_responder, name='invitado_responder'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

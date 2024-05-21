@@ -7,7 +7,7 @@
       </button>
     </div>
     <div class="modal-body">
-
+      
       <form action="{% url 'editar_guardar' gincana.id parada.id %}" method="POST">
         {% csrf_token %}
        
