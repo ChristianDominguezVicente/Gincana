@@ -13,14 +13,24 @@
 
                 <div id="map" class="map"></div>
 
-                <div class="input-registro">
-                    <form action="{% url 'invitado_gincana_iniciar' gincana.id invitado.usuario %}" method="POST">
-                        {% csrf_token %}
-                        <button class="btn-signin">
-                            Responder Gincana
-                        </button>
-                    </form>
-                </div>
+                <div><strong>{{pregunta}}</strong></div>
+
+                <h2>Fin</h2>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Puntuación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ invitado.usuario }}</td>
+                            <td>{{ puntuacion }}</td>
+                        </tr>
+                    </tbody>
+                </table>
                 
                 {{ paradas|json_script:"paradas_json" }}
 
@@ -54,7 +64,7 @@
                             popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta + '<br>';
                             popupContent += '<strong>Respuestas:</strong><br>';
                             parada.respuestas.forEach(respuesta => {
-                                popupContent += respuesta.respuesta + '<br>';
+                                popupContent += respuesta.respuesta + ' - Puntos: ' + respuesta.puntos + ' - Correcta: ' + respuesta.es_correcta + '<br>';
                             });
                         } else {
                             popupContent += '<br>No hay pregunta asociada a esta parada.';

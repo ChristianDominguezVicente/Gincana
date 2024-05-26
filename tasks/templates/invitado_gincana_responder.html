@@ -14,20 +14,28 @@
                 <div id="map" class="map"></div>
 
                 <div><strong>{{pregunta}}</strong></div>
-                {% for respuesta in respuestas %}
-                    <div>
-                        {{ respuesta.respuesta }}
-                    </div>
-                {% endfor %}
 
-                <div class="input-registro">
-                    <form action="{% url 'invitado_gincana_iniciar' gincana.id invitado.usuario %}" method="POST">
-                        {% csrf_token %}
-                        <button class="btn-signin">
-                            Responder
-                        </button>
-                    </form>
-                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Respuestas</th>
+                            <th>Elige respuesta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for respuesta in respuestas %}
+                            <tr>
+                                <td>{{ respuesta.respuesta }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'invitado_registrar' gincana.id invitado.usuario parada respuesta.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success">Responder</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
                 
                 {{ paradas|json_script:"paradas_json" }}
 
@@ -61,7 +69,7 @@
                             popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta + '<br>';
                             popupContent += '<strong>Respuestas:</strong><br>';
                             parada.respuestas.forEach(respuesta => {
-                                popupContent += respuesta.respuesta + ' - Puntos: ' + respuesta.puntos + ' - Correcta: ' + respuesta.es_correcta + '<br>';
+                                popupContent += respuesta.respuesta + '<br>';
                             });
                         } else {
                             popupContent += '<br>No hay pregunta asociada a esta parada.';
