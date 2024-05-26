@@ -6,6 +6,29 @@
 
 <div class="container-in">
     <h1>Puntuaciones</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th colspan="2">Edición</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for edicion in ediciones %}
+                <tr>
+                    <td>{{ edicion }}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" id="edicion_{{edicion}} me-2" style="display:inline;" onclick="abrir_modal('{% url 'puntuacion_edicion' gincana.id edicion %}')" data-toggle="modal" data-target="#edicion">
+                            Puntuaciones
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="edicion" role="dialog"></div>
+
 </div>
 <footer class="footer">
     <div class="footer-group">
@@ -28,5 +51,15 @@
 
 {% endblock %}
 
+{% block extrajs %}
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    function abrir_modal(url){
+        $('#edicion').load(url, function (){
+            $(this).modal('show');
+        });
+    }
+</script>
+{% endblock extrajs %}
 </body>
 </html>

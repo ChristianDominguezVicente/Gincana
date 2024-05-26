@@ -38,6 +38,7 @@ urlpatterns = [
     path('mis_gincanas/<int:gincana_id>/editar/', views.editar_gincana, name='editar_gincana'),
     path('mis_gincanas/<int:gincana_id>/configuracion/', views.configuracion_gincana, name='configuracion_gincana'),
     path('mis_gincanas/<int:gincana_id>/puntuacion/', views.puntuacion_gincana, name='puntuacion_gincana'),
+    path('mis_gincanas/<int:gincana_id>/puntuacion/<str:edicion>/', views.puntuacion_edicion, name='puntuacion_edicion'),
     path('mis_gincanas/<int:gincana_id>/eliminar/', views.gincana_eliminar, name='gincana_eliminar'),
     path('mis_gincanas/<int:gincana_id>/usuarios_invitados/', views.usuarios_invitados, name='usuarios_invitados'),
     path('mis_gincanas/<int:gincana_id>/usuarios_invitados/crear/', views.crear_usuarios_invitados, name='crear_usuarios_invitados'),
@@ -65,6 +66,8 @@ urlpatterns = [
     path('invitado_gincana/<int:gincana_id>/<str:invitado>/', views.invitado_gincana, name='invitado_gincana'),
     path('invitado_gincana/<int:gincana_id>/<str:invitado>/responder/', views.invitado_gincana_iniciar, name='invitado_gincana_iniciar'),
     path('invitado_gincana/<int:gincana_id>/<str:invitado>/responder/<int:parada>/', views.invitado_responder, name='invitado_responder'),
+    path('invitado_gincana/<int:gincana_id>/<str:invitado>/responder/<int:parada>/registrar/<int:respuesta_id>/', views.invitado_registrar, name='invitado_registrar'),
+    path('invitado_gincana/<int:gincana_id>/<str:invitado>/fin/', views.invitado_fin, name='invitado_fin'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

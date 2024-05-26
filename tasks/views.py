@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.utils.datastructures import MultiValueDictKeyError
 from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm, ContactForm, InvitadosForm, AuthenticationInvitadosForm
-from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta, Invitado
-from django.utils import timezone
+from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta, Invitado, Puntuacion, GincanaJugada
 from django.contrib.auth.decorators import login_required
-from datetime import date
 from django.core.mail import send_mail
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-import datetime, random, json, folium, time, os, shutil, uuid
+import datetime, random, json, folium, os, shutil, uuid
+from datetime import date, datetime, timezone, time
+import time as t
 from selenium import webdriver
 from django.conf import settings
 from django.http import JsonResponse
@@ -57,7 +57,7 @@ def signup(request):
                 })
             else:
                 if request.POST['password1'] == request.POST['password2']:
-                    d = datetime.datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
+                    d = datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
                     edad = date.today().year - d.year -((date.today().month, date.today().day) <(d.month, d.day))
                     if edad >= 18:
                         try:
@@ -392,7 +392,25 @@ def puntuacion_gincana(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
-    return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
+    ediciones_distintas = GincanaJugada.objects.filter(gincana_id=gincana.id).values_list('edicion', flat=True).distinct()
+    ediciones = list(ediciones_distintas)
+    return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'ediciones': ediciones})
+
+@login_required        
+def puntuacion_edicion(request, gincana_id, edicion):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+
+    invitados = Invitado.objects.filter(gincana_id=gincana.id)
+    invitados_puntuaciones = []
+    for invitado in invitados:
+        puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
+        puntuacion = 0
+        for punto in puntos:
+            puntuacion+=punto.puntuacion
+        invitados_puntuaciones.append((invitado, puntuacion))
+    return render(request, 'puntuacion_edicion.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion})  
 
 @login_required        
 def gincana_publica(request, gincana_id):  
@@ -437,12 +455,37 @@ def gincana_iniciar(request, gincana_id):
     
     if request.method == "POST" and gincana.activa == False and gincana.duracion is not None and todas_con_pregunta:
         gincana.activa = True
+        gincana.edicion = datetime.now(timezone.utc)
+        print(gincana.edicion)
         gincana.save()
         return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
     elif request.method == "POST" and gincana.activa == True and gincana.duracion is not None and todas_con_pregunta:
         gincana.activa = False
-        gincana.edicion = timezone.now()
         gincana.save()
+
+        invitados = Invitado.objects.filter(gincana_id=gincana.id)
+        for invitado in invitados:
+            puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
+            puntuacion = 0
+            for punto in puntos:
+                puntuacion+=punto.puntuacion
+
+            duracion = datetime.now(timezone.utc) - gincana.edicion
+            print(gincana.edicion)
+            total = int(duracion.total_seconds())
+            horas, resto = divmod(total, 3600)
+            minutos, segundos = divmod(resto, 60)
+
+            duracion = time(horas, minutos, segundos)
+
+            gincanaJugada = GincanaJugada.objects.create(
+                duracion=duracion,
+                total_puntos=puntuacion,
+                edicion=gincana.edicion,
+                gincana_id=gincana.id,
+                invitado_id=invitado.usuario
+            )
+            gincanaJugada.save()
         return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
     else:
         return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled, 
@@ -845,7 +888,7 @@ def parada_guardar(request, gincana_id):
     if driver and driver2:
         driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
         driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
-        time.sleep(2)
+        t.sleep(2)
         driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
         driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
         driver.quit()
@@ -945,7 +988,7 @@ def guardar_cambios_gincana(request, gincana_id):
     if driver and driver2:
         driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
         driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
-        time.sleep(2)
+        t.sleep(2)
         driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
         driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
         driver.quit()
@@ -1022,7 +1065,7 @@ def borrar_parada(request, gincana_id):
 
     if driver:
         driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
-        time.sleep(2)
+        t.sleep(2)
         driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
         driver.quit()
 
@@ -1274,42 +1317,112 @@ def invitado_gincana(request, gincana_id, invitado):
         return render(request, 'invitado_gincana.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data})
     
 def invitado_gincana_iniciar(request, gincana_id, invitado):
-    gincana = get_object_or_404(Gincana, pk=gincana_id)
-    invitado_gincana = get_object_or_404(Invitado, pk=invitado)
-    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    paradas_data = []
-    for parada in paradas:
-        pregunta = parada.pregunta_set.first()
-        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
-        parada_data = {
-            'latitud': parada.latitud,
-            'longitud': parada.longitud,
-            'pregunta': pregunta.enunciado if pregunta else None,
-            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
-        }
-        paradas_data.append(parada_data)
-    if request.method == "POST" and gincana.activa == True:
-        return redirect ('invitado_responder', gincana_id = gincana_id, invitado = invitado, parada = (invitado_gincana.respondidas+1))
+    if request.user.is_authenticated:
+        return redirect('home')
     else:
-        return render(request, 'invitado_gincana.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 'parada': (invitado_gincana.respondidas+1), 
-            'error': "La Gincana todavía no ha empezado."})
+        gincana = get_object_or_404(Gincana, pk=gincana_id)
+        invitado_gincana = get_object_or_404(Invitado, pk=invitado)
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        paradas_data = []
+        for parada in paradas:
+            pregunta = parada.pregunta_set.first()
+            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+            parada_data = {
+                'latitud': parada.latitud,
+                'longitud': parada.longitud,
+                'pregunta': pregunta.enunciado if pregunta else None,
+                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+            }
+            paradas_data.append(parada_data)
+        if request.method == "POST" and gincana.activa == True:
+            return redirect ('invitado_responder', gincana_id = gincana_id, invitado = invitado, parada = (invitado_gincana.respondidas+1))
+        else:
+            return render(request, 'invitado_gincana.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 'parada': (invitado_gincana.respondidas+1), 
+                'error': "La Gincana todavía no ha empezado."})
     
 def invitado_responder(request, gincana_id, invitado, parada):
-    gincana = get_object_or_404(Gincana, pk=gincana_id)
-    invitado_gincana = get_object_or_404(Invitado, pk=invitado)
-    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    paradas_data = []
-    for parada in paradas:
-        if parada.orden == parada:
-            pregunta = get_object_or_404(Pregunta, parada_id=parada.id)
-        pregunta = parada.pregunta_set.first()
-        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
-        parada_data = {
-            'latitud': parada.latitud,
-            'longitud': parada.longitud,
-            'pregunta': pregunta.enunciado if pregunta else None,
-            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
-        }
-        paradas_data.append(parada_data)
-    return render(request, 'invitado_gincana_responder.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 'parada': parada, 'pregunta': parada, 
-        'pregunta': pregunta.enunciado, 'respuestas': respuestas})
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        gincana = get_object_or_404(Gincana, pk=gincana_id)
+        invitado_gincana = get_object_or_404(Invitado, pk=invitado)
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        paradas_data = []
+        for par in paradas:
+            if par.orden == parada:
+                preg = get_object_or_404(Pregunta, parada_id=par.id)
+                res = list(preg.respuesta_set.all()) if preg else []
+            pregunta = par.pregunta_set.first()
+            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+            parada_data = {
+                'latitud': par.latitud,
+                'longitud': par.longitud,
+                'pregunta': pregunta.enunciado if pregunta else None,
+                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+            }
+            paradas_data.append(parada_data)
+        if Parada.objects.filter(gincana=gincana).order_by('orden').last().orden < parada:
+            return redirect('invitado_fin', gincana_id=gincana_id, invitado=invitado)
+        else:
+            return render(request, 'invitado_gincana_responder.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 
+                'parada': parada, 'pregunta': preg.enunciado, 'respuestas': res})
+
+def invitado_registrar(request, gincana_id, invitado, parada, respuesta_id):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        invitado_gincana = get_object_or_404(Invitado, pk=invitado)
+        res = get_object_or_404(Respuesta, pk=respuesta_id)
+        preg = get_object_or_404(Pregunta, pk=res.pregunta.id)
+        par = get_object_or_404(Parada, pk=preg.parada.id)
+
+        if par.orden == invitado_gincana.respondidas:
+            gincana = get_object_or_404(Gincana, pk=gincana_id)
+            if Parada.objects.filter(gincana=gincana).order_by('orden').last().orden < parada:
+                return redirect('invitado_fin', gincana_id=gincana_id, invitado=invitado)
+            else:
+                parada+=1
+                return redirect('invitado_responder', gincana_id=gincana_id, invitado=invitado, parada=parada)
+
+        parada+=1
+        gincana = get_object_or_404(Gincana, pk=gincana_id)
+        
+        invitado_gincana.respondidas+=1
+        invitado_gincana.update()
+
+        respondida = Puntuacion.objects.create(
+            puntuacion=res.puntos,
+            invitado=get_object_or_404(Invitado, pk=invitado),
+            respuesta_id=res.id,
+        )
+        respondida.save()
+
+        if Parada.objects.filter(gincana=gincana).order_by('orden').last().orden < parada:
+            return redirect('invitado_fin', gincana_id=gincana_id, invitado=invitado)
+        else:
+            return redirect('invitado_responder', gincana_id=gincana_id, invitado=invitado, parada=parada)
+        
+def invitado_fin(request, gincana_id, invitado):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        gincana = get_object_or_404(Gincana, pk=gincana_id)
+        invitado_gincana = get_object_or_404(Invitado, pk=invitado)
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        paradas_data = []
+        for parada in paradas:
+            pregunta = parada.pregunta_set.first()
+            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+            parada_data = {
+                'latitud': parada.latitud,
+                'longitud': parada.longitud,
+                'pregunta': pregunta.enunciado if pregunta else None,
+                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+            }
+            paradas_data.append(parada_data)
+
+        puntos = Puntuacion.objects.filter(invitado_id=invitado_gincana.usuario)
+        puntuacion = 0
+        for punto in puntos:
+            puntuacion+=punto.puntuacion
+        return render(request, 'invitado_fin.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 'puntuacion': puntuacion})

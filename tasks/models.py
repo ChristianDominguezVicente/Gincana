@@ -364,16 +364,7 @@ class Gincana(models.Model):
     email_profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.titulo + ' - ' + self.email_profesor.email
-    
-class GincanaJugada(models.Model):
-    duracion = models.TimeField('Duración', null=True, blank=True)
-    total_puntos = models.IntegerField('Puntuación', null=True, blank=True)
-    edición = models.DateTimeField('Edición', auto_now_add=True, primary_key=True)
-    gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.gincana.titulo + ' - ' + self.edición
+        return self.titulo + ' - ' + self.email_profesor.email  
 
 class Verificacion(models.Model):
     code = models.IntegerField('Código', null=True, blank=True)
@@ -446,6 +437,9 @@ class Invitado(models.Model):
         canvas.close()
         super().save(*args, **kwargs)
 
+    def update(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
     def delete(self, *args, **kwargs):
         if self.qr_code:
             if os.path.isfile(self.qr_code.path):
@@ -466,4 +460,14 @@ class Puntuacion(models.Model):
     respuesta = models.ForeignKey(Respuesta, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.puntuacion + ' - ' + self.invitado.usuario + ' - ' + self.invitado.gincana.titulo
+        return str(self.puntuacion) + ' - ' + self.invitado.usuario + ' - ' + self.invitado.gincana.titulo
+    
+class GincanaJugada(models.Model):
+    duracion = models.TimeField('Duración', null=True, blank=True)
+    total_puntos = models.IntegerField('Puntuación', null=True, blank=True)
+    edicion = models.DateTimeField('Edición', null=True, blank=True)
+    gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
+    invitado = models.ForeignKey(Invitado, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.gincana.titulo + ' - ' + self.edicion.strptime('%Y-%m-%d')
