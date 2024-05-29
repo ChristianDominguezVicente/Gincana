@@ -7,6 +7,8 @@
 <div class="container-in">
     <h1>Puntuaciones</h1>
 
+    <p style="font-weight: bold;">{{descarga}}</p>
+
     <table class="table">
         <thead>
             <tr>
@@ -27,7 +29,15 @@
         </tbody>
     </table>
 
+    <div class="input-registro">
+        <button type="button" class="btn-signin" onclick="abrir_modal('{% url 'puntuacion_total' gincana.id %}')" data-toggle="modal" data-target="#total">
+            Puntuación Total
+        </button>
+    </div>
+
     <div class="modal fade" id="edicion" role="dialog"></div>
+
+    <div class="modal fade" id="total" role="dialog"></div>
 
 </div>
 <footer class="footer">
@@ -52,6 +62,15 @@
 {% endblock %}
 
 {% block extrajs %}
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    function abrir_modal(url){
+        $('#edicion').load(url, function (){
+            $(this).modal('show');
+        });
+    }
+</script>
+
 <script type="text/javascript">
     var $ = jQuery.noConflict();
     function abrir_modal(url){

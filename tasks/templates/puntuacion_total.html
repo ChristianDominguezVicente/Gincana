@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 class="modal-title">{{edicion}}</h2>
+            <h2 class="modal-title">Total</h2>
             <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -31,10 +31,12 @@
             <button type="button" class="btn btn-danger" data-bs-dismiss="modal" style="margin-right: 10px;">
                 Cancelar
             </button>
-            
-            <button type="submit" class="btn btn-success" id="descargar">
-                Descargar Informe
-            </button>
-          </div>
+            <form action="{% url 'puntuacion_informe' gincana.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success" id="descargar">
+                    Descargar Informe Completo
+                </button>
+            </form>
+        </div>
     </div>
 </div>
