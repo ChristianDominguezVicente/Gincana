@@ -67,6 +67,17 @@ h2{
   text-transform: uppercase;
   letter-spacing: 2px;
 }
+
+h3{
+  color: rgba(0, 0,0,0.8);
+  border-bottom: 3px solid rgb(60, 128, 103);
+  text-align: center;
+  display: inline-block;
+  margin-bottom: 30px;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
   
 .input-box, #id_genero, #id_pais{
   display: block;

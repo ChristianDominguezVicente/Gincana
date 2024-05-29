@@ -7,12 +7,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-import datetime, random, json, folium, os, shutil, uuid
+import datetime, random, json, folium, os, shutil, uuid, pdfkit
 from datetime import date, datetime, timezone, time
 import time as t
 from selenium import webdriver
 from django.conf import settings
 from django.http import JsonResponse
+from collections import defaultdict
 
 # Create your views here.
 
@@ -397,20 +398,71 @@ def puntuacion_gincana(request, gincana_id):
     return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'ediciones': ediciones})
 
 @login_required        
-def puntuacion_edicion(request, gincana_id, edicion):
+def puntuacion_total(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     profesores = Profesor.objects.filter(email=request.user.email)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
-    invitados = Invitado.objects.filter(gincana_id=gincana.id)
+    gincanaJugadas = GincanaJugada.objects.filter(gincana=gincana)
     invitados_puntuaciones = []
-    for invitado in invitados:
+    for gincanaJugada in gincanaJugadas:
+        invitado = gincanaJugada.invitado
         puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
         puntuacion = 0
         for punto in puntos:
             puntuacion+=punto.puntuacion
         invitados_puntuaciones.append((invitado, puntuacion))
-    return render(request, 'puntuacion_edicion.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion})  
+    return render(request, 'puntuacion_total.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
+        'invitados_puntuaciones': invitados_puntuaciones})
+
+@login_required        
+def puntuacion_informe(request, gincana_id):  
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+
+    ediciones_distintas = GincanaJugada.objects.filter(gincana_id=gincana.id).values_list('edicion', flat=True).distinct()
+    ediciones = list(ediciones_distintas)
+
+    options = {
+        'page-size': 'A4',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'custom-header': [
+            ('Accept-Encoding', 'gzip')
+        ],
+        'no-outline': None
+    }
+
+    pdfkit.from_file(os.path.join(settings.BASE_DIR, 'tasks\\templates', 'puntuacion_total.html'), 'puntuacion_total.pdf', options=options)
+
+    return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'ediciones': ediciones,
+        'descarga': 'Informe Completo descargado.'})
+
+@login_required        
+def puntuacion_edicion(request, gincana_id, edicion):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    profesores = Profesor.objects.filter(email=request.user.email)
+    dark_mode_enabled = request.session.get('darkModeEnabled', False)
+
+    gincanaJugadas = GincanaJugada.objects.filter(gincana=gincana, edicion=edicion)
+    invitados_puntuaciones = []
+    for gincanaJugada in gincanaJugadas:
+        invitado = gincanaJugada.invitado
+        puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
+        puntuacion = 0
+        for punto in puntos:
+            puntuacion+=punto.puntuacion
+        invitados_puntuaciones.append((invitado, puntuacion))
+    return render(request, 'puntuacion_edicion.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
+        'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion})  
+
+@login_required        
+def puntuacion_edicion_informe(request, gincana_id, edicion):
+    return
 
 @login_required        
 def gincana_publica(request, gincana_id):  
@@ -456,7 +508,6 @@ def gincana_iniciar(request, gincana_id):
     if request.method == "POST" and gincana.activa == False and gincana.duracion is not None and todas_con_pregunta:
         gincana.activa = True
         gincana.edicion = datetime.now(timezone.utc)
-        print(gincana.edicion)
         gincana.save()
         return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
     elif request.method == "POST" and gincana.activa == True and gincana.duracion is not None and todas_con_pregunta:
@@ -465,13 +516,16 @@ def gincana_iniciar(request, gincana_id):
 
         invitados = Invitado.objects.filter(gincana_id=gincana.id)
         for invitado in invitados:
+            if GincanaJugada.objects.filter(gincana=gincana, invitado=invitado).exists():
+                continue 
+
             puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
             puntuacion = 0
             for punto in puntos:
                 puntuacion+=punto.puntuacion
 
             duracion = datetime.now(timezone.utc) - gincana.edicion
-            print(gincana.edicion)
+
             total = int(duracion.total_seconds())
             horas, resto = divmod(total, 3600)
             minutos, segundos = divmod(resto, 60)
@@ -1220,10 +1274,21 @@ def usuarios_invitados(request, gincana_id):
     profesores = Profesor.objects.filter(email=request.user.email)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-    invitados = Invitado.objects.filter(gincana=gincana)
     form = InvitadosForm()
-    count = Invitado.objects.filter(gincana=gincana).count()
-    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form, 'num': count})
+    total = Invitado.objects.filter(gincana=gincana).count()
+    invitados = Invitado.objects.filter(gincana=gincana)
+    invitados_ordenados = defaultdict(list)
+    
+    for invitado in invitados:
+        jugadas = GincanaJugada.objects.filter(gincana=gincana, invitado=invitado)
+        if jugadas.exists():
+            for jugada in jugadas:
+                invitados_ordenados[jugada.edicion].append(invitado)
+        else:
+            invitados_ordenados["Nuevos"].append(invitado)
+
+    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
+        'invitados_ordenados': dict(invitados_ordenados), 'form': form, 'total': total})
 
 @login_required
 def crear_usuarios_invitados(request, gincana_id):
@@ -1426,3 +1491,4 @@ def invitado_fin(request, gincana_id, invitado):
         for punto in puntos:
             puntuacion+=punto.puntuacion
         return render(request, 'invitado_fin.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 'puntuacion': puntuacion})
+    

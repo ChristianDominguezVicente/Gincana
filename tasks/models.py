@@ -427,7 +427,7 @@ class Invitado(models.Model):
         qr_url = f'http://192.168.1.77:8000/invitado_gincana/{self.gincana.id}/{self.usuario}/'
 
         qrcode_img = qrcode.make(qr_url)
-        canvas = Image.new('RGB', (520, 520), 'white')
+        canvas = Image.new('RGB', (490, 490), 'white')
         draw = ImageDraw.Draw(canvas)
         canvas.paste(qrcode_img)
         fname = f'qr_code-{self.usuario}.png'
