@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{edicion}}</title>
+    <style>
+        .container-in {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-in">
+        <h2>{{edicion}}</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Usuarios</th>
+                    <th>Puntuación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invitado, puntuacion in invitados_puntuaciones %}
+                    <tr>
+                        <td>{{invitado.usuario}}</td>
+                        <td>{{puntuacion}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

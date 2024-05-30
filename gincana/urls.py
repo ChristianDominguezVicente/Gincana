@@ -44,6 +44,7 @@ urlpatterns = [
     path('mis_gincanas/<int:gincana_id>/puntuacion/<str:edicion>/informe/', views.puntuacion_edicion_informe, name='puntuacion_edicion_informe'),
     path('mis_gincanas/<int:gincana_id>/eliminar/', views.gincana_eliminar, name='gincana_eliminar'),
     path('mis_gincanas/<int:gincana_id>/usuarios_invitados/', views.usuarios_invitados, name='usuarios_invitados'),
+    path('mis_gincanas/<int:gincana_id>/usuarios_invitados/documento_qrs/', views.documento_qrs, name='documento_qrs'),
     path('mis_gincanas/<int:gincana_id>/usuarios_invitados/crear/', views.crear_usuarios_invitados, name='crear_usuarios_invitados'),
     path('mis_gincanas/<int:gincana_id>/usuarios_invitados/borrar/<str:usuario>/', views.borrar_usuarios_invitados, name='borrar_usuarios_invitados'),
     path('logout/', views.signout, name='logout'),

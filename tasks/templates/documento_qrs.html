@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Usuarios Invitados</title>
+    <style>
+        .container-in {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-in">
+        <h2>Usuarios Invitados</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>QR</th>
+                    <th>Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invitado in invitados %}
+                    <tr>
+                        <td>
+                            <img src="data:image/png;base64,{{ invitado.qr_code_base64 }}" width="200" height="200">
+                        </td>
+                        <td>{{invitado.usuario}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

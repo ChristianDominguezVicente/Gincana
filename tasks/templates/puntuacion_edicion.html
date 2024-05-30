@@ -32,9 +32,12 @@
                 Cancelar
             </button>
             
-            <button type="submit" class="btn btn-success" id="descargar">
-                Descargar Informe
-            </button>
+            <form action="{% url 'puntuacion_edicion_informe' gincana.id edicion %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success" id="descargar">
+                    Descargar Informe
+                </button>
+            </form>
           </div>
     </div>
 </div>
