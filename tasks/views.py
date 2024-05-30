@@ -7,12 +7,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-import datetime, random, json, folium, os, shutil, uuid, pdfkit
+import datetime, random, json, folium, os, shutil, uuid, pdfkit, base64
 from datetime import date, datetime, timezone, time
 import time as t
 from selenium import webdriver
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
 from collections import defaultdict
 
 # Create your views here.
@@ -418,11 +419,18 @@ def puntuacion_total(request, gincana_id):
 @login_required        
 def puntuacion_informe(request, gincana_id):  
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    profesores = Profesor.objects.filter(email=request.user.email)
-    dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
-    ediciones_distintas = GincanaJugada.objects.filter(gincana_id=gincana.id).values_list('edicion', flat=True).distinct()
-    ediciones = list(ediciones_distintas)
+    gincanaJugadas = GincanaJugada.objects.filter(gincana=gincana)
+    invitados_puntuaciones = []
+    for gincanaJugada in gincanaJugadas:
+        invitado = gincanaJugada.invitado
+        puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
+        puntuacion = 0
+        for punto in puntos:
+            puntuacion+=punto.puntuacion
+        invitados_puntuaciones.append((invitado, puntuacion))
+
+    html_string = render_to_string('informe_total.html', {'invitados_puntuaciones': invitados_puntuaciones})
 
     options = {
         'page-size': 'A4',
@@ -437,10 +445,12 @@ def puntuacion_informe(request, gincana_id):
         'no-outline': None
     }
 
-    pdfkit.from_file(os.path.join(settings.BASE_DIR, 'tasks\\templates', 'puntuacion_total.html'), 'puntuacion_total.pdf', options=options)
+    pdf = pdfkit.from_string(html_string, False, options=options)
 
-    return render(request, 'puntuacion_gincana.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'ediciones': ediciones,
-        'descarga': 'Informe Completo descargado.'})
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="puntuacion_total.pdf"'
+
+    return response
 
 @login_required        
 def puntuacion_edicion(request, gincana_id, edicion):
@@ -462,7 +472,39 @@ def puntuacion_edicion(request, gincana_id, edicion):
 
 @login_required        
 def puntuacion_edicion_informe(request, gincana_id, edicion):
-    return
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+
+    gincanaJugadas = GincanaJugada.objects.filter(gincana=gincana, edicion=edicion)
+    invitados_puntuaciones = []
+    for gincanaJugada in gincanaJugadas:
+        invitado = gincanaJugada.invitado
+        puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
+        puntuacion = 0
+        for punto in puntos:
+            puntuacion+=punto.puntuacion
+        invitados_puntuaciones.append((invitado, puntuacion))
+
+    html_string = render_to_string('informe_edicion.html', {'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion})
+
+    options = {
+        'page-size': 'A4',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'custom-header': [
+            ('Accept-Encoding', 'gzip')
+        ],
+        'no-outline': None
+    }
+
+    pdf = pdfkit.from_string(html_string, False, options=options)
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="puntuacion_edicion.pdf"'
+
+    return response
 
 @login_required        
 def gincana_publica(request, gincana_id):  
@@ -1289,6 +1331,44 @@ def usuarios_invitados(request, gincana_id):
 
     return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
         'invitados_ordenados': dict(invitados_ordenados), 'form': form, 'total': total})
+
+@login_required
+def documento_qrs(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
+    invitados = Invitado.objects.filter(gincana=gincana)
+    invitados_nuevos = []
+    for invitado in invitados:
+        jugadas = GincanaJugada.objects.filter(gincana=gincana, invitado=invitado)
+        if not jugadas.exists():
+            invitados_nuevos.append(invitado)
+
+    for invitado in invitados_nuevos:
+        if invitado.qr_code and hasattr(invitado.qr_code, 'file'):
+            qr_code_image = invitado.qr_code.file.read()
+            qr_code_base64 = base64.b64encode(qr_code_image).decode('utf-8')
+            invitado.qr_code_base64 = qr_code_base64
+
+    html_string = render_to_string('documento_qrs.html', {'invitados': invitados_nuevos})
+
+    options = {
+        'page-size': 'A4',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'custom-header': [
+            ('Accept-Encoding', 'gzip')
+        ],
+        'no-outline': None
+    }
+
+    pdf = pdfkit.from_string(html_string, False, options=options)
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="documento_qrs.pdf"'
+
+    return response
 
 @login_required
 def crear_usuarios_invitados(request, gincana_id):
