@@ -38,8 +38,7 @@ def home(request):
     profesores = Profesor.objects.filter(email=request.user.email)
 
     dark_mode_cookie = request.COOKIES.get('darkModeEnabled')
-    dark_mode_enabled = dark_mode_cookie if dark_mode_cookie is not None else False
-
+    dark_mode_enabled = dark_mode_cookie if dark_mode_cookie is not None else 'false'
 
     return render(request, 'home.html', {'mis_gincanas': mis_gincanas, 'gincanas_publicas': gincanas_publicas, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled})
 
@@ -1297,7 +1296,7 @@ def centro_de_ayuda(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            asunto = form.cleaned_data['asunto']
+            asunto = form.cleaned_data['asunto'] + " - " + request.user.email
             descripcion = form.cleaned_data['descripcion']
             send_mail(
                 asunto,
@@ -1543,6 +1542,27 @@ def invitado_registrar(request, gincana_id, invitado, parada, respuesta_id):
         respondida.save()
 
         if Parada.objects.filter(gincana=gincana).order_by('orden').last().orden < parada:
+            puntos = Puntuacion.objects.filter(invitado_id=invitado_gincana.usuario)
+            puntuacion = 0
+            for punto in puntos:
+                puntuacion+=punto.puntuacion
+
+            duracion = datetime.now(timezone.utc) - gincana.edicion
+
+            total = int(duracion.total_seconds())
+            horas, resto = divmod(total, 3600)
+            minutos, segundos = divmod(resto, 60)
+
+            duracion = time(horas, minutos, segundos)
+
+            gincanaJugada = GincanaJugada.objects.create(
+                duracion=duracion,
+                total_puntos=puntuacion,
+                edicion=gincana.edicion,
+                gincana_id=gincana.id,
+                invitado_id=invitado_gincana.usuario
+            )
+            gincanaJugada.save()
             return redirect('invitado_fin', gincana_id=gincana_id, invitado=invitado)
         else:
             return redirect('invitado_responder', gincana_id=gincana_id, invitado=invitado, parada=parada)
@@ -1571,4 +1591,23 @@ def invitado_fin(request, gincana_id, invitado):
         for punto in puntos:
             puntuacion+=punto.puntuacion
         return render(request, 'invitado_fin.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 'puntuacion': puntuacion})
-    
+
+@login_required
+def gincana_confirmacion_eliminar(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    return render(request, 'confirmacion_eliminar.html', {'gincana': gincana}) 
+
+@login_required
+def gincana_confirmacion_iniciar(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    return render(request, 'confirmacion_iniciar.html', {'gincana': gincana}) 
+
+@login_required
+def gincana_confirmacion_terminar(request, gincana_id):
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    return render(request, 'confirmacion_terminar.html', {'gincana': gincana}) 
+
+@login_required
+def profesor_confirmacion_cuenta(request, email_id):
+    profesor = get_object_or_404(Profesor, pk=email_id, email=request.user.email)
+    return render(request, 'confirmacion_cuenta.html', {'email_id': email_id, 'profesor': profesor}) 

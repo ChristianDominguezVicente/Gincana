@@ -58,25 +58,19 @@
     </script>
 
     <div class="input-registro">
-        <form action="{% url 'gincana_iniciar' gincana.id %}" method="POST">
-            {% csrf_token %}
-            {% if gincana.activa == False %}
-                <button class="btn-signin">
-                    Iniciar
-                </button>
-            {% elif gincana.activa == True %}
-                <button class="btn-signin">
-                    Terminar
-                </button>
-            {% endif %}
-        </form>
-        <span style="margin-right: 10px;"></span>
-        <form action="{% url 'gincana_eliminar' gincana.id %}" method="POST">
-            {% csrf_token %}
-            <button class="btn-signin">
-                Eliminar
+        {% if gincana.activa == False %}
+            <button class="btn-signin" style="margin-left: 0px; margin-right: 0px;" onclick="abrir_modal_confirmacion_iniciar('{% url 'gincana_confirmacion_iniciar' gincana.id %}')" data-toggle="modal" data-target="#confirmacion_eliminar">
+                Iniciar
             </button>
-        </form>
+        {% elif gincana.activa == True %}
+            <button class="btn-signin" style="margin-left: 0px; margin-right: 0px;" onclick="abrir_modal_confirmacion_terminar('{% url 'gincana_confirmacion_terminar' gincana.id %}')" data-toggle="modal" data-target="#confirmacion_eliminar">
+                Terminar
+            </button>
+        {% endif %}
+        <span style="margin-right: 10px;"></span>
+        <button class="btn-signin" style="margin-left: 0px; margin-right: 0px;" onclick="abrir_modal_confirmacion_eliminar('{% url 'gincana_confirmacion_eliminar' gincana.id %}')" data-toggle="modal" data-target="#confirmacion_eliminar">
+            Eliminar
+        </button>
         <span style="margin-right: 10px;"></span>
         <form action="{% url 'usuarios_invitados' gincana.id %}" method="POST">
             {% csrf_token %}
@@ -86,6 +80,13 @@
         </form>
     </div>
 </div>
+
+<div class="modal fade" id="confirmacion_eliminar" role="dialog"></div>
+
+<div class="modal fade" id="confirmacion_iniciar" role="dialog"></div>
+
+<div class="modal fade" id="confirmacion_terminar" role="dialog"></div>
+
 <footer class="footer">
     <div class="footer-group">
         <div class="footer-box">
@@ -110,8 +111,26 @@
     
 <script type="text/javascript">
     var $ = jQuery.noConflict();
-    function abrir_modal_parada(url){
-        $('#add').load(url, function (){
+    function abrir_modal_confirmacion_eliminar(url){
+        $('#confirmacion_eliminar').load(url, function (){
+            $(this).modal('show');
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    function abrir_modal_confirmacion_iniciar(url){
+        $('#confirmacion_iniciar').load(url, function (){
+            $(this).modal('show');
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    function abrir_modal_confirmacion_terminar(url){
+        $('#confirmacion_terminar').load(url, function (){
             $(this).modal('show');
         });
     }

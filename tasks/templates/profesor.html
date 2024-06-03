@@ -30,13 +30,12 @@
         </button>
     </form>
     <span style="margin-right: 10px;"></span>
-    <form action="{% url 'profesor_eliminar' profesor.email %}" method="POST">
-        {% csrf_token %}
-        <button class="btn-signin">
-            Eliminar
-        </button>
-    </form>
+    <button class="btn-signin" style="margin-left: 0px; margin-right: 0px;" onclick="abrir_modal_confirmacion_cuenta('{% url 'profesor_confirmacion_cuenta' profesor.email %}')" data-toggle="modal" data-target="#confirmacion_cuenta">
+        Eliminar
+    </button>
 </div>
+
+<div class="modal fade" id="confirmacion_cuenta" role="dialog"></div>
 
 <footer class="footer">
     <div class="footer-group">
@@ -58,3 +57,16 @@
 </div>
 
 {% endblock %}
+
+{% block extrajs %}
+    
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    function abrir_modal_confirmacion_cuenta(url){
+        $('#confirmacion_cuenta').load(url, function (){
+            $(this).modal('show');
+        });
+    }
+</script>
+
+{% endblock extrajs %}
