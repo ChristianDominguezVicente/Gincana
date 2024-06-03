@@ -1,0 +1,29 @@
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 class="modal-title">Confirmación Cuenta</h2>
+      <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      
+      <p>
+        ¿Está seguro que quiere eliminar tu cuenta?
+      </p>
+      
+      <div class="modal-footer" style="display: flex; justify-content: center;">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" style="margin-right: 10px;">
+          No
+        </button>
+
+        <form action="{% url 'profesor_eliminar' profesor.email %}" method="POST">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">
+            Si
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
