@@ -1,5 +1,5 @@
 from django import forms
-from .models import Gincana, Profesor, Verificacion, Pregunta, Respuesta
+from .models import Gincana, Profesor, Verificacion, Pregunta, Respuesta, Parada
 from bootstrap_datepicker_plus.widgets import TimePickerInput
 
 class AuthenticationForm(forms.Form):
@@ -401,6 +401,28 @@ class PasswordCambioForm(forms.Form):
 
     password1.label=""
     password2.label=""
+
+class ParadaForm(forms.ModelForm):
+    nombre = forms.CharField(label = 'Nombre', widget = forms.TextInput(
+        attrs = {
+            'class': 'input-box',
+            'placeholder': 'Nombre'
+        }
+    ))
+
+    nombre.label=""
+
+    class Meta:
+        model = Parada
+        fields = ['nombre']
+        widget = {
+            'nombre': forms.TextInput(
+                attrs = {
+                    'class': 'input-box',
+                    'placeholder': 'Nombre'
+                }
+            )
+        }
 
 class PreguntaForm(forms.ModelForm):
     enunciado = forms.CharField(widget = forms.Textarea(

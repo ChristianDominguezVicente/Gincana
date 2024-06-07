@@ -20,22 +20,42 @@
         $('#add').on('shown.bs.modal', function () {
           var screenWidth = window.innerWidth;
 
-          if (screenWidth <= 570) {
-            var map = L.map('map2').setView([51.505, -0.09], 12);
+          if (typeof paradas2 !== 'undefined') {
+            let paradas2 = JSON.parse(document.getElementById('paradas_json').textContent);
           } else {
-            var map = L.map('map2').setView([51.505, -0.09], 13);
+            paradas2 = JSON.parse(document.getElementById('paradas_json').textContent);
+          }
+
+          if (paradas2.length === 0) {
+            if (screenWidth <= 570) {
+                var map = L.map('map2').setView([51.505, -0.09], 12);
+            } else {
+                var map = L.map('map2').setView([51.505, -0.09], 13);
+            }
+          }
+          else {
+              var sumaLat = 0;
+              var sumaLng = 0;
+
+              paradas2.forEach(parada => {
+                  sumaLat += parada.latitud;
+                  sumaLng += parada.longitud;
+              });
+
+              var latMedia = sumaLat / paradas.length;
+              var lngMedia = sumaLng / paradas.length;
+
+              if (screenWidth <= 570) {
+                  var map = L.map('map2').setView([latMedia, lngMedia], 12);
+              } else {
+                  var map = L.map('map2').setView([latMedia, lngMedia], 13);
+              }
           }
 
           L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           }).addTo(map);
           map.invalidateSize();
-
-          if (typeof paradas2 !== 'undefined') {
-            let paradas2 = JSON.parse(document.getElementById('paradas_json').textContent);
-          } else {
-            paradas2 = JSON.parse(document.getElementById('paradas_json').textContent);
-          }
 
           var contador = 0;
           var anterior_parada;
@@ -47,7 +67,7 @@
               var marker =  L.marker([parada.latitud, parada.longitud]).addTo(map);
               let polyline = L.polyline([anterior_parada,[parada.latitud, parada.longitud]]).addTo(map);
             }
-            var popupContent = '<strong>Parada ' + (contador+1) + '</strong><br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
+            var popupContent = '<strong>Parada ' + (contador+1) + ': ' + parada.nombre + '</strong><br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
             if (parada.pregunta) {
                 popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta + '<br>';
                 popupContent += '<strong>Respuestas:</strong><br>';

@@ -9,7 +9,7 @@
             <div class="container-in">
                 <h1>{{gincana.titulo}}</h1>
 
-                <p style="color: red; font-weight: bold;">{{error}}</p>
+                <p class="error">{{error}}</p>
 
                 <div id="map" class="map"></div>
 
@@ -42,17 +42,37 @@
                 <script>
                     var screenWidth = window.innerWidth;
 
-                    if (screenWidth <= 570) {
-                        var map = L.map('map').setView([51.505, -0.09], 12);
-                    } else {
-                        var map = L.map('map').setView([51.505, -0.09], 13);
+                    let paradas = JSON.parse(document.getElementById('paradas_json').textContent);
+
+                    if (paradas.length === 0) {
+                        if (screenWidth <= 570) {
+                            var map = L.map('map').setView([51.505, -0.09], 12);
+                        } else {
+                            var map = L.map('map').setView([51.505, -0.09], 13);
+                        }
+                    }
+                    else {
+                        var sumaLat = 0;
+                        var sumaLng = 0;
+
+                        paradas.forEach(parada => {
+                            sumaLat += parada.latitud;
+                            sumaLng += parada.longitud;
+                        });
+
+                        var latMedia = sumaLat / paradas.length;
+                        var lngMedia = sumaLng / paradas.length;
+
+                        if (screenWidth <= 570) {
+                            var map = L.map('map').setView([latMedia, lngMedia], 12);
+                        } else {
+                            var map = L.map('map').setView([latMedia, lngMedia], 13);
+                        }
                     }
 
                     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     }).addTo(map);
-
-                    let paradas = JSON.parse(document.getElementById('paradas_json').textContent);
                     
                     var contador = 0;
                     var anterior_parada;
@@ -64,7 +84,7 @@
                             var marker =  L.marker([parada.latitud, parada.longitud]).addTo(map);
                             let polyline = L.polyline([anterior_parada,[parada.latitud, parada.longitud]]).addTo(map);
                         }
-                        var popupContent = '<strong>Parada ' + (contador+1) + '</strong><br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
+                        var popupContent = '<strong>Parada ' + (contador+1) + ': ' + parada.nombre + '</strong><br>Latitud: ' + parada.latitud + '<br>Longitud: ' + parada.longitud;
                         if (parada.pregunta) {
                             popupContent += '<br><strong>Pregunta:</strong><br>' + parada.pregunta + '<br>';
                             popupContent += '<strong>Respuestas:</strong><br>';

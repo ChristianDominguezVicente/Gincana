@@ -377,6 +377,7 @@ class Parada(models.Model):
     orden = models.IntegerField('Orden', default=1)
     latitud = models.FloatField('Latitud')
     longitud = models.FloatField('Longitud')
+    nombre = models.CharField('Nombre de la parada', max_length=100, default="default")
     gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
 
     def __str__(self):
