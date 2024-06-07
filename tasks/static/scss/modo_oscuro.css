@@ -19,6 +19,16 @@ body{
   background-color: #333;
 }
 
+.barra {
+  display: flex; 
+  justify-content: center;
+}
+
+.error {
+  color: #FFADAD; 
+  font-weight: bold;
+}
+
 .container{
   width: 100%;
   display: flex;
@@ -115,6 +125,7 @@ h3{
 }
 
 .input-reloj{
+  width: 80%;
   display: flex;
   align-items: center;
   padding: 10px;
@@ -417,6 +428,11 @@ h3{
   .separador {
     width: 10%;
     height: 3px;
+  }
+
+  .barra {
+    margin-top: 10px;
+    margin-left: 115px;
   }
 }
 

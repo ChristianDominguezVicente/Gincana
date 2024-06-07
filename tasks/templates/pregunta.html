@@ -10,12 +10,12 @@
       
       <form action="{% url 'editar_guardar' gincana.id parada.id %}" method="POST">
         {% csrf_token %}
-       
-        {{ preguntaForm.enunciado }}
+        {{paradaForm}}
+        {{preguntaForm.enunciado}}
         <div class="pregunta_form" style="display: flex; align-items: center;">
-          <label for="{{ preguntaForm.num_respuestas.id }}" style="white-space: nowrap;">{{ preguntaForm.num_respuestas.label }}: </label>
+          <label for="{{preguntaForm.num_respuestas.id}}" style="white-space: nowrap;">{{preguntaForm.num_respuestas.label}}: </label>
           <span style="margin-right: 10px;"></span> 
-          {{ preguntaForm.num_respuestas }}
+          {{preguntaForm.num_respuestas}}
         </div>
 
         <div id="respuestas_fields"></div>

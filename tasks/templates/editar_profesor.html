@@ -6,7 +6,7 @@
 <div class="container-in">
     <h1 class="titulo">{{profesor.email}}</h1>
 
-    <p style="color: red; font-weight: bold;">{{error}}</p>
+    <p class="error">{{error}}</p>
 
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}

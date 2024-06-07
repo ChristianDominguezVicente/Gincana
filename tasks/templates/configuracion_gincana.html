@@ -91,7 +91,7 @@
                             <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar" name="q">
                             <button class="btn btn-success" type="submit">Buscar</button>
                         </form>
-                        <div style="display: flex; justify-content: center;">
+                        <div class="barra">
                             {% for profesor in profesores %}
                                 <button id="dark-mode-toggle" style="border: none; background-color: transparent;">
                                     <img id="dark-mode-image" width="30" height="30" class="rounded-circle" src="{% static 'media/Modo_oscuro.png' %}" >
@@ -108,7 +108,7 @@
                 <div class="container-in">
                     <h1>Configuración</h1>
 
-                    <p style="color: red; font-weight: bold;">{{error}}</p>
+                    <p class="error">{{error}}</p>
 
                     <form method="POST">
                         {% csrf_token %}

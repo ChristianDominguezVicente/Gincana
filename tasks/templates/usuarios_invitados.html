@@ -8,59 +8,61 @@
     <div>
         <h1>Usuarios Invitados</h1>
     </div>
-    <p style="color: red; font-weight: bold;">{{error}}</p>
-    <div>
+    <p class="error">{{error}}</p>
+    <div class="container-in">
         <h2>Administrar Usuarios Invitados: {{total}}</h2>
-        {% for edicion, invitados in invitados_ordenados.items %}
-            <div>
-                <h3>Edición: {{edicion}} ({{invitados|length}})</h3>
-            </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>QR Code</th>
-                        <th>Usuario</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for invitado in invitados %}
-                        <tr>
-                            <td>
-                                <img src="{{invitado.qr_code.url}}" width="100" height="100">
-                            </td>
-                            <td>{{invitado.usuario}}</td>
-                            <td>
-                                <form method="post" action="{% url 'borrar_usuarios_invitados' gincana.id invitado.usuario %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger">Borrar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="3">No hay invitados en esta edición.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% if edicion == 'Nuevos' %}
-                <div class="modal-footer" style="display: flex; justify-content: center;">
-                    <form action="{% url 'documento_qrs' gincana.id %}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-pass" id="descargar">
-                            Descargar Documento QRs
-                        </button>
-                    </form>
+        <div class="container-in">
+            {% for edicion, invitados in invitados_ordenados.items %}
+                <div>
+                    <h3>Edición: {{edicion}} ({{invitados|length}})</h3>
                 </div>
-            {% endif %} 
-        {% endfor %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>QR Code</th>
+                            <th>Usuario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invitado in invitados %}
+                            <tr>
+                                <td>
+                                    <img src="{{invitado.qr_code.url}}" width="100" height="100">
+                                </td>
+                                <td>{{invitado.usuario}}</td>
+                                <td>
+                                    <form method="post" action="{% url 'borrar_usuarios_invitados' gincana.id invitado.usuario %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Borrar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3">No hay invitados en esta edición.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if edicion == 'Nuevos' %}
+                    <div class="modal-footer" style="display: flex; justify-content: center;">
+                        <form action="{% url 'documento_qrs' gincana.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-pass" id="descargar">
+                                Descargar Documento QRs
+                            </button>
+                        </form>
+                    </div>
+                {% endif %} 
+            {% endfor %}
+        </div>
     </div>
-    <div>
+    <div class="container-in">
         <h2>Crear Usuarios Invitados</h2>
-        <form method="post" action="{% url 'crear_usuarios_invitados' gincana.id %}">
+        <form action="{% url 'crear_usuarios_invitados' gincana.id %}" method="POST">
             {% csrf_token %}
-            {{ form.as_p }}
+            {{form.as_p}}
             <button class="btn-signin">Crear Invitados</button>
           </form>
     </div>

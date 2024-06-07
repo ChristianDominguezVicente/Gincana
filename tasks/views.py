@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.utils.datastructures import MultiValueDictKeyError
-from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, PreguntaForm, RespuestaForm, ContactForm, InvitadosForm, AuthenticationInvitadosForm
+from .forms import GincanaForm, ProfesorForm, GincanaConfiguracionForm, EditarProfesorForm, VerificacionForm, PasswordForm, PasswordCambioForm, AuthenticationForm, ParadaForm, PreguntaForm, RespuestaForm, ContactForm, InvitadosForm, AuthenticationInvitadosForm
 from .models import Gincana, Profesor, Verificacion, Parada, Pregunta, Respuesta, Invitado, Puntuacion, GincanaJugada
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
@@ -284,6 +284,7 @@ def gincana(request, gincana_id):
             pregunta = parada.pregunta_set.first()
             respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
             parada_data = {
+                'nombre': parada.nombre,
                 'latitud': parada.latitud,
                 'longitud': parada.longitud,
                 'pregunta': pregunta.enunciado if pregunta else None,
@@ -300,6 +301,7 @@ def gincana(request, gincana_id):
                 pregunta = parada.pregunta_set.first()
                 respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
                 parada_data = {
+                    'nombre': parada.nombre,
                     'latitud': parada.latitud,
                     'longitud': parada.longitud,
                     'pregunta': pregunta.enunciado if pregunta else None,
@@ -329,6 +331,7 @@ def editar_gincana(request, gincana_id):
         pregunta = parada.pregunta_set.first()
         respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
         parada_data = {
+            'nombre': parada.nombre,
             'latitud': parada.latitud,
             'longitud': parada.longitud,
             'pregunta': pregunta.enunciado if pregunta else None,
@@ -357,6 +360,7 @@ def configuracion_gincana(request, gincana_id):
             pregunta = parada.pregunta_set.first()
             respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
             parada_data = {
+                'nombre': parada.nombre,
                 'latitud': parada.latitud,
                 'longitud': parada.longitud,
                 'pregunta': pregunta.enunciado if pregunta else None,
@@ -368,21 +372,27 @@ def configuracion_gincana(request, gincana_id):
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-            paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-            paradas_data = []
-            for parada in paradas:
-                pregunta = parada.pregunta_set.first()
-                respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
-                parada_data = {
-                    'latitud': parada.latitud,
-                    'longitud': parada.longitud,
-                    'pregunta': pregunta.enunciado if pregunta else None,
-                    'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
-                }
-                paradas_data.append(parada_data)
-            form = GincanaConfiguracionForm(request.POST, instance=gincana)
-            form.save()
-            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
+            if gincana.activa == False:
+                paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+                paradas_data = []
+                for parada in paradas:
+                    pregunta = parada.pregunta_set.first()
+                    respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+                    parada_data = {
+                        'nombre': parada.nombre,
+                        'latitud': parada.latitud,
+                        'longitud': parada.longitud,
+                        'pregunta': pregunta.enunciado if pregunta else None,
+                        'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+                    }
+                    paradas_data.append(parada_data)
+                form = GincanaConfiguracionForm(request.POST, instance=gincana)
+                form.save()
+                return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
+            else:
+                form = GincanaConfiguracionForm(request.POST, instance=gincana)
+                return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
+                    'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "La Gincana esta activa, no pueden hacerse cambios mientras lo este."})
         except ValueError:
             return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
                 'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "Error actualizando la Gincana"})
@@ -516,6 +526,7 @@ def gincana_publica(request, gincana_id):
         pregunta = parada.pregunta_set.first()
         respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
         parada_data = {
+            'nombre': parada.nombre,
             'latitud': parada.latitud,
             'longitud': parada.longitud,
             'pregunta': pregunta.enunciado if pregunta else None,
@@ -535,6 +546,7 @@ def gincana_iniciar(request, gincana_id):
         pregunta = parada.pregunta_set.first()
         respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
         parada_data = {
+            'nombre': parada.nombre,
             'latitud': parada.latitud,
             'longitud': parada.longitud,
             'pregunta': pregunta.enunciado if pregunta else None,
@@ -547,10 +559,26 @@ def gincana_iniciar(request, gincana_id):
     todas_con_pregunta = all(Pregunta.objects.filter(parada_id=parada_id).exists() for parada_id in ids_paradas)
     
     if request.method == "POST" and gincana.activa == False and gincana.duracion is not None and todas_con_pregunta:
-        gincana.activa = True
-        gincana.edicion = datetime.now(timezone.utc)
-        gincana.save()
-        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+        invitados = Invitado.objects.filter(gincana=gincana)
+        comprobacion = False
+        
+        if invitados.exists():
+            for invitado in invitados:
+                jugadas = GincanaJugada.objects.filter(gincana=gincana, invitado=invitado)
+                if not jugadas.exists():
+                    comprobacion = True
+                
+            if comprobacion == True:
+                gincana.activa = True
+                gincana.edicion = datetime.now(timezone.utc)
+                gincana.save()
+                return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data})
+            else:
+                return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled, 
+                    'error': "Se necesita tener creados Usuarios Invitados."})
+        else:
+            return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled, 
+                'error': "Se necesita tener creados Usuarios Invitados."})
     elif request.method == "POST" and gincana.activa == True and gincana.duracion is not None and todas_con_pregunta:
         gincana.activa = False
         gincana.save()
@@ -654,21 +682,27 @@ def signin(request):
                 'form': AuthenticationForm
             })
         else:
-            profesor = get_object_or_404(Profesor,pk=request.POST['username'])
-            if profesor.usuario_verificado == False:
-                return redirect('verificacion', email=request.POST['username'])
-            else:
-                user = authenticate(request, username=request.POST['username'], 
-                    password=request.POST['password'])
-
-                if user is None:
-                    return render(request, 'signin.html',{
-                        'form': AuthenticationForm,
-                        'error': 'El usuario o la contraseña es incorrecto'
-                    })
+            if Profesor.objects.filter(pk=request.POST['username']).exists():
+                profesor = get_object_or_404(Profesor,pk=request.POST['username'])
+                if profesor.usuario_verificado == False:
+                    return redirect('verificacion', email=request.POST['username'])
                 else:
-                    login(request, user)
-                    return redirect('home')
+                    user = authenticate(request, username=request.POST['username'], 
+                        password=request.POST['password'])
+
+                    if user is None:
+                        return render(request, 'signin.html',{
+                            'form': AuthenticationForm,
+                            'error': 'El usuario o la contraseña es incorrecto'
+                        })
+                    else:
+                        login(request, user)
+                        return redirect('home')
+            else:
+                return render(request, 'signin.html',{
+                    'form': AuthenticationForm,
+                    'error': 'El usuario o la contraseña es incorrecto'
+                })
         
 def informacion(request):
     if request.user.is_authenticated:
@@ -889,6 +923,7 @@ def parada(request, gincana_id):
         pregunta = parada.pregunta_set.first()
         respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
         parada_data = {
+            'nombre': parada.nombre,
             'latitud': parada.latitud,
             'longitud': parada.longitud,
             'pregunta': pregunta.enunciado if pregunta else None,
@@ -900,296 +935,340 @@ def parada(request, gincana_id):
 @login_required
 def parada_guardar(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    contador = Parada.objects.filter(gincana=gincana).count()
-    paradas_data = json.loads(request.POST.get('parada'))
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
-
-    for latitud, longitud in paradas_data.items():
-        contador += 1
-        if not Parada.objects.filter(latitud=latitud, longitud=longitud, gincana_id=gincana_id).exists():
-            parada= Parada.objects.create(
-                orden=contador,
-                latitud=latitud,
-                longitud=longitud,
-                gincana_id=gincana_id
-            )
-            parada.save()
-
-    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    map = folium.Map(location=[51.505, -0.09], zoom_start=13)
-
-    for parada in paradas:
-        folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
-
-    for i in range(len(paradas) - 1):
-        parada_actual = paradas[i]
-        parada_siguiente = paradas[i + 1]
-        folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
-
-    map.save(f'mapa_gincana_{gincana_id}.html')
-    map.save(f'mapa_gincana_{gincana_id}_oscuro.html')
-
-    mapa_oscuro_file = f'mapa_gincana_{gincana_id}_oscuro.html'
-    with open(mapa_oscuro_file, 'r') as file:
-        mapa_oscuro_content = file.read()
-
-    pos_head_cierre = mapa_oscuro_content.find('</head>')
-
-    estilo_css = '<style>body { filter: invert(1) hue-rotate(180deg); }</style>'
-    mapa_oscuro_content = mapa_oscuro_content[:pos_head_cierre] + estilo_css + mapa_oscuro_content[pos_head_cierre:]
-
-    with open(mapa_oscuro_file, 'w') as file:
-        file.write(mapa_oscuro_content)
     
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless') 
-    
-    firefox_options = webdriver.FirefoxOptions()
-    firefox_options.headless = True
-    
-    edge_options = webdriver.EdgeOptions()
-    edge_options.use_chromium = True
-    edge_options.add_argument('--headless')
+    if gincana.activa == False:
+        contador = Parada.objects.filter(gincana=gincana).count()
+        paradas_data = json.loads(request.POST.get('parada'))
+        
 
-    try:
-        driver = webdriver.Chrome(options=chrome_options)
-        driver2 = webdriver.Chrome(options=chrome_options)
-    except:
+        for latitud, longitud in paradas_data.items():
+            contador += 1
+            if not Parada.objects.filter(latitud=latitud, longitud=longitud, gincana_id=gincana_id).exists():
+                parada= Parada.objects.create(
+                    orden=contador,
+                    latitud=latitud,
+                    longitud=longitud,
+                    gincana_id=gincana_id
+                )
+                parada.save()
+
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        sumaLat = 0
+        sumaLng = 0
+        if paradas.exists():
+            for parada in paradas:
+                sumaLat += parada.latitud
+                sumaLng += parada.longitud
+            latMedia = sumaLat / paradas.count()
+            lngMedia = sumaLng / paradas.count()
+            map = folium.Map(location=[latMedia, lngMedia], zoom_start=13)
+        else:
+            map = folium.Map(location=[51.505, -0.09], zoom_start=13)
+
+        for parada in paradas:
+            folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
+
+        for i in range(len(paradas) - 1):
+            parada_actual = paradas[i]
+            parada_siguiente = paradas[i + 1]
+            folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
+
+        map.save(f'mapa_gincana_{gincana_id}.html')
+        map.save(f'mapa_gincana_{gincana_id}_oscuro.html')
+
+        mapa_oscuro_file = f'mapa_gincana_{gincana_id}_oscuro.html'
+        with open(mapa_oscuro_file, 'r') as file:
+            mapa_oscuro_content = file.read()
+
+        pos_head_cierre = mapa_oscuro_content.find('</head>')
+
+        estilo_css = '<style>body { filter: invert(1) hue-rotate(180deg); }</style>'
+        mapa_oscuro_content = mapa_oscuro_content[:pos_head_cierre] + estilo_css + mapa_oscuro_content[pos_head_cierre:]
+
+        with open(mapa_oscuro_file, 'w') as file:
+            file.write(mapa_oscuro_content)
+        
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless') 
+        
+        firefox_options = webdriver.FirefoxOptions()
+        firefox_options.headless = True
+        
+        edge_options = webdriver.EdgeOptions()
+        edge_options.use_chromium = True
+        edge_options.add_argument('--headless')
+
         try:
-            driver = webdriver.Firefox(options=firefox_options)
-            driver2 = webdriver.Firefox(options=firefox_options)
+            driver = webdriver.Chrome(options=chrome_options)
+            driver2 = webdriver.Chrome(options=chrome_options)
         except:
             try:
-                driver = webdriver.Edge(options=edge_options)
-                driver2 = webdriver.Edge(options=edge_options)
+                driver = webdriver.Firefox(options=firefox_options)
+                driver2 = webdriver.Firefox(options=firefox_options)
             except:
-                driver = None
-                driver2 = None
+                try:
+                    driver = webdriver.Edge(options=edge_options)
+                    driver2 = webdriver.Edge(options=edge_options)
+                except:
+                    driver = None
+                    driver2 = None
 
-    user_agent = request.META['HTTP_USER_AGENT']
-    if 'Chrome' in user_agent:
-        driver = webdriver.Chrome(options=chrome_options)
-        driver2 = webdriver.Chrome(options=chrome_options)
-    elif 'Firefox' in user_agent:
-        driver = webdriver.Firefox()
-        driver2 = webdriver.Firefox()
-    elif 'Edg' in user_agent:  
-        driver = webdriver.Edge()
-        driver2 = webdriver.Edge()
+        user_agent = request.META['HTTP_USER_AGENT']
+        if 'Chrome' in user_agent:
+            driver = webdriver.Chrome(options=chrome_options)
+            driver2 = webdriver.Chrome(options=chrome_options)
+        elif 'Firefox' in user_agent:
+            driver = webdriver.Firefox()
+            driver2 = webdriver.Firefox()
+        elif 'Edg' in user_agent:  
+            driver = webdriver.Edge()
+            driver2 = webdriver.Edge()
+        else:
+            driver = None
+            driver2 = None
+
+        if driver and driver2:
+            driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+            driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
+            t.sleep(2)
+            driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+            driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
+            driver.quit()
+            driver2.quit()
+
+        os.remove(f'mapa_gincana_{gincana_id}.html')
+        os.remove(f'mapa_gincana_{gincana_id}_oscuro.html')
+        
+        nombre_archivo = f"mapa_{gincana.id}.png"
+        nombre_archivo2 = f"mapa_{gincana.id}_oscuro.png"
+        ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+        ruta_imagen2 = os.path.join(settings.MEDIA_ROOT, nombre_archivo2)
+        shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+        shutil.move(f'mapa_gincana_{gincana_id}_oscuro.png', ruta_imagen2)
+        gincana.imagen = nombre_archivo
+        gincana.imagen_oscura = nombre_archivo2
+        gincana.save()
+
+        return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
     else:
-        driver = None
-        driver2 = None
-
-    if driver and driver2:
-        driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
-        driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
-        t.sleep(2)
-        driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
-        driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
-        driver.quit()
-        driver2.quit()
-
-    os.remove(f'mapa_gincana_{gincana_id}.html')
-    os.remove(f'mapa_gincana_{gincana_id}_oscuro.html')
-    
-    nombre_archivo = f"mapa_{gincana.id}.png"
-    nombre_archivo2 = f"mapa_{gincana.id}_oscuro.png"
-    ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
-    ruta_imagen2 = os.path.join(settings.MEDIA_ROOT, nombre_archivo2)
-    shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
-    shutil.move(f'mapa_gincana_{gincana_id}_oscuro.png', ruta_imagen2)
-    gincana.imagen = nombre_archivo
-    gincana.imagen_oscura = nombre_archivo2
-    gincana.save()
-
-    return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
+        return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled, 'error': 'No se pueden hacer cambios si la Gincana está activa.'})
 
 @login_required
 def guardar_cambios_gincana(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
-    ordered_ids = request.POST.getlist('ordered_ids[]')
+    if gincana.activa == False:
+        ordered_ids = request.POST.getlist('ordered_ids[]')
+        ordered_ids = [int(id) for id in ordered_ids]
 
-    ordered_ids = [int(id) for id in ordered_ids]
+        for index, parada_id in enumerate(ordered_ids, start=1):
+            Parada.objects.filter(id=parada_id, gincana=gincana).update(orden=index)
+        
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        sumaLat = 0
+        sumaLng = 0
+        if paradas.exists():
+            for parada in paradas:
+                sumaLat += parada.latitud
+                sumaLng += parada.longitud
+            latMedia = sumaLat / paradas.count()
+            lngMedia = sumaLng / paradas.count()
+            map = folium.Map(location=[latMedia, lngMedia], zoom_start=13)
+        else:
+            map = folium.Map(location=[51.505, -0.09], zoom_start=13)
 
-    for index, parada_id in enumerate(ordered_ids, start=1):
-        Parada.objects.filter(id=parada_id, gincana=gincana).update(orden=index)
-    
-    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    map = folium.Map(location=[51.505, -0.09], zoom_start=13)
+        for parada in paradas:
+            folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
 
-    for parada in paradas:
-        folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
+        for i in range(len(paradas) - 1):
+            parada_actual = paradas[i]
+            parada_siguiente = paradas[i + 1]
+            folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
 
-    for i in range(len(paradas) - 1):
-        parada_actual = paradas[i]
-        parada_siguiente = paradas[i + 1]
-        folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
+        map.save(f'mapa_gincana_{gincana_id}.html')
+        map.save(f'mapa_gincana_{gincana_id}_oscuro.html')
 
-    map.save(f'mapa_gincana_{gincana_id}.html')
-    map.save(f'mapa_gincana_{gincana_id}_oscuro.html')
+        mapa_oscuro_file = f'mapa_gincana_{gincana_id}_oscuro.html'
+        with open(mapa_oscuro_file, 'r') as file:
+            mapa_oscuro_content = file.read()
 
-    mapa_oscuro_file = f'mapa_gincana_{gincana_id}_oscuro.html'
-    with open(mapa_oscuro_file, 'r') as file:
-        mapa_oscuro_content = file.read()
+        pos_head_cierre = mapa_oscuro_content.find('</head>')
 
-    pos_head_cierre = mapa_oscuro_content.find('</head>')
+        estilo_css = '<style>body { filter: invert(1) hue-rotate(180deg); }</style>'
+        mapa_oscuro_content = mapa_oscuro_content[:pos_head_cierre] + estilo_css + mapa_oscuro_content[pos_head_cierre:]
 
-    estilo_css = '<style>body { filter: invert(1) hue-rotate(180deg); }</style>'
-    mapa_oscuro_content = mapa_oscuro_content[:pos_head_cierre] + estilo_css + mapa_oscuro_content[pos_head_cierre:]
+        with open(mapa_oscuro_file, 'w') as file:
+            file.write(mapa_oscuro_content)
+        
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless') 
+        
+        firefox_options = webdriver.FirefoxOptions()
+        firefox_options.headless = True
+        
+        edge_options = webdriver.EdgeOptions()
+        edge_options.use_chromium = True
+        edge_options.add_argument('--headless')
 
-    with open(mapa_oscuro_file, 'w') as file:
-        file.write(mapa_oscuro_content)
-    
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless') 
-    
-    firefox_options = webdriver.FirefoxOptions()
-    firefox_options.headless = True
-    
-    edge_options = webdriver.EdgeOptions()
-    edge_options.use_chromium = True
-    edge_options.add_argument('--headless')
-
-    try:
-        driver = webdriver.Chrome(options=chrome_options)
-        driver2 = webdriver.Chrome(options=chrome_options)
-    except:
         try:
-            driver = webdriver.Firefox(options=firefox_options)
-            driver2 = webdriver.Firefox(options=firefox_options)
+            driver = webdriver.Chrome(options=chrome_options)
+            driver2 = webdriver.Chrome(options=chrome_options)
         except:
             try:
-                driver = webdriver.Edge(options=edge_options)
-                driver2 = webdriver.Edge(options=edge_options)
+                driver = webdriver.Firefox(options=firefox_options)
+                driver2 = webdriver.Firefox(options=firefox_options)
             except:
-                driver = None
-                driver2 = None
+                try:
+                    driver = webdriver.Edge(options=edge_options)
+                    driver2 = webdriver.Edge(options=edge_options)
+                except:
+                    driver = None
+                    driver2 = None
 
-    user_agent = request.META['HTTP_USER_AGENT']
-    if 'Chrome' in user_agent:
-        driver = webdriver.Chrome(options=chrome_options)
-        driver2 = webdriver.Chrome(options=chrome_options)
-    elif 'Firefox' in user_agent:
-        driver = webdriver.Firefox()
-        driver2 = webdriver.Firefox()
-    elif 'Edg' in user_agent:  
-        driver = webdriver.Edge()
-        driver2 = webdriver.Edge()
+        user_agent = request.META['HTTP_USER_AGENT']
+        if 'Chrome' in user_agent:
+            driver = webdriver.Chrome(options=chrome_options)
+            driver2 = webdriver.Chrome(options=chrome_options)
+        elif 'Firefox' in user_agent:
+            driver = webdriver.Firefox()
+            driver2 = webdriver.Firefox()
+        elif 'Edg' in user_agent:  
+            driver = webdriver.Edge()
+            driver2 = webdriver.Edge()
+        else:
+            driver = None
+            driver2 = None
+
+        if driver and driver2:
+            driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+            driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
+            t.sleep(2)
+            driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+            driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
+            driver.quit()
+            driver2.quit()
+
+        os.remove(f'mapa_gincana_{gincana_id}.html')
+        os.remove(f'mapa_gincana_{gincana_id}_oscuro.html')
+        
+        nombre_archivo = f"mapa_{gincana.id}.png"
+        nombre_archivo2 = f"mapa_{gincana.id}_oscuro.png"
+        ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+        ruta_imagen2 = os.path.join(settings.MEDIA_ROOT, nombre_archivo2)
+        shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+        shutil.move(f'mapa_gincana_{gincana_id}_oscuro.png', ruta_imagen2)
+        gincana.imagen = nombre_archivo
+        gincana.imagen_oscura = nombre_archivo2
+        gincana.save()
+
+        return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
     else:
-        driver = None
-        driver2 = None
-
-    if driver and driver2:
-        driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
-        driver2.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}_oscuro.html'))
-        t.sleep(2)
-        driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
-        driver2.save_screenshot(f'mapa_gincana_{gincana_id}_oscuro.png')
-        driver.quit()
-        driver2.quit()
-
-    os.remove(f'mapa_gincana_{gincana_id}.html')
-    os.remove(f'mapa_gincana_{gincana_id}_oscuro.html')
-    
-    nombre_archivo = f"mapa_{gincana.id}.png"
-    nombre_archivo2 = f"mapa_{gincana.id}_oscuro.png"
-    ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
-    ruta_imagen2 = os.path.join(settings.MEDIA_ROOT, nombre_archivo2)
-    shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
-    shutil.move(f'mapa_gincana_{gincana_id}_oscuro.png', ruta_imagen2)
-    gincana.imagen = nombre_archivo
-    gincana.imagen_oscura = nombre_archivo2
-    gincana.save()
-
-    return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
+        return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled, 'error': 'No se pueden hacer cambios si la Gincana está activa.'})
 
 @login_required
 def borrar_parada(request, gincana_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
-    parada_id = request.POST.get('parada_id')
-
-    parada = Parada.objects.get(id=parada_id)
-
-    parada.delete()
-
-    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    map = folium.Map(location=[51.505, -0.09], zoom_start=13)
-
-    for parada in paradas:
-        folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
-
-    for i in range(len(paradas) - 1):
-        parada_actual = paradas[i]
-        parada_siguiente = paradas[i + 1]
-        folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
-
-    map.save(f'mapa_gincana_{gincana_id}.html')
     
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless') 
-    
-    firefox_options = webdriver.FirefoxOptions()
-    firefox_options.headless = True
-    
-    edge_options = webdriver.EdgeOptions()
-    edge_options.use_chromium = True
-    edge_options.add_argument('--headless')
+    if gincana.activa == False:
+        parada_id = request.POST.get('parada_id')
 
-    try:
-        driver = webdriver.Chrome(options=chrome_options)
-    except:
+        parada = Parada.objects.get(id=parada_id)
+
+        parada.delete()
+
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        sumaLat = 0
+        sumaLng = 0
+        if paradas.exists():
+            for parada in paradas:
+                sumaLat += parada.latitud
+                sumaLng += parada.longitud
+            latMedia = sumaLat / paradas.count()
+            lngMedia = sumaLng / paradas.count()
+            map = folium.Map(location=[latMedia, lngMedia], zoom_start=13)
+        else:
+            map = folium.Map(location=[51.505, -0.09], zoom_start=13)
+
+        for parada in paradas:
+            folium.Marker([parada.latitud, parada.longitud], popup=f'Parada {parada.orden}').add_to(map)
+
+        for i in range(len(paradas) - 1):
+            parada_actual = paradas[i]
+            parada_siguiente = paradas[i + 1]
+            folium.PolyLine([(parada_actual.latitud, parada_actual.longitud), (parada_siguiente.latitud, parada_siguiente.longitud)]).add_to(map)
+
+        map.save(f'mapa_gincana_{gincana_id}.html')
+        
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless') 
+        
+        firefox_options = webdriver.FirefoxOptions()
+        firefox_options.headless = True
+        
+        edge_options = webdriver.EdgeOptions()
+        edge_options.use_chromium = True
+        edge_options.add_argument('--headless')
+
         try:
-            driver = webdriver.Firefox(options=firefox_options)
+            driver = webdriver.Chrome(options=chrome_options)
         except:
             try:
-                driver = webdriver.Edge(options=edge_options)
+                driver = webdriver.Firefox(options=firefox_options)
             except:
-                driver = None
+                try:
+                    driver = webdriver.Edge(options=edge_options)
+                except:
+                    driver = None
 
-    user_agent = request.META['HTTP_USER_AGENT']
-    if 'Chrome' in user_agent:
-        driver = webdriver.Chrome(options=chrome_options)
-    elif 'Firefox' in user_agent:
-        driver = webdriver.Firefox()
-    elif 'Edg' in user_agent:  
-        driver = webdriver.Edge()
+        user_agent = request.META['HTTP_USER_AGENT']
+        if 'Chrome' in user_agent:
+            driver = webdriver.Chrome(options=chrome_options)
+        elif 'Firefox' in user_agent:
+            driver = webdriver.Firefox()
+        elif 'Edg' in user_agent:  
+            driver = webdriver.Edge()
+        else:
+            driver = None
+
+        if driver:
+            driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
+            t.sleep(2)
+            driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
+            driver.quit()
+
+        os.remove(f'mapa_gincana_{gincana_id}.html')
+        
+        nombre_archivo = f"mapa_{gincana.id}.png"
+        ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+        shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
+        gincana.imagen = nombre_archivo
+        gincana.save()
+        
+        return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
     else:
-        driver = None
-
-    if driver:
-        driver.get('file://' + os.path.abspath(f'mapa_gincana_{gincana_id}.html'))
-        t.sleep(2)
-        driver.save_screenshot(f'mapa_gincana_{gincana_id}.png')
-        driver.quit()
-
-    os.remove(f'mapa_gincana_{gincana_id}.html')
-    
-    nombre_archivo = f"mapa_{gincana.id}.png"
-    ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
-    shutil.move(f'mapa_gincana_{gincana_id}.png', ruta_imagen)
-    gincana.imagen = nombre_archivo
-    gincana.save()
-    
-    return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled})
+        return render(request, 'editar_gincana.html', {'gincana': gincana, 'darkModeEnabled': dark_mode_enabled, 'error': 'No se pueden hacer cambios si la Gincana está activa.'})
 
 @login_required
 def editar_parada(request, gincana_id, parada_id):
     gincana = get_object_or_404(Gincana, pk=gincana_id)
-    parada = get_object_or_404(Parada, pk=parada_id)
     dark_mode_enabled = request.session.get('darkModeEnabled', False)
 
+    parada = get_object_or_404(Parada, pk=parada_id)
+
     if Pregunta.objects.filter(parada_id=parada_id).exists():
+        paradaForm = ParadaForm(instance=parada)
         pregunta = Pregunta.objects.get(parada_id=parada_id)
         preguntaForm = PreguntaForm(instance=pregunta)
         respuestas = Respuesta.objects.filter(pregunta_id=pregunta.id)
         respuestasForms = [RespuestaForm(instance=respuesta) for respuesta in respuestas]
     else:
+        paradaForm = ParadaForm()
         preguntaForm = PreguntaForm()
         respuestasForms = [RespuestaForm() for _ in range(10)]
 
-    return render(request, 'pregunta.html', {'gincana': gincana, 'preguntaForm': preguntaForm, 'respuestaForm': respuestasForms, 'parada': parada, 'darkModeEnabled': dark_mode_enabled})
+    return render(request, 'pregunta.html', {'gincana': gincana, 'paradaForm': paradaForm,'preguntaForm': preguntaForm, 'respuestaForm': respuestasForms, 'parada': parada, 'darkModeEnabled': dark_mode_enabled})
 
 @login_required
 def editar_guardar(request, gincana_id, parada_id):
@@ -1204,25 +1283,32 @@ def editar_guardar(request, gincana_id, parada_id):
     
     paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
     paradas_data = []
-    for parada in paradas:
-        pregunta = parada.pregunta_set.first()
-        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
-        parada_data = {
-            'latitud': parada.latitud,
-            'longitud': parada.longitud,
-            'pregunta': pregunta.enunciado if pregunta else None,
-            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
-        }
-        paradas_data.append(parada_data)
-
-    for parada in paradas:
-        pregunta = parada.pregunta_set.first()
-        respuestas = pregunta.respuesta_set.all() if pregunta else []
-
-        parada.pregunta = pregunta
-        parada.respuestas = respuestas
+    
 
     if request.method == 'POST':
+        par = Parada.objects.get(pk=parada_id)
+        par.nombre = request.POST['nombre']
+        par.save()
+
+        for parada in paradas:
+            pregunta = parada.pregunta_set.first()
+            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+            parada_data = {
+                'nombre': parada.nombre,
+                'latitud': parada.latitud,
+                'longitud': parada.longitud,
+                'pregunta': pregunta.enunciado if pregunta else None,
+                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+            }
+            paradas_data.append(parada_data)
+
+        for parada in paradas:
+            pregunta = parada.pregunta_set.first()
+            respuestas = pregunta.respuesta_set.all() if pregunta else []
+
+            parada.pregunta = pregunta
+            parada.respuestas = respuestas
+
         pregunta_form = PreguntaForm(request.POST)
 
         if pregunta_form.is_valid():
@@ -1230,7 +1316,7 @@ def editar_guardar(request, gincana_id, parada_id):
             pregunta.enunciado = pregunta_form.cleaned_data['enunciado']
             pregunta.save()
 
-            Respuesta.objects.filter(pregunta=pregunta).delete()
+            #Respuesta.objects.filter(pregunta=pregunta).delete()
 
             num_respuestas = int(request.POST.get('num_respuestas', 0))
 
@@ -1259,14 +1345,26 @@ def editar_guardar(request, gincana_id, parada_id):
                         'error': 'La puntuación solo pueden ser numeros enteros.'})
                 es_correcta = request.POST.get(f'respuesta_{i}_es_correcta')
 
-                respuesta = Respuesta(
-                    respuesta=respuesta_texto,
-                    puntos=int(puntos),
-                    es_correcta=bool(es_correcta),
-                    pregunta=pregunta
-                )
-                respuesta.save()
+                respuestas = Respuesta.objects.filter(pregunta=pregunta)
 
+                if i < respuestas.count():
+                    respuesta=respuestas[i]
+                    respuesta.respuesta=respuesta_texto
+                    respuesta.puntos=int(puntos)
+                    respuesta.es_correcta=bool(es_correcta)
+                    respuesta.save()
+                else:
+                    respuesta = Respuesta(
+                        respuesta=respuesta_texto,
+                        puntos=int(puntos),
+                        es_correcta=bool(es_correcta),
+                        pregunta=pregunta
+                    )
+                    respuesta.save()
+
+                if num_respuestas < respuestas.count():
+                    for j in range(num_respuestas, respuestas.count()):
+                        respuestas[j].delete()
 
             return redirect('editar_gincana', gincana_id=gincana_id)
     else:
@@ -1371,50 +1469,89 @@ def documento_qrs(request, gincana_id):
 
 @login_required
 def crear_usuarios_invitados(request, gincana_id):
-    profesores = Profesor.objects.filter(email=request.user.email)
-    dark_mode_enabled = request.session.get('darkModeEnabled', False)
     gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-    invitados = Invitado.objects.filter(gincana=gincana)
-    count = Invitado.objects.filter(gincana=gincana).count()
+    if gincana.activa == False:
+        profesores = Profesor.objects.filter(email=request.user.email)
+        dark_mode_enabled = request.session.get('darkModeEnabled', False)
+        
+        invitados = Invitado.objects.filter(gincana=gincana)
+        count = Invitado.objects.filter(gincana=gincana).count()
 
-    paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-    paradas_data = []
-    for parada in paradas:
-        pregunta = parada.pregunta_set.first()
-        respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
-        parada_data = {
-            'latitud': parada.latitud,
-            'longitud': parada.longitud,
-            'pregunta': pregunta.enunciado if pregunta else None,
-            'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
-        }
-        paradas_data.append(parada_data)
+        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+        paradas_data = []
+        for parada in paradas:
+            pregunta = parada.pregunta_set.first()
+            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+            parada_data = {
+                'nombre': parada.nombre,
+                'latitud': parada.latitud,
+                'longitud': parada.longitud,
+                'pregunta': pregunta.enunciado if pregunta else None,
+                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+            }
+            paradas_data.append(parada_data)
 
-    paradas_gincana = Parada.objects.filter(gincana=gincana)
-    ids_paradas = paradas_gincana.values_list('id', flat=True)
-    todas_con_pregunta = all(Pregunta.objects.filter(parada_id=parada_id).exists() for parada_id in ids_paradas)
+        paradas_gincana = Parada.objects.filter(gincana=gincana)
+        ids_paradas = paradas_gincana.values_list('id', flat=True)
+        todas_con_pregunta = all(Pregunta.objects.filter(parada_id=parada_id).exists() for parada_id in ids_paradas)
 
-    if request.method == "POST" and gincana.duracion is not None and todas_con_pregunta:
-        form = InvitadosForm(request.POST)
-        if form.is_valid():
-            numero_invitados = int(form.cleaned_data['usuarios'])
-            for i in range(numero_invitados):
-                unique_id = uuid.uuid4().hex
-                usuario = f'invitado_{gincana_id}_{count + i + 1}_{unique_id}'
-                invitado = Invitado(usuario=usuario, gincana=gincana)
-                invitado.save()
-            return redirect('usuarios_invitados', gincana_id = gincana_id)
+        if request.method == "POST" and gincana.duracion is not None and todas_con_pregunta:
+            form = InvitadosForm(request.POST)
+            if form.is_valid():
+                numero_invitados = int(form.cleaned_data['usuarios'])
+                for i in range(numero_invitados):
+                    unique_id = uuid.uuid4().hex
+                    usuario = f'invitado_{gincana_id}_{count + i + 1}_{unique_id}'
+                    invitado = Invitado(usuario=usuario, gincana=gincana)
+                    invitado.save()
+                return redirect('usuarios_invitados', gincana_id = gincana_id)
+        else:
+            form = InvitadosForm()
+
+        return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form, 'num': count,
+            'error': "Se necesita primero configurar la hora de finalización de la Gincana y añadir a todas las Paradas sus Preguntas y Respuestas."})
     else:
+        profesores = Profesor.objects.filter(email=request.user.email)
+        dark_mode_enabled = request.session.get('darkModeEnabled', False)
+        total = Invitado.objects.filter(gincana=gincana).count()
+        invitados = Invitado.objects.filter(gincana=gincana)
+        invitados_ordenados = defaultdict(list)
+        
+        for invitado in invitados:
+            jugadas = GincanaJugada.objects.filter(gincana=gincana, invitado=invitado)
+            if jugadas.exists():
+                for jugada in jugadas:
+                    invitados_ordenados[jugada.edicion].append(invitado)
+            else:
+                invitados_ordenados["Nuevos"].append(invitado)
         form = InvitadosForm()
-
-    return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 'invitados': invitados, 'form': form, 'num': count,
-        'error': "Se necesita primero configurar la hora de finalización de la Gincana y añadir a todas las Paradas sus Preguntas y Respuestas."})
+        return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
+            'invitados_ordenados': dict(invitados_ordenados), 'form': form, 'total': total , 'error': 'No se pueden hacer cambios si la Gincana está activa.'})
 
 @login_required
 def borrar_usuarios_invitados(request, gincana_id, usuario):
-    invitado = get_object_or_404(Invitado, usuario=usuario, gincana_id=gincana_id)
-    invitado.delete()
-    return redirect('usuarios_invitados', gincana_id = gincana_id)
+    gincana = get_object_or_404(Gincana, pk=gincana_id)
+    if gincana.activa == False:
+        invitado = get_object_or_404(Invitado, usuario=usuario, gincana_id=gincana_id)
+        invitado.delete()
+        return redirect('usuarios_invitados', gincana_id = gincana_id)
+    else:
+        profesores = Profesor.objects.filter(email=request.user.email)
+        dark_mode_enabled = request.session.get('darkModeEnabled', False)
+        total = Invitado.objects.filter(gincana=gincana).count()
+        invitados = Invitado.objects.filter(gincana=gincana)
+        invitados_ordenados = defaultdict(list)
+        
+        for invitado in invitados:
+            jugadas = GincanaJugada.objects.filter(gincana=gincana, invitado=invitado)
+            if jugadas.exists():
+                for jugada in jugadas:
+                    invitados_ordenados[jugada.edicion].append(invitado)
+            else:
+                invitados_ordenados["Nuevos"].append(invitado)
+        form = InvitadosForm()
+        return render(request, 'usuarios_invitados.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
+            'invitados_ordenados': dict(invitados_ordenados), 'form': form, 'total': total , 'error': 'No se pueden hacer cambios si la Gincana está activa.'})
 
 def selector(request):
     if request.user.is_authenticated:
@@ -1452,6 +1589,7 @@ def invitado_gincana(request, gincana_id, invitado):
             pregunta = parada.pregunta_set.first()
             respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
             parada_data = {
+                'nombre': parada.nombre,
                 'latitud': parada.latitud,
                 'longitud': parada.longitud,
                 'pregunta': pregunta.enunciado if pregunta else None,
@@ -1472,6 +1610,7 @@ def invitado_gincana_iniciar(request, gincana_id, invitado):
             pregunta = parada.pregunta_set.first()
             respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
             parada_data = {
+                'nombre': parada.nombre,
                 'latitud': parada.latitud,
                 'longitud': parada.longitud,
                 'pregunta': pregunta.enunciado if pregunta else None,
@@ -1499,6 +1638,7 @@ def invitado_responder(request, gincana_id, invitado, parada):
             pregunta = par.pregunta_set.first()
             respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
             parada_data = {
+                'nombre': parada.nombre,
                 'latitud': par.latitud,
                 'longitud': par.longitud,
                 'pregunta': pregunta.enunciado if pregunta else None,
@@ -1579,6 +1719,7 @@ def invitado_fin(request, gincana_id, invitado):
             pregunta = parada.pregunta_set.first()
             respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
             parada_data = {
+                'nombre': parada.nombre,
                 'latitud': parada.latitud,
                 'longitud': parada.longitud,
                 'pregunta': pregunta.enunciado if pregunta else None,
