@@ -3,6 +3,7 @@ from .models import Gincana, GincanaJugada, Invitado, Puntuacion
 import datetime 
 from datetime import datetime, timezone, time
 from pytz import timezone as t
+from django.shortcuts import get_object_or_404
 
 @shared_task(bind=True)
 def terminar_gincana(self):
@@ -15,13 +16,10 @@ def terminar_gincana(self):
 
             invitados = Invitado.objects.filter(gincana_id=gincana.id)
             for invitado in invitados:
-                if GincanaJugada.objects.filter(gincana=gincana, invitado=invitado).exists():
-                    continue 
-
                 puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
                 puntuacion = 0
                 for punto in puntos:
-                    puntuacion+=punto.puntuacion
+                    puntuacion+=punto.respuesta.puntos
 
                 duracion = datetime.now(timezone.utc) - gincana.edicion
 
@@ -30,15 +28,21 @@ def terminar_gincana(self):
                 minutos, segundos = divmod(resto, 60)
 
                 duracion = time(horas, minutos, segundos)
-
-                gincanaJugada = GincanaJugada.objects.create(
-                    duracion=duracion,
-                    total_puntos=puntuacion,
-                    edicion=gincana.edicion,
-                    gincana_id=gincana.id,
-                    invitado_id=invitado.usuario
-                )
-                gincanaJugada.save()
+                
+                if GincanaJugada.objects.filter(gincana=gincana, invitado=invitado).exists():
+                    gincanaJugada = get_object_or_404(GincanaJugada, invitado=invitado)
+                    if gincanaJugada.duracion == time(0, 0, 0):
+                        gincanaJugada.duracion = duracion
+                        gincanaJugada.save()
+                else:
+                    gincanaJugada = GincanaJugada.objects.create(
+                        duracion=duracion,
+                        total_puntos=puntuacion,
+                        edicion=gincana.edicion,
+                        gincana_id=gincana.id,
+                        invitado_id=invitado.usuario
+                    )
+                    gincanaJugada.save()
             gincanas['desactivadas'].append((gincana.titulo, gincana.duracion))
         else:
             gincanas['activas'].append((gincana.titulo, gincana.duracion))

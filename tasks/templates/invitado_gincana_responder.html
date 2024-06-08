@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base3.html' %}
 
 {% block content %}
 
@@ -25,7 +25,7 @@
                     <tbody>
                         {% for respuesta in respuestas %}
                             <tr>
-                                <td>{{ respuesta.respuesta }}</td>
+                                <td>{{respuesta.respuesta}}</td>
                                 <td>
                                     <form method="POST" action="{% url 'invitado_registrar' gincana.id invitado.usuario parada respuesta.id %}" style="display:inline;">
                                         {% csrf_token %}

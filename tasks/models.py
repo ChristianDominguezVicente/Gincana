@@ -456,12 +456,11 @@ def delete_invitados(sender, instance, **kwargs):
         invitado.delete()
 
 class Puntuacion(models.Model):
-    puntuacion = models.IntegerField('puntuacion')
     invitado = models.ForeignKey(Invitado, on_delete=models.CASCADE)
     respuesta = models.ForeignKey(Respuesta, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.puntuacion) + ' - ' + self.invitado.usuario + ' - ' + self.invitado.gincana.titulo
+        return str(self.respuesta.puntos) + ' - ' + self.invitado.usuario + ' - ' + self.invitado.gincana.titulo
     
 class GincanaJugada(models.Model):
     duracion = models.TimeField('Duración', null=True, blank=True)

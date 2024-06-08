@@ -14,7 +14,7 @@
         <div style="font-weight: bold;">Regenerando mapa, espere por favor.</div>
       </div>
 
-      {{ paradas|json_script:"paradas_json" }}
+      {{paradas|json_script:"paradas_json"}}
 
       <script>
         $('#add').on('shown.bs.modal', function () {
@@ -107,7 +107,7 @@
             $.ajax({
               url: "parada/guardar/",
               type: "POST",
-              data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'parada': JSON.stringify(dict_values)},
+              data: {csrfmiddlewaretoken: '{{csrf_token}}', 'parada': JSON.stringify(dict_values)},
               success: function(response) {
                   document.getElementById('loading-screen2').style.display = 'none';
                   window.location.reload();
@@ -128,9 +128,6 @@
           Guardar Paradas
         </button>
       </div>
-
-      
-
     </div>
   </div>
 </div>

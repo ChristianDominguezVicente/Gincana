@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base3.html' %}
 
 {% block content %}
 
@@ -26,13 +26,13 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{ invitado.usuario }}</td>
-                            <td>{{ puntuacion }}</td>
+                            <td>{{invitado.usuario}}</td>
+                            <td>{{puntuacion}}</td>
                         </tr>
                     </tbody>
                 </table>
                 
-                {{ paradas|json_script:"paradas_json" }}
+                {{paradas|json_script:"paradas_json"}}
 
                 <script>
                     var screenWidth = window.innerWidth;

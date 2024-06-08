@@ -12,9 +12,9 @@
                     <a href="{% url 'gincana' mi_gincana.id %}" class="gincana">
                         <div class="gincana-img">
                             {% if darkModeEnabled == 'true' %}
-                                <img src="{{ mi_gincana.imagen_oscura.url }}" alt="{{ mi_gincana.titulo }}" class="img-gincana">
+                                <img src="{{mi_gincana.imagen_oscura.url}}" alt="{{mi_gincana.titulo}}" class="img-gincana">
                             {% elif darkModeEnabled == 'false' %}
-                                <img src="{{ mi_gincana.imagen.url }}" alt="{{ mi_gincana.titulo }}" class="img-gincana">
+                                <img src="{{mi_gincana.imagen.url}}" alt="{{mi_gincana.titulo}}" class="img-gincana">
                             {% endif %}
                         </div>
                         <div class="gincana-titulo">
@@ -55,9 +55,9 @@
                     <a href="{% url 'gincana_publica' gincana_publica.id %}" class="gincana">
                         <div class="gincana-img">
                             {% if darkModeEnabled == 'true' %}
-                                <img src="{{ gincana_publica.imagen_oscura.url }}" alt="{{ gincana_publica.titulo }}" class="img-gincana">
+                                <img src="{{gincana_publica.imagen_oscura.url}}" alt="{{gincana_publica.titulo}}" class="img-gincana">
                             {% elif darkModeEnabled == 'false' %}
-                                <img src="{{ gincana_publica.imagen.url }}" alt="{{ gincana_publica.titulo }}" class="img-gincana">
+                                <img src="{{gincana_publica.imagen.url}}" alt="{{gincana_publica.titulo}}" class="img-gincana">
                             {% endif %} 
                         </div>
                         <div class="gincana-titulo">
