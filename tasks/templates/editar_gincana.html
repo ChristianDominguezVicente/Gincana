@@ -183,7 +183,7 @@
                 type: "POST",
                 data: {
                     'ordered_ids[]': orderedIds,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                    csrfmiddlewaretoken: '{{csrf_token}}'
                 },
                 success: function(response) {
                     document.getElementById('loading-screen').style.display = 'none';
@@ -210,7 +210,7 @@
                 type: "POST",
                 data: {
                     parada_id: parada_id,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                    csrfmiddlewaretoken: '{{csrf_token}}'
                 },
                 success: function(response) {
                     document.getElementById('loading-screen').style.display = 'none';

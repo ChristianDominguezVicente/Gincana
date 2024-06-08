@@ -76,11 +76,11 @@
                         <div class="barra">
                             {% for profesor in profesores %}
                                 <button id="dark-mode-toggle" style="border: none; background-color: transparent;">
-                                    <img id="dark-mode-image" width="30" height="30" class="rounded-circle" src="{% static 'media/Modo_oscuro.png' %}" >
+                                    <img id="dark-mode-image" width="35" height="35" class="rounded-circle" src="{% static 'media/Modo_oscuro.png' %}" >
                                 </button>
                                 <span style="margin-right: 10px;"></span>
                                 <a href="{% url 'profesor' profesor.email %}" class="d-flex align-items-center text-white text-decoration-none">
-                                    <img width="30" height="30" class="rounded-circle" src="{{ profesor.imagen.url }}" >
+                                    <img width="35" height="35" class="rounded-circle" style="background-color: #9E9E9E;border: 2px solid #3C8067; padding: 1px;" src="{{profesor.imagen.url}}" >
                                 </a>
                             {% endfor %}
                         </div>
@@ -113,7 +113,7 @@
                 type: "POST",
                 data: {
                     'darkModeEnabled': darkModeEnabled,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                    csrfmiddlewaretoken: '{{csrf_token}}'
                 },
                 success: function(data) {
                     location.reload();
@@ -141,7 +141,7 @@
                 type: "POST",
                 data: {
                     'darkModeEnabled': darkModeEnabled,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'  
+                    csrfmiddlewaretoken: '{{csrf_token}}'  
                 }
             });
 

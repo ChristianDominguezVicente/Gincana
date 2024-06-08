@@ -4,35 +4,41 @@
 
 {% load static %}
 
-<h1><img class="profile-pic" src="{{ profesor.imagen.url }}" ></h1>
-<h1 class="titulo">{{profesor.email}}</h1>
-<p>{{profesor.nombre}}</p>
-<p>{{profesor.apellidos}}</p>
-<p>{{profesor.fecha_nacimiento}}</p>
-<p>{{profesor.genero}}</p>
-<p>{{profesor.pais}}</p>
-<p>{{profesor.ciudad}}</p>
-<p>{{profesor.organizacion}}</p>
+<div class="container-in">
+    <img width="50" height="50" class="profile-pic rounded-circle" style="background-color: #9E9E9E;border: 2px solid #3C8067; padding: 1px;" src="{{profesor.imagen.url}}" >
+    <span style="margin-right: 10px;"></span>
+    <h1 class="titulo">{{profesor.email}}</h1>
 
-<div >
-    <div class="input-registro">
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <button class="btn-signin">
-            Editar
+    <div class="container-in">
+        <p>{{profesor.nombre}}</p>
+        <p>{{profesor.apellidos}}</p>
+        <p>{{profesor.fecha_nacimiento}}</p>
+        <p>{{profesor.genero}}</p>
+        <p>{{profesor.pais}}</p>
+        <p>{{profesor.ciudad}}</p>
+        <p>{{profesor.organizacion}}</p>
+    </div>
+    
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <div class="input-registro">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <button class="btn-signin">
+                Editar
+            </button>
+        </form>
+        <span style="margin-right: 10px;"></span>
+        <form action="{% url 'verificacion_password2' profesor.email %}" method="POST">
+            {% csrf_token %}
+            <button class="btn-pass">
+                Cambiar Contraseña
+            </button>
+        </form>
+        <span style="margin-right: 10px;"></span>
+        <button class="btn-signin" style="margin-left: 0px; margin-right: 0px;" onclick="abrir_modal_confirmacion_cuenta('{% url 'profesor_confirmacion_cuenta' profesor.email %}')" data-toggle="modal" data-target="#confirmacion_cuenta">
+            Eliminar
         </button>
-    </form>
-    <span style="margin-right: 10px;"></span>
-    <form action="{% url 'verificacion_password2' profesor.email %}" method="POST">
-        {% csrf_token %}
-        <button class="btn-pass">
-            Cambiar Contraseña
-        </button>
-    </form>
-    <span style="margin-right: 10px;"></span>
-    <button class="btn-signin" style="margin-left: 0px; margin-right: 0px;" onclick="abrir_modal_confirmacion_cuenta('{% url 'profesor_confirmacion_cuenta' profesor.email %}')" data-toggle="modal" data-target="#confirmacion_cuenta">
-        Eliminar
-    </button>
+    </div>
 </div>
 
 <div class="modal fade" id="confirmacion_cuenta" role="dialog"></div>

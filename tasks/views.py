@@ -420,7 +420,7 @@ def puntuacion_total(request, gincana_id):
         puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
         puntuacion = 0
         for punto in puntos:
-            puntuacion+=punto.puntuacion
+            puntuacion+=punto.respuesta.puntos
         invitados_puntuaciones.append((invitado, puntuacion))
     return render(request, 'puntuacion_total.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
         'invitados_puntuaciones': invitados_puntuaciones})
@@ -474,7 +474,7 @@ def puntuacion_edicion(request, gincana_id, edicion):
         puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
         puntuacion = 0
         for punto in puntos:
-            puntuacion+=punto.puntuacion
+            puntuacion+=punto.respuesta.puntos
         invitados_puntuaciones.append((invitado, puntuacion))
     return render(request, 'puntuacion_edicion.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
         'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion})  
@@ -585,13 +585,10 @@ def gincana_iniciar(request, gincana_id):
 
         invitados = Invitado.objects.filter(gincana_id=gincana.id)
         for invitado in invitados:
-            if GincanaJugada.objects.filter(gincana=gincana, invitado=invitado).exists():
-                continue 
-
             puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
             puntuacion = 0
             for punto in puntos:
-                puntuacion+=punto.puntuacion
+                puntuacion+=punto.respuesta.puntos
 
             duracion = datetime.now(timezone.utc) - gincana.edicion
 
@@ -600,15 +597,21 @@ def gincana_iniciar(request, gincana_id):
             minutos, segundos = divmod(resto, 60)
 
             duracion = time(horas, minutos, segundos)
-
-            gincanaJugada = GincanaJugada.objects.create(
-                duracion=duracion,
-                total_puntos=puntuacion,
-                edicion=gincana.edicion,
-                gincana_id=gincana.id,
-                invitado_id=invitado.usuario
-            )
-            gincanaJugada.save()
+            
+            if GincanaJugada.objects.filter(gincana=gincana, invitado=invitado).exists():
+                gincanaJugada = get_object_or_404(GincanaJugada, invitado=invitado)
+                if gincanaJugada.duracion == time(0, 0, 0):
+                    gincanaJugada.duracion = duracion
+                    gincanaJugada.save()
+            else:
+                gincanaJugada = GincanaJugada.objects.create(
+                    duracion=duracion,
+                    total_puntos=puntuacion,
+                    edicion=gincana.edicion,
+                    gincana_id=gincana.id,
+                    invitado_id=invitado.usuario
+                )
+                gincanaJugada.save()
         return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
     else:
         return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled, 
@@ -1316,8 +1319,6 @@ def editar_guardar(request, gincana_id, parada_id):
             pregunta.enunciado = pregunta_form.cleaned_data['enunciado']
             pregunta.save()
 
-            #Respuesta.objects.filter(pregunta=pregunta).delete()
-
             num_respuestas = int(request.POST.get('num_respuestas', 0))
 
             cont_true=0
@@ -1638,7 +1639,7 @@ def invitado_responder(request, gincana_id, invitado, parada):
             pregunta = par.pregunta_set.first()
             respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
             parada_data = {
-                'nombre': parada.nombre,
+                'nombre': par.nombre,
                 'latitud': par.latitud,
                 'longitud': par.longitud,
                 'pregunta': pregunta.enunciado if pregunta else None,
@@ -1675,17 +1676,38 @@ def invitado_registrar(request, gincana_id, invitado, parada, respuesta_id):
         invitado_gincana.update()
 
         respondida = Puntuacion.objects.create(
-            puntuacion=res.puntos,
             invitado=get_object_or_404(Invitado, pk=invitado),
             respuesta_id=res.id,
         )
         respondida.save()
 
+        puntos = Puntuacion.objects.filter(invitado_id=invitado_gincana.usuario)
+        puntuacion = 0
+        for punto in puntos:
+            puntuacion+=punto.respuesta.puntos
+
+        gincanaJugada = GincanaJugada.objects.filter(invitado_id=invitado_gincana.usuario)
+        if gincanaJugada.exists():
+            gincanaJugada = get_object_or_404(GincanaJugada, invitado_id=invitado_gincana.usuario)
+            gincanaJugada.total_puntos=puntuacion
+            gincanaJugada.save()
+        else:
+            duracion = time(0, 0, 0)
+
+            gincanaJugada = GincanaJugada.objects.create(
+                duracion=duracion,
+                total_puntos=puntuacion,
+                edicion=gincana.edicion,
+                gincana_id=gincana.id,
+                invitado_id=invitado_gincana.usuario
+            )
+            gincanaJugada.save()
+
         if Parada.objects.filter(gincana=gincana).order_by('orden').last().orden < parada:
             puntos = Puntuacion.objects.filter(invitado_id=invitado_gincana.usuario)
             puntuacion = 0
             for punto in puntos:
-                puntuacion+=punto.puntuacion
+                puntuacion+=punto.respuesta.puntos
 
             duracion = datetime.now(timezone.utc) - gincana.edicion
 
@@ -1695,13 +1717,9 @@ def invitado_registrar(request, gincana_id, invitado, parada, respuesta_id):
 
             duracion = time(horas, minutos, segundos)
 
-            gincanaJugada = GincanaJugada.objects.create(
-                duracion=duracion,
-                total_puntos=puntuacion,
-                edicion=gincana.edicion,
-                gincana_id=gincana.id,
-                invitado_id=invitado_gincana.usuario
-            )
+            gincanaJugada = get_object_or_404(GincanaJugada, invitado_id=invitado_gincana.usuario)
+            gincanaJugada.duracion=duracion
+            gincanaJugada.total_puntos=puntuacion
             gincanaJugada.save()
             return redirect('invitado_fin', gincana_id=gincana_id, invitado=invitado)
         else:
@@ -1730,7 +1748,7 @@ def invitado_fin(request, gincana_id, invitado):
         puntos = Puntuacion.objects.filter(invitado_id=invitado_gincana.usuario)
         puntuacion = 0
         for punto in puntos:
-            puntuacion+=punto.puntuacion
+            puntuacion+=punto.respuesta.puntos
         return render(request, 'invitado_fin.html', {'gincana': gincana, 'invitado': invitado_gincana, 'paradas': paradas_data, 'puntuacion': puntuacion})
 
 @login_required
