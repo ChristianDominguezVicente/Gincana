@@ -85,7 +85,7 @@ def signup(request):
                                     password=request.POST['password1'])
 
                                 user.save()
-                                num=random.randint(0,9999)
+                                num=random.randint(1000,9999)
                                 Verificacion.objects.create(code=num, email=user.email)
 
                                 send_mail(
@@ -372,30 +372,43 @@ def configuracion_gincana(request, gincana_id):
     else:
         try:
             gincana = get_object_or_404(Gincana, pk=gincana_id, email_profesor=request.user)
-            if gincana.activa == False:
-                paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
-                paradas_data = []
-                for parada in paradas:
-                    pregunta = parada.pregunta_set.first()
-                    respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
-                    parada_data = {
-                        'nombre': parada.nombre,
-                        'latitud': parada.latitud,
-                        'longitud': parada.longitud,
-                        'pregunta': pregunta.enunciado if pregunta else None,
-                        'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
-                    }
-                    paradas_data.append(parada_data)
-                form = GincanaConfiguracionForm(request.POST, instance=gincana)
-                form.save()
-                return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
+            form = GincanaConfiguracionForm(request.POST, instance=gincana)
+            paradas_gincana = Parada.objects.filter(gincana=gincana)
+            ids_paradas = paradas_gincana.values_list('id', flat=True)
+            todas_con_pregunta = all(Pregunta.objects.filter(parada_id=parada_id).exists() for parada_id in ids_paradas)
+            if form.is_valid():
+                if todas_con_pregunta:
+                    if gincana.activa == False:
+                        paradas = Parada.objects.filter(gincana=gincana).order_by('orden')
+                        paradas_data = []
+                        for parada in paradas:
+                            pregunta = parada.pregunta_set.first()
+                            respuestas = list(pregunta.respuesta_set.all()) if pregunta else []
+                            parada_data = {
+                                'nombre': parada.nombre,
+                                'latitud': parada.latitud,
+                                'longitud': parada.longitud,
+                                'pregunta': pregunta.enunciado if pregunta else None,
+                                'respuestas': [{'respuesta': respuesta.respuesta, 'puntos': respuesta.puntos, 'es_correcta': respuesta.es_correcta} for respuesta in respuestas]
+                            }
+                            paradas_data.append(parada_data)
+                        form = GincanaConfiguracionForm(request.POST, instance=gincana)
+                        form.save()
+                        return render(request, 'gincana.html', {'gincana': gincana, 'profesores': profesores, 'paradas': paradas_data, 'darkModeEnabled': dark_mode_enabled})
+                    else:
+                        form = GincanaConfiguracionForm(request.POST, instance=gincana)
+                        return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
+                            'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "La Gincana esta activa, no pueden hacerse cambios mientras lo este."})
+                else:
+                    form = GincanaConfiguracionForm(request.POST, instance=gincana)
+                    return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
+                        'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "Para hacer cambios de configuracion necesitas tener todas las preguntas y respuestas completadas."})
             else:
-                form = GincanaConfiguracionForm(request.POST, instance=gincana)
                 return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
-                    'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "La Gincana esta activa, no pueden hacerse cambios mientras lo este."})
+                    'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "Error actualizando la Gincana."})
         except ValueError:
             return render(request, 'configuracion_gincana.html', {'gincana': gincana, 'form': form,
-                'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "Error actualizando la Gincana"})
+                'darkModeEnabled': dark_mode_enabled, 'profesores': profesores, 'error': "Error actualizando la Gincana."})
 
 @login_required        
 def puntuacion_gincana(request, gincana_id):  
@@ -433,13 +446,26 @@ def puntuacion_informe(request, gincana_id):
     invitados_puntuaciones = []
     for gincanaJugada in gincanaJugadas:
         invitado = gincanaJugada.invitado
+        duracion = gincanaJugada.duracion
         puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
         puntuacion = 0
         for punto in puntos:
-            puntuacion+=punto.puntuacion
-        invitados_puntuaciones.append((invitado, puntuacion))
+            puntuacion+=punto.respuesta.puntos
+        invitados_puntuaciones.append((invitado, puntuacion, duracion))
 
-    html_string = render_to_string('informe_total.html', {'invitados_puntuaciones': invitados_puntuaciones})
+    paradas = Parada.objects.filter(gincana_id=gincana_id)
+    preguntas = []
+    for parada in paradas:
+        pregunta = get_object_or_404(Pregunta, parada_id=parada.id)
+        respuestas = Respuesta.objects.filter(pregunta_id=pregunta.id)
+        respondidas = []
+        for respuesta in respuestas:
+            puntos = Puntuacion.objects.filter(respuesta_id=respuesta.id)
+            for punto in puntos:
+                respondidas.append((punto.invitado.usuario, punto.respuesta.respuesta))
+        preguntas.append({'parada': parada.nombre, 'pregunta': pregunta.enunciado, 'respondidas': respondidas})
+
+    html_string = render_to_string('informe_edicion.html', {'invitados_puntuaciones': invitados_puntuaciones, 'preguntas': preguntas})
 
     options = {
         'page-size': 'A4',
@@ -487,13 +513,26 @@ def puntuacion_edicion_informe(request, gincana_id, edicion):
     invitados_puntuaciones = []
     for gincanaJugada in gincanaJugadas:
         invitado = gincanaJugada.invitado
+        duracion = gincanaJugada.duracion
         puntos = Puntuacion.objects.filter(invitado_id=invitado.usuario)
         puntuacion = 0
         for punto in puntos:
-            puntuacion+=punto.puntuacion
-        invitados_puntuaciones.append((invitado, puntuacion))
+            puntuacion+=punto.respuesta.puntos
+        invitados_puntuaciones.append((invitado, puntuacion, duracion))
 
-    html_string = render_to_string('informe_edicion.html', {'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion})
+    paradas = Parada.objects.filter(gincana_id=gincana_id)
+    preguntas = []
+    for parada in paradas:
+        pregunta = get_object_or_404(Pregunta, parada_id=parada.id)
+        respuestas = Respuesta.objects.filter(pregunta_id=pregunta.id)
+        respondidas = []
+        for respuesta in respuestas:
+            puntos = Puntuacion.objects.filter(respuesta_id=respuesta.id)
+            for punto in puntos:
+                respondidas.append((punto.invitado.usuario, punto.respuesta.respuesta))
+        preguntas.append({'parada': parada.nombre, 'pregunta': pregunta.enunciado, 'respondidas': respondidas})
+
+    html_string = render_to_string('informe_edicion.html', {'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion, 'preguntas': preguntas})
 
     options = {
         'page-size': 'A4',
@@ -632,6 +671,25 @@ def gincana_copiar(request, gincana_id):
         nueva_Gincana.pk = None
         nueva_Gincana.email_profesor = request.user
         nueva_Gincana.save()
+
+        gincana = get_object_or_404(Gincana, pk=gincana_id)
+        nombre_archivo = f"mapa_{gincana.id}.png"
+        nombre_archivo2 = f"mapa_{gincana.id}_oscuro.png"
+        ruta_imagen = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+        ruta_imagen2 = os.path.join(settings.MEDIA_ROOT, nombre_archivo2)
+
+        nombre_archivo3 = f"mapa_{nueva_Gincana.id}.png"
+        nombre_archivo4 = f"mapa_{nueva_Gincana.id}_oscuro.png"
+        ruta_imagen3 = os.path.join(settings.MEDIA_ROOT, nombre_archivo3)
+        ruta_imagen4 = os.path.join(settings.MEDIA_ROOT, nombre_archivo4)
+
+        shutil.copy(ruta_imagen, ruta_imagen3)
+        shutil.copy(ruta_imagen2, ruta_imagen4)
+
+        nueva_Gincana.imagen = ruta_imagen3
+        nueva_Gincana.imagen_oscura = ruta_imagen4
+        nueva_Gincana.save()
+        
         for parada in paradas:
             nueva_parada = Parada.objects.create(
                 orden=parada.orden,
