@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Puntuación Total</title>
@@ -43,5 +43,46 @@
             </tbody>
         </table>
     </div>
+    <div class="container-in">
+        <h2>Tiempos de los usuarios</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Usuarios</th>
+                    <th>Duración</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invitado, puntuacion, duracion in invitados_puntuaciones %}
+                    <tr>
+                        <td>{{invitado.usuario}}</td>
+                        <td>{{duracion|time:"H:i:s"}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% for pregunta in preguntas %}
+        <div class="container-in">
+            <h2>Parada {{forloop.counter}}: {{pregunta.parada}}</h2>
+            <h3>{{pregunta.pregunta}}</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Usuarios</th>
+                        <th>Respuesta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invitado, respuesta in pregunta.respondidas %}
+                        <tr>
+                            <td>{{invitado}}</td>
+                            <td>{{respuesta}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
 </body>
 </html>
