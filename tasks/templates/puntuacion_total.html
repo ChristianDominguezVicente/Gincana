@@ -12,16 +12,24 @@
                     <thead>
                         <tr>
                             <th>Usuarios</th>
+                            <th>Edición</th>
                             <th>Puntuación</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for invitado, puntuacion in invitados_puntuaciones %}
+                        {% if invitados_puntuaciones %}
+                            {% for invitado, puntuacion, edicion in invitados_puntuaciones %}
+                                <tr>
+                                    <td>{{invitado.usuario}}</td>
+                                    <td>{{edicion}}</td>
+                                    <td>{{puntuacion}}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
                             <tr>
-                                <td>{{invitado.usuario}}</td>
-                                <td>{{puntuacion}}</td>
+                                <td colspan="2">Todavía no se ha realizado ninguna gincana.</td>
                             </tr>
-                        {% endfor %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>

@@ -434,7 +434,7 @@ def puntuacion_total(request, gincana_id):
         puntuacion = 0
         for punto in puntos:
             puntuacion+=punto.respuesta.puntos
-        invitados_puntuaciones.append((invitado, puntuacion))
+        invitados_puntuaciones.append((invitado, puntuacion, gincanaJugada.edicion))
     return render(request, 'puntuacion_total.html', {'gincana': gincana, 'profesores': profesores, 'darkModeEnabled': dark_mode_enabled, 
         'invitados_puntuaciones': invitados_puntuaciones})
 
@@ -451,7 +451,7 @@ def puntuacion_informe(request, gincana_id):
         puntuacion = 0
         for punto in puntos:
             puntuacion+=punto.respuesta.puntos
-        invitados_puntuaciones.append((invitado, puntuacion, duracion))
+        invitados_puntuaciones.append((invitado, puntuacion, duracion, gincanaJugada.edicion))
 
     paradas = Parada.objects.filter(gincana_id=gincana_id)
     preguntas = []
@@ -465,7 +465,7 @@ def puntuacion_informe(request, gincana_id):
                 respondidas.append((punto.invitado.usuario, punto.respuesta.respuesta))
         preguntas.append({'parada': parada.nombre, 'pregunta': pregunta.enunciado, 'respondidas': respondidas})
 
-    html_string = render_to_string('informe_edicion.html', {'invitados_puntuaciones': invitados_puntuaciones, 'preguntas': preguntas})
+    html_string = render_to_string('informe_total.html', {'invitados_puntuaciones': invitados_puntuaciones, 'preguntas': preguntas})
 
     options = {
         'page-size': 'A4',
@@ -483,7 +483,7 @@ def puntuacion_informe(request, gincana_id):
     pdf = pdfkit.from_string(html_string, False, options=options)
 
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="puntuacion_total.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="puntuacion_total_{gincana.titulo}.pdf"'
 
     return response
 
@@ -511,6 +511,7 @@ def puntuacion_edicion_informe(request, gincana_id, edicion):
 
     gincanaJugadas = GincanaJugada.objects.filter(gincana=gincana, edicion=edicion)
     invitados_puntuaciones = []
+    invitados = []
     for gincanaJugada in gincanaJugadas:
         invitado = gincanaJugada.invitado
         duracion = gincanaJugada.duracion
@@ -519,6 +520,7 @@ def puntuacion_edicion_informe(request, gincana_id, edicion):
         for punto in puntos:
             puntuacion+=punto.respuesta.puntos
         invitados_puntuaciones.append((invitado, puntuacion, duracion))
+        invitados.append(invitado.usuario)
 
     paradas = Parada.objects.filter(gincana_id=gincana_id)
     preguntas = []
@@ -529,7 +531,8 @@ def puntuacion_edicion_informe(request, gincana_id, edicion):
         for respuesta in respuestas:
             puntos = Puntuacion.objects.filter(respuesta_id=respuesta.id)
             for punto in puntos:
-                respondidas.append((punto.invitado.usuario, punto.respuesta.respuesta))
+                if punto.invitado.usuario in invitados:
+                    respondidas.append((punto.invitado.usuario, punto.respuesta.respuesta))
         preguntas.append({'parada': parada.nombre, 'pregunta': pregunta.enunciado, 'respondidas': respondidas})
 
     html_string = render_to_string('informe_edicion.html', {'invitados_puntuaciones': invitados_puntuaciones, 'edicion': edicion, 'preguntas': preguntas})
@@ -550,7 +553,7 @@ def puntuacion_edicion_informe(request, gincana_id, edicion):
     pdf = pdfkit.from_string(html_string, False, options=options)
 
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="puntuacion_edicion.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="puntuacion_{gincana.titulo}_edicion_{edicion}.pdf"'
 
     return response
 

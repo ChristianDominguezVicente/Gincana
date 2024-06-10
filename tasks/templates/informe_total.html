@@ -30,13 +30,15 @@
             <thead>
                 <tr>
                     <th>Usuarios</th>
+                    <th>Edición</th>
                     <th>Puntuación</th>
                 </tr>
             </thead>
             <tbody>
-                {% for invitado, puntuacion in invitados_puntuaciones %}
+                {% for invitado, puntuacion, duracion, edicion in invitados_puntuaciones %}
                     <tr>
                         <td>{{invitado.usuario}}</td>
+                        <td>{{edicion}}</td>
                         <td>{{puntuacion}}</td>
                     </tr>
                 {% endfor %}
@@ -49,13 +51,15 @@
             <thead>
                 <tr>
                     <th>Usuarios</th>
+                    <th>Edición</th>
                     <th>Duración</th>
                 </tr>
             </thead>
             <tbody>
-                {% for invitado, puntuacion, duracion in invitados_puntuaciones %}
+                {% for invitado, puntuacion, duracion, edicion in invitados_puntuaciones %}
                     <tr>
                         <td>{{invitado.usuario}}</td>
+                        <td>{{edicion}}</td>
                         <td>{{duracion|time:"H:i:s"}}</td>
                     </tr>
                 {% endfor %}
