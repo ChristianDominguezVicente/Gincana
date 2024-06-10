@@ -878,6 +878,17 @@ def profesor_eliminar(request, email_id):
                     'profesor': profesor,'profesores': profesores, 'darkModeEnabled': dark_mode_enabled
                 })
             else:
+                gincanas = Gincana.objects.filter(email_profesor=email_id)
+                for gincana in gincanas:
+                    ruta = os.path.join(settings.MEDIA_ROOT, gincana.imagen.name)
+                    ruta2 = os.path.join(settings.MEDIA_ROOT, gincana.imagen_oscura.name)
+                    if gincana.imagen and gincana.imagen.name != 'mapa.png':
+                        if os.path.exists(ruta) and os.path.exists(ruta2):
+                            os.remove(ruta)
+                            os.remove(ruta2)
+                if profesor.imagen and profesor.imagen.name != 'usuario.png':
+                        if os.path.exists(os.path.join(settings.MEDIA_ROOT, profesor.imagen.name)):
+                            os.remove(os.path.join(settings.MEDIA_ROOT, profesor.imagen.name))
                 profesor.delete()
                 return redirect('signin')
         except MultiValueDictKeyError:
@@ -899,11 +910,20 @@ def editar_profesor(request, email_id):
         try:
             profesor = get_object_or_404(Profesor, pk = email_id, email = request.user.email)
             form = EditarProfesorForm(request.POST, request.FILES, instance=profesor)
-            d = datetime.datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
+            d = datetime.strptime(request.POST['fecha_nacimiento'], '%Y-%m-%d').date()
             edad = date.today().year - d.year -((date.today().month, date.today().day) <(d.month, d.day))
             if edad >= 18:
                 profesor.fecha_nacimiento=request.POST['fecha_nacimiento']
-                profesor.imagen=request.FILES['imagen']
+                if 'imagen' in request.FILES:
+                    imagen = request.FILES['imagen']
+                    imagen.name = f"{profesor.email}.png"
+
+                    if profesor.imagen and profesor.imagen.name != 'usuario.png':
+                        if os.path.exists(os.path.join(settings.MEDIA_ROOT, profesor.imagen.name)):
+                            os.remove(os.path.join(settings.MEDIA_ROOT, profesor.imagen.name))
+
+                    profesor.imagen = imagen
+
                 form.save()
                 return redirect('profesor', email_id=request.user.email)
             else:
