@@ -6,26 +6,33 @@
 
 <div class="container-in">
     <h1>Puntuaciones</h1>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th colspan="2">Edición</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for edicion in ediciones %}
+    <div class="container-in">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>{{edicion}}</td>
-                    <td>
-                        <button type="button" class="btn btn-primary" id="edicion_{{edicion}} me-2" style="display:inline;" onclick="abrir_modal('{% url 'puntuacion_edicion' gincana.id edicion %}')" data-toggle="modal" data-target="#edicion">
-                            Puntuaciones
-                        </button>
-                    </td>
+                    <th colspan="2">Edición</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% if ediciones %}
+                    {% for edicion in ediciones %}
+                        <tr>
+                            <td>{{edicion}}</td>
+                            <td>
+                                <button type="button" class="btn btn-primary" id="edicion_{{edicion}} me-2" style="display:inline;" onclick="abrir_modal('{% url 'puntuacion_edicion' gincana.id edicion %}')" data-toggle="modal" data-target="#edicion">
+                                    Puntuaciones
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="2">Todavía no se ha realizado ninguna gincana.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 
     <div class="input-registro">
         <button type="button" class="btn-signin" onclick="abrir_modal('{% url 'puntuacion_total' gincana.id %}')" data-toggle="modal" data-target="#total">
