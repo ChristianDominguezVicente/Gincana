@@ -13,29 +13,31 @@
 
                 <div id="map" class="map"></div>
 
-                <div><strong>{{pregunta}}</strong></div>
+                <div class="container-in"><strong>{{pregunta}}</strong></div>
 
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Respuestas</th>
-                            <th>Elige respuesta</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for respuesta in respuestas %}
+                <div class="container-in">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td>{{respuesta.respuesta}}</td>
-                                <td>
-                                    <form method="POST" action="{% url 'invitado_registrar' gincana.id invitado.usuario parada respuesta.id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-success">Responder</button>
-                                    </form>
-                                </td>
+                                <th>Respuestas</th>
+                                <th>Elige respuesta</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for respuesta in respuestas %}
+                                <tr>
+                                    <td>{{respuesta.respuesta}}</td>
+                                    <td>
+                                        <form method="POST" action="{% url 'invitado_registrar' gincana.id invitado.usuario parada respuesta.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success">Responder</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 
                 {{ paradas|json_script:"paradas_json" }}
 
