@@ -13,6 +13,7 @@ class AuthenticationForm(forms.Form):
         )
     )
     password = forms.CharField(
+        max_length=128,
         widget=forms.PasswordInput(
             attrs={
                 'class': "input-box",
@@ -24,6 +25,7 @@ class AuthenticationForm(forms.Form):
     password.label=""
 
 class VerificacionForm(forms.ModelForm):
+    max_length=4,
     code = forms.IntegerField(
         widget=forms.NumberInput(
             attrs={
@@ -48,6 +50,7 @@ class VerificacionForm(forms.ModelForm):
 
 class GincanaForm(forms.ModelForm):
     titulo = forms.CharField(
+        max_length=128,
         widget=forms.TextInput(
             attrs={
                 'class': "input-box",
@@ -62,7 +65,7 @@ class GincanaForm(forms.ModelForm):
         fields = ['titulo']
 
 class GincanaConfiguracionForm(forms.ModelForm):
-    titulo = forms.CharField(label = 'Título:', widget = forms.TextInput(
+    titulo = forms.CharField(label = 'Título:', max_length=128, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese el título de la Gincana',
@@ -70,7 +73,7 @@ class GincanaConfiguracionForm(forms.ModelForm):
         }
     ))
 
-    descripcion = forms.CharField(label = 'Descripción de la Gincana:', widget = forms.Textarea(
+    descripcion = forms.CharField(label = 'Descripción de la Gincana:', max_length=1000, widget = forms.Textarea(
         attrs = {
             'class': 'input-des',
             'placeholder': 'Ingrese una descripcion',
@@ -125,7 +128,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    password1 = forms.CharField(label = 'Contraseña', widget = forms.PasswordInput(
+    password1 = forms.CharField(label = 'Contraseña', max_length=128, widget = forms.PasswordInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su contraseña...',
@@ -134,7 +137,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    password2 = forms.CharField(label = 'Confirme su Contraseña', widget = forms.PasswordInput(
+    password2 = forms.CharField(label = 'Confirme su Contraseña', max_length=128, widget = forms.PasswordInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese nuevamente su contraseña...',
@@ -143,7 +146,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    email = forms.EmailField(label = 'Correo Electrónico', widget = forms.EmailInput(
+    email = forms.EmailField(label = 'Correo Electrónico', max_length=254, widget = forms.EmailInput(        
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Correo Electrónico',
@@ -152,7 +155,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    nombre = forms.CharField(label = 'Nombre', widget = forms.TextInput(
+    nombre = forms.CharField(label = 'Nombre', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Nombre',
@@ -161,7 +164,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    apellidos = forms.CharField(label = 'Apellidos', widget = forms.TextInput(
+    apellidos = forms.CharField(label = 'Apellidos', max_length=100, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Apellidos',
@@ -170,7 +173,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    ciudad = forms.CharField(label = 'Ciudad', widget = forms.TextInput(
+    ciudad = forms.CharField(label = 'Ciudad', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Ciudad',
@@ -179,7 +182,7 @@ class ProfesorForm(forms.ModelForm):
         }
     ))
 
-    organizacion = forms.CharField(label = 'Organización', widget = forms.TextInput(
+    organizacion = forms.CharField(label = 'Organización', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Organización',
@@ -267,7 +270,7 @@ class EditarProfesorForm(forms.ModelForm):
         }
     ))
 
-    nombre = forms.CharField(label = 'Nombre', widget = forms.TextInput(
+    nombre = forms.CharField(label = 'Nombre', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Nombre',
@@ -276,7 +279,7 @@ class EditarProfesorForm(forms.ModelForm):
         }
     ))
 
-    apellidos = forms.CharField(label = 'Apellidos', widget = forms.TextInput(
+    apellidos = forms.CharField(label = 'Apellidos', max_length=100, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Apellidos',
@@ -285,7 +288,7 @@ class EditarProfesorForm(forms.ModelForm):
         }
     ))
 
-    ciudad = forms.CharField(label = 'Ciudad', widget = forms.TextInput(
+    ciudad = forms.CharField(label = 'Ciudad', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Ciudad',
@@ -294,7 +297,7 @@ class EditarProfesorForm(forms.ModelForm):
         }
     ))
 
-    organizacion = forms.CharField(label = 'Organización', widget = forms.TextInput(
+    organizacion = forms.CharField(label = 'Organización', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Organización',
@@ -357,7 +360,7 @@ class EditarProfesorForm(forms.ModelForm):
         }
 
 class PasswordForm(forms.ModelForm):
-    email = forms.EmailField(label = 'Correo Electrónico', widget = forms.EmailInput(
+    email = forms.EmailField(label = 'Correo Electrónico', max_length=254, widget = forms.EmailInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su Correo Electrónico',
@@ -381,7 +384,7 @@ class PasswordForm(forms.ModelForm):
         }
 
 class PasswordCambioForm(forms.Form):
-    password1 = forms.CharField(label = 'Contraseña', widget = forms.PasswordInput(
+    password1 = forms.CharField(label = 'Contraseña', max_length=128, widget = forms.PasswordInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su contraseña...',
@@ -390,7 +393,7 @@ class PasswordCambioForm(forms.Form):
         }
     ))
 
-    password2 = forms.CharField(label = 'Confirme su Contraseña', widget = forms.PasswordInput(
+    password2 = forms.CharField(label = 'Confirme su Contraseña', max_length=128, widget = forms.PasswordInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese nuevamente su contraseña...',
@@ -403,7 +406,7 @@ class PasswordCambioForm(forms.Form):
     password2.label=""
 
 class ParadaForm(forms.ModelForm):
-    nombre = forms.CharField(label = 'Nombre', widget = forms.TextInput(
+    nombre = forms.CharField(label = 'Nombre', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Nombre'
@@ -425,7 +428,7 @@ class ParadaForm(forms.ModelForm):
         }
 
 class PreguntaForm(forms.ModelForm):
-    enunciado = forms.CharField(widget = forms.Textarea(
+    enunciado = forms.CharField(max_length=254, widget = forms.Textarea(
         attrs = {
             'class': 'input-des',
             'placeholder': 'Enunciado de la Pregunta'
@@ -462,7 +465,7 @@ class PreguntaForm(forms.ModelForm):
         }
 
 class RespuestaForm(forms.ModelForm):
-    respuesta = forms.CharField(label = 'Respuesta', widget = forms.TextInput(
+    respuesta = forms.CharField(label = 'Respuesta', max_length=128, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Respuesta'
@@ -504,7 +507,7 @@ class ContactForm(forms.Form):
             'placeholder': 'Ingrese el asunto'
         }
     ))
-    descripcion = forms.CharField(label = 'Descripción de la Gincana:', widget = forms.Textarea(
+    descripcion = forms.CharField(label = 'Descripción de la Gincana:', max_length=10000, widget = forms.Textarea(
         attrs = {
             'class': 'input-des',
             'placeholder': 'Ingrese una descripcion'
@@ -524,7 +527,7 @@ class InvitadosForm(forms.Form):
     )
 
 class AuthenticationInvitadosForm(forms.Form):
-    usuario = forms.CharField(widget = forms.TextInput(
+    usuario = forms.CharField(max_length=254, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
             'placeholder': 'Ingrese su usuario'
