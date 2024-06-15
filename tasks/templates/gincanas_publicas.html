@@ -5,6 +5,13 @@
 {% load static %}
 <div class="container-in">
     <h1>Gincanas Públicas</h1>
+
+    <div>
+        <p style="display: flex; font-weight: bold; justify-content: center; align-items: center;">
+            Las Gincanas Públicas son Gincanas creadas por otros Profesores, que han decidido compartirlas con los demás para que puedan usarlas.
+        </p>
+    </div>
+
     <ul class="row">
         {% for gincana in gincanas %}
             {% if forloop.counter0|divisibleby:4 %}
@@ -20,8 +27,10 @@
                         {% endif %} 
                     </div>
                     <div class="gincana-titulo">
-                        {% if gincana.visibilidad %}
-                            <strong>{{gincana.titulo}}</strong>
+                        {% if gincana.visibilidad and gincana.email_profesor in profesores %}
+                            <strong>{{gincana.titulo}} <i class="fs-8 bi-globe-europe-africa"></i> <i class="fs-8 bi-map-fill"></i></strong>
+                        {% elif gincana.visibilidad %}
+                            <strong>{{gincana.titulo}} <i class="fs-8 bi-globe-europe-africa"></i></strong>
                         {% else %}
                             {{gincana.titulo}}
                         {% endif %}
@@ -41,10 +50,8 @@
             {% endif %}  
         </div>
         <div class="footer-box">
-            <p>
-                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Etiam eu turpis molestie, dictum est a, mattis tellus. 
-                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            <p style="text-align: justify;">
+                Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or DG Justice and Consumers. Neither the European Union nor the granting authority can be held responsible for them.
             </p>
         </div>
     </div>

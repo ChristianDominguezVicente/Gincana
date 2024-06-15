@@ -25,38 +25,27 @@
 </head>
 <body>
     <div class="container-in">
+        <h1>{{gincana.titulo}}</h1>
+        <div>
+            <p><strong>{{gincana.descripcion}}</strong></p>
+        </div>
+    </div>
+    <div class="container-in">
         <h2>{{edicion}}</h2>
         <table class="table">
             <thead>
                 <tr>
-                    <th>Usuarios</th>
+                    <th>ID</th>
+                    <th>Duración</th>
                     <th>Puntuación</th>
                 </tr>
             </thead>
             <tbody>
                 {% for invitado, puntuacion, duracion in invitados_puntuaciones %}
                     <tr>
-                        <td>{{invitado.usuario}}</td>
-                        <td>{{puntuacion}}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="container-in">
-        <h2>Tiempos de los usuarios</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Usuarios</th>
-                    <th>Duración</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for invitado, puntuacion, duracion in invitados_puntuaciones %}
-                    <tr>
-                        <td>{{invitado.usuario}}</td>
+                        <td>{{invitado.id}}</td>
                         <td>{{duracion|time:"H:i:s"}}</td>
+                        <td>{{puntuacion}}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -69,19 +58,24 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Usuarios</th>
+                        <th>ID</th>
                         <th>Respuesta</th>
+                        <th>Puntuación</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for invitado, respuesta in pregunta.respondidas %}
+                    {% for id, respuesta, puntos in pregunta.respondidas %}
                         <tr>
-                            <td>{{invitado}}</td>
+                            <td>{{id}}</td>
                             <td>{{respuesta}}</td>
+                            <td>{{puntos}}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+        <div class="container-in">
+            Han respondido correctamente: {{num_correctos}} invitados.
         </div>
     {% endfor %}
 </body>

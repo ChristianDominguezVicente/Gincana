@@ -9,8 +9,8 @@
     <p class="error">{{error}}</p>
 
     <div class="container-in">
-        <p>{{gincana.descripcion}}</p>
-        <p>{{gincana.email_profesor}}</p>
+        <p><strong>{{gincana.descripcion}}</strong></p>
+        <p>{{gincana.email_profesor.nombre}} {{gincana.email_profesor.apellidos}}</p>
     </div>
 
     <div id="map" class="map"></div>
@@ -99,10 +99,8 @@
             {% endif %}  
         </div>
         <div class="footer-box">
-            <p>
-                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Etiam eu turpis molestie, dictum est a, mattis tellus. 
-                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            <p style="text-align: justify;">
+                Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or DG Justice and Consumers. Neither the European Union nor the granting authority can be held responsible for them. 
             </p>
         </div>
     </div>

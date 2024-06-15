@@ -13,14 +13,16 @@
                     <a href="{% url 'gincana' mi_gincana.id %}" class="gincana">
                         <div class="gincana-img">
                             {% if darkModeEnabled == 'true' %}
-                                <img src="{{ mi_gincana.imagen_oscura.url }}" alt="{{ mi_gincana.titulo }}" class="img-gincana">
+                                <img src="{{mi_gincana.imagen_oscura.url}}" alt="{{mi_gincana.titulo}}" class="img-gincana">
                             {% elif darkModeEnabled == 'false' %}
-                                <img src="{{ mi_gincana.imagen.url }}" alt="{{ mi_gincana.titulo }}" class="img-gincana">
+                                <img src="{{mi_gincana.imagen.url}}" alt="{{mi_gincana.titulo}}" class="img-gincana">
                             {% endif %}
                         </div>
                         <div class="gincana-titulo">
-                            {% if mi_gincana.visibilidad %}
-                                <strong>{{mi_gincana.titulo}}</strong>
+                            {% if mi_gincana.visibilidad and mi_gincana.email_profesor in profesores %}
+                                <strong>{{mi_gincana.titulo}} <i class="fs-8 bi-globe-europe-africa"></i> <i class="fs-8 bi-map-fill"></i></strong>
+                            {% elif mi_gincana.visibilidad %}
+                                <strong>{{mi_gincana.titulo}} <i class="fs-8 bi-globe-europe-africa"></i></strong>
                             {% else %}
                                 {{mi_gincana.titulo}}
                             {% endif %}
@@ -48,22 +50,24 @@
     <h1>Gincanas Públicas</h1>
     <ul class="row">
         {% for gincana_publica in gincanas_publicas %}
-            {% if forloop.counter0|divisibleby:4 %}
-                </ul><ul class="row">
-            {% endif %}
             {% if forloop.counter0 < 12 %}
+                {% if forloop.counter0|divisibleby:4 and not forloop.first %}
+                    </ul><ul class="row">
+                {% endif %}
                 <div class="col">
                     <a href="{% url 'gincana_publica' gincana_publica.id %}" class="gincana">
                         <div class="gincana-img">
                             {% if darkModeEnabled == 'true' %}
-                                <img src="{{ gincana_publica.imagen_oscura.url }}" alt="{{ gincana_publica.titulo }}" class="img-gincana">
+                                <img src="{{gincana_publica.imagen_oscura.url}}" alt="{{gincana_publica.titulo}}" class="img-gincana">
                             {% elif darkModeEnabled == 'false' %}
-                                <img src="{{ gincana_publica.imagen.url }}" alt="{{ gincana_publica.titulo }}" class="img-gincana">
+                                <img src="{{gincana_publica.imagen.url}}" alt="{{gincana_publica.titulo}}" class="img-gincana">
                             {% endif %} 
                         </div>
                         <div class="gincana-titulo">
-                            {% if gincana_publica.visibilidad %}
-                                <strong>{{gincana_publica.titulo}}</strong>
+                            {% if gincana_publica.visibilidad and gincana_publica.email_profesor in profesores %}
+                                <strong>{{gincana_publica.titulo}} <i class="fs-8 bi-globe-europe-africa"></i> <i class="fs-8 bi-map-fill"></i></strong>
+                            {% elif gincana_publica.visibilidad %}
+                                <strong>{{gincana_publica.titulo}} <i class="fs-8 bi-globe-europe-africa"></i></strong>
                             {% else %}
                                 {{gincana_publica.titulo}}
                             {% endif %}
@@ -72,14 +76,45 @@
                 </div>
             {% endif %}
         {% endfor %}
-    </ul>
-    <div class="col">
-        <a href="{% url 'gincanas_publicas' %}" class="gincana">
-            <div class="gincana-titulo">
-                <strong>Gincanas Públicas</strong>
+    
+        {% if gincanas_publicas|length > 12 %}
+            {% if forloop.counter0|divisibleby:4 and not forloop.first %}
+                </ul><ul class="row">
+            {% endif %}
+            <div class="col">
+                <a href="{% url 'gincanas_publicas' %}" class="gincana">
+                    <div class="gincana-img">
+                        {% if darkModeEnabled == 'true' %}
+                            <img src="{% static 'media/publico_oscuro.png' %}" alt="Gincana Publica" class="img-gincana">
+                        {% elif darkModeEnabled == 'false' %}
+                            <img src="{% static 'media/publico.png' %}" alt="Gincana Publica" class="img-gincana">
+                        {% endif %} 
+                    </div>
+                    <div class="gincana-titulo">
+                        <strong>Gincanas Públicas</strong>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
+        {% else %}
+            {% if gincanas_publicas|length|divisibleby:4 and not forloop.first %}
+                </ul><ul class="row">
+            {% endif %}
+            <div class="col">
+                <a href="{% url 'gincanas_publicas' %}" class="gincana">
+                    <div class="gincana-img">
+                        {% if darkModeEnabled == 'true' %}
+                            <img src="{% static 'media/publico_oscuro.png' %}" alt="Gincana Publica" class="img-gincana">
+                        {% elif darkModeEnabled == 'false' %}
+                            <img src="{% static 'media/publico.png' %}" alt="Gincana Publica" class="img-gincana">
+                        {% endif %} 
+                    </div>
+                    <div class="gincana-titulo">
+                        <strong>Gincanas Públicas</strong>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+    </ul>
 </div>
 <footer class="footer">
     <div class="footer-group">
@@ -91,10 +126,8 @@
             {% endif %}  
         </div>
         <div class="footer-box">
-            <p>
-                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Etiam eu turpis molestie, dictum est a, mattis tellus. 
-                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            <p style="text-align: justify;">
+                Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or DG Justice and Consumers. Neither the European Union nor the granting authority can be held responsible for them.
             </p>
         </div>
     </div>

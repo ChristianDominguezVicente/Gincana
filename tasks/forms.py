@@ -406,10 +406,10 @@ class PasswordCambioForm(forms.Form):
     password2.label=""
 
 class ParadaForm(forms.ModelForm):
-    nombre = forms.CharField(label = 'Nombre', max_length=50, widget = forms.TextInput(
+    nombre = forms.CharField(label = 'Nombre de la Parada', max_length=50, widget = forms.TextInput(
         attrs = {
             'class': 'input-box',
-            'placeholder': 'Nombre'
+            'placeholder': 'Nombre de la Parada'
         }
     ))
 
