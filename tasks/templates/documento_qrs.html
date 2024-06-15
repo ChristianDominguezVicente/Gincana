@@ -29,6 +29,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>QR</th>
                     <th>Usuario</th>
                 </tr>
@@ -36,8 +37,9 @@
             <tbody>
                 {% for invitado in invitados %}
                     <tr>
+                        <td>{{invitado.id}}</td>
                         <td>
-                            <img src="data:image/png;base64,{{invitado.qr_code_base64}}" width="150" height="150">
+                            <img src="data:image/png;base64,{{invitado.qr_code_base64}}" width="125" height="125">
                         </td>
                         <td>{{invitado.usuario}}</td>
                     </tr>

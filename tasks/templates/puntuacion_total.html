@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-xl" role="document">
+<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
     <div class="modal-content">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
             <h2 class="modal-title">Total</h2>
@@ -11,6 +11,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Usuarios</th>
                             <th>Edición</th>
                             <th>Puntuación</th>
@@ -18,8 +19,9 @@
                     </thead>
                     <tbody>
                         {% if invitados_puntuaciones %}
-                            {% for invitado, puntuacion, edicion in invitados_puntuaciones %}
+                            {% for id, invitado, puntuacion, edicion in invitados_puntuaciones %}
                                 <tr>
+                                    <td>{{id}}</td>
                                     <td>{{invitado.usuario}}</td>
                                     <td>{{edicion}}</td>
                                     <td>{{puntuacion}}</td>
@@ -27,7 +29,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="2">Todavía no se ha realizado ninguna gincana.</td>
+                                <td colspan="4">Todavía no se ha realizado ninguna gincana.</td>
                             </tr>
                         {% endif %}
                     </tbody>

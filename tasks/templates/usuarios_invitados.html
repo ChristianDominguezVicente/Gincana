@@ -5,12 +5,47 @@
 {% load static %}
 
 <div class="container-in">
+    {% if darkModeEnabled == 'true' %}
+        <a href="{% url 'gincana' gincana.id %}" class="flecha">
+            <img src="{% static 'media/flecha_oscura.png' %}">
+        </a>
+    {% elif darkModeEnabled == 'false' %}
+        <a href="{% url 'gincana' gincana.id %}" class="flecha">
+            <img src="{% static 'media/flecha.png' %}">
+        </a>
+    {% endif %} 
+    
     <div>
         <h1>Usuarios Invitados</h1>
     </div>
     <p class="error">{{error}}</p>
+    {% if botonError == "faltan_preguntas" %}
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <a href="{% url 'editar_gincana' gincana.id %}" class="btn btn-danger">Configurar Preguntas y Respuestas</a>
+        </div>
+    {% elif botonError == "falta_duracion" %}
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <a href="{% url 'configuracion_gincana' gincana.id %}" class="btn btn-danger">Configurar Duración</a>
+        </div>
+    {% endif %}
+
     <div class="container-in">
         <h2>Administrar Usuarios Invitados: {{total}}</h2>
+
+        <div>
+            <p style="display: flex; font-weight: bold; justify-content: center; align-items: center;">
+                Cree tantos usuarios Invitados como participantes. Después distribuya los códigos QRs o los usuarios para que participen.
+            </p>
+        </div>
+
+        <div class="container-in">
+            <h2>Crear Usuarios Invitados</h2>
+            <form action="{% url 'crear_usuarios_invitados' gincana.id %}" method="POST">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button class="btn-signin">Crear Invitados</button>
+              </form>
+        </div>
         <div class="container-in">
             {% for edicion, invitados in invitados_ordenados.items %}
                 <div>
@@ -19,6 +54,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>QR Code</th>
                             <th>Usuario</th>
                             <th>Acciones</th>
@@ -27,6 +63,7 @@
                     <tbody>
                         {% for invitado in invitados %}
                             <tr>
+                                <td>{{invitado.id}}</td>
                                 <td>
                                     <img src="{{invitado.qr_code.url}}" width="100" height="100">
                                 </td>
@@ -58,14 +95,6 @@
             {% endfor %}
         </div>
     </div>
-    <div class="container-in">
-        <h2>Crear Usuarios Invitados</h2>
-        <form action="{% url 'crear_usuarios_invitados' gincana.id %}" method="POST">
-            {% csrf_token %}
-            {{form.as_p}}
-            <button class="btn-signin">Crear Invitados</button>
-          </form>
-    </div>
 </div>
 <footer class="footer">
     <div class="footer-group">
@@ -77,10 +106,8 @@
             {% endif %}  
         </div>
         <div class="footer-box">
-            <p>
-                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Etiam eu turpis molestie, dictum est a, mattis tellus. 
-                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            <p style="text-align: justify;">
+                Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or DG Justice and Consumers. Neither the European Union nor the granting authority can be held responsible for them. 
             </p>
         </div>
     </div>

@@ -8,6 +8,19 @@
     <h1>{{gincana.titulo}}</h1>
 
     <p class="error">{{error}}</p>
+    {% if botonError == "faltan_preguntas" %}
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <a href="{% url 'editar_gincana' gincana.id %}" class="btn btn-danger">Configurar Preguntas y Respuestas</a>
+        </div>
+    {% elif botonError == "falta_duracion" %}
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <a href="{% url 'configuracion_gincana' gincana.id %}" class="btn btn-danger">Configurar Duración</a>
+        </div>
+    {% elif botonError == "faltan_usuarios" %}
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <a href="{% url 'usuarios_invitados' gincana.id %}" class="btn btn-danger">Crear Usuarios Invitados</a>
+        </div>
+    {% endif %}
 
     <div id="map" class="map"></div>
     
@@ -80,6 +93,30 @@
 
     <div style="display: flex; justify-content: center; align-items: center;">
         <div class="input-registro">
+            <form action="{% url 'editar_gincana' gincana.id %}">
+                {% csrf_token %}
+                <button class="btn-signin">
+                    Editar Gincana
+                </button>
+            </form>
+            <span style="margin-right: 10px;"></span>
+            <form action="{% url 'configuracion_gincana' gincana.id %}">
+                {% csrf_token %}
+                <button class="btn-signin">
+                    Configuración
+                </button>
+            </form>
+            <span style="margin-right: 10px;"></span>
+            <form action="{% url 'puntuacion_gincana' gincana.id %}">
+                {% csrf_token %}
+                <button class="btn-signin">
+                    Puntuaciones
+                </button>
+            </form>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <div class="input-registro">
             {% if gincana.activa == False %}
                 <button class="btn-signin" style="margin-left: 0px; margin-right: 0px;" onclick="abrir_modal_confirmacion_iniciar('{% url 'gincana_confirmacion_iniciar' gincana.id %}')" data-toggle="modal" data-target="#confirmacion_eliminar">
                     Iniciar
@@ -120,10 +157,8 @@
             {% endif %}  
         </div>
         <div class="footer-box">
-            <p>
-                Corem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Etiam eu turpis molestie, dictum est a, mattis tellus. 
-                Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. 
+            <p style="text-align: justify;">
+                Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or DG Justice and Consumers. Neither the European Union nor the granting authority can be held responsible for them.
             </p>
         </div>
     </div>

@@ -357,7 +357,7 @@ class Gincana(models.Model):
     fecha = models.DateTimeField('Fecha de creación', auto_now_add=True)
     edicion = models.DateTimeField('Edición de la gincana', null=True, blank=True)
     duracion = models.TimeField('Duración', null=True, blank=True)
-    visibilidad = models.BooleanField('Visibilidad de la gincana: ', default=False)
+    visibilidad = models.BooleanField('Gincana Pública: ', default=False)
     activa = models.BooleanField('Actividad de la gincana', default=False)
     imagen = models.ImageField("Imagen de la gincana", default="mapa.png", upload_to='', null=True, blank=True)
     imagen_oscura = models.ImageField("Imagen oscura de la gincana", default="mapa_oscuro.png", upload_to='', null=True, blank=True)
@@ -371,7 +371,7 @@ class Verificacion(models.Model):
     email = models.EmailField("Correo Electrónico", unique = True, max_length=254, primary_key=True)
 
     def __str__(self):
-        return self.code + ' - ' + self.email_profesor.email
+        return str(self.code) + ' - ' + self.email
     
 class Parada(models.Model):
     orden = models.IntegerField('Orden', default=1)
@@ -416,6 +416,7 @@ class Invitado(models.Model):
     usuario = models.CharField('Invitado', unique = True, max_length=200, primary_key=True)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True)
     respondidas = models.IntegerField('Respondidas', default=0)
+    id = models.IntegerField('Id', default=0)
     gincana = models.ForeignKey(Gincana, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -428,7 +429,7 @@ class Invitado(models.Model):
         qr_url = f'http://192.168.1.77:8000/invitado_gincana/{self.gincana.id}/{self.usuario}/'
 
         qrcode_img = qrcode.make(qr_url)
-        canvas = Image.new('RGB', (490, 490), 'white')
+        canvas = Image.new('RGB', (520, 520), 'white')
         draw = ImageDraw.Draw(canvas)
         canvas.paste(qrcode_img)
         fname = f'qr_code-{self.usuario}.png'

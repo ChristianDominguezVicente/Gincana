@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-xl" role="document">
+<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
   <div class="modal-content">
     <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
       <h2 class="modal-title">Editar Pregunta {{parada.orden}}</h2>
@@ -11,6 +11,13 @@
       <form action="{% url 'editar_guardar' gincana.id parada.id %}" method="POST">
         {% csrf_token %}
         {{paradaForm}}
+
+        <div style="display: flex; justify-content: center; align-items: center;">
+          <p style="margin-bottom: 5px; margin-top: 5px;">
+            <strong>Edite la pregunta  de opción múltiple:</strong>
+          </p>
+        </div>
+
         {{preguntaForm.enunciado}}
         <div class="pregunta_form" style="display: flex; align-items: center;">
           <label for="{{preguntaForm.num_respuestas.id}}" style="white-space: nowrap;">{{preguntaForm.num_respuestas.label}}: </label>
@@ -44,7 +51,7 @@
         var respuesta_form = '<div class="respuesta_form" style="display: flex; align-items: center;">' +
           '<input class="input-box "type="text" name="respuesta_' + i + '_respuesta" placeholder="Respuesta" style="margin-right: 10px;">' +
           '<input class="input-box type="number" name="respuesta_' + i + '_puntos" placeholder="Puntos" style="margin-right: 10px;">' +
-          'Correcta/Fallo <input type="checkbox" name="respuesta_' + i + '_es_correcta" style="margin-left: 10px;"><br>' +
+          'Correcta <input type="checkbox" name="respuesta_' + i + '_es_correcta" style="margin-left: 10px;"><br>' +
         '</div>';
         respuestas_fields.append(respuesta_form);
       }
