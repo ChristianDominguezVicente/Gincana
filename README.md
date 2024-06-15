@@ -1,3 +1,27 @@
+MANUAL DE INSTALACIÓN:
+1. Crear un entorno virtual: python -m venv /ruta_del_proyecto/venv
+2. Instalar todas las dependencias: pip install -r requirements.txt
+3. Instalar en el equipo Redis para el funcionamiento de celery:
+   - Windows: https://github.com/tporadowski/redis/releases
+     - Verificar funcionamiento: Ir a la carpeta de Program Files donde esta instalado redis, ejecutar redis-cli.exe y escribir en la terminal que aparecerá PING, debe contestar PONG.
+   - Linux:
+     - Instación: sudo apt install redis-server
+     - Iniciar servicio: sudo systemctl start redis-server
+     - Habilitar servicio: sudo systemctl enable redis-server
+     - Verificar funcionamiento: redis-cli ping
+4. Instalar en el equipo wkhtmltopdf para poder generar PDFs:
+   - Windows: https://wkhtmltopdf.org/downloads.html
+     - Después de instalarlo: añadir wkhtmltopdf al PATH del sistema
+     - Verificar instalación: wkhtmltopdf --version
+   - Linux: sudo apt installa wkhtmltopdf
+
+MANUAL DE ARRANQUE:
+1. .\venv\Scripts\activate
+2. python manage.py runserver
+3. celery -A gincana.celery worker --pool=solo -l info
+4. celery -A gincana beat -l INFO
+
+NOTAS:
 En la aplicación web se puede crear Usuarios, iniciar y cerrar sesión. Crear Gincanas, eliminarlas e actualizarlas.
 
 Se ha seguido el siguiente tutorial para la estructura de la aplicación web:
