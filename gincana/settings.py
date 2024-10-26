@@ -167,7 +167,6 @@ EMAIL_HOST_USER = 'herstorygincanas@gmail.com'
 EMAIL_HOST_PASSWORD = 'fdorgalukdwmjgdt'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-# 5mkH0oVL9Un6K6veK4E7ZojoYN8laBup3FE0UrJ6ow5K5nVoYZ
 
 
 # CELERY SETTINGS
