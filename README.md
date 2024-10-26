@@ -1,3 +1,6 @@
+Acceso a la página:
+https://gincanas.herstoryproject.eu/
+
 MANUAL DE INSTALACIÓN:
 1. Crear un entorno virtual: python -m venv /ruta_del_proyecto/venv
 2. Instalar todas las dependencias: pip install -r requirements.txt
